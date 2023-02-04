@@ -1,0 +1,162 @@
+{
+    "children": [
+        {
+            "backgroundSVG": "opentoolcontroller/resources/icons/evaporator_background.svg",
+            "children": [
+                {
+                    "behaviorFiles": [
+                        "tests/behaviors/open.json"
+                    ],
+                    "children": [
+                        {
+                            "children": [],
+                            "defaultLayer": "fault",
+                            "description": "",
+                            "fontColorHex": "#a8fbff",
+                            "fontSize": 48,
+                            "hasText": true,
+                            "name": "Icon",
+                            "rotation": 12.0,
+                            "scale": 1.1,
+                            "svg": "opentoolcontroller/resources/icons/valves/valve.svg",
+                            "textX": 0.0,
+                            "textY": 0.0,
+                            "type_info": "Device_Icon_Node",
+                            "x": 455.0,
+                            "y": 625.0
+                        },
+                        {
+                            "children": [],
+                            "description": "",
+                            "displayDigits": 2,
+                            "displayScientific": false,
+                            "max": 500.0,
+                            "min": 0.0,
+                            "name": "setpoint",
+                            "type_info": "Float_Var_Node",
+                            "units": "",
+                            "userManualSet": true
+                        },
+                        {
+                            "children": [],
+                            "description": "",
+                            "halPin": "",
+                            "name": "output_valve",
+                            "offName": "Closed",
+                            "onName": "Open",
+                            "type_info": "Digital_Output_Node"
+                        },
+                        {
+                            "children": [],
+                            "description": "",
+                            "displayDigits": 3,
+                            "displayScientific": true,
+                            "max": 100.0,
+                            "min": 0.0,
+                            "name": "tolerance",
+                            "type_info": "Float_Var_Node",
+                            "units": "",
+                            "userManualSet": true
+                        },
+                        {
+                            "calibrationTableData": [
+                                [
+                                    "hal_value",
+                                    "gui_value"
+                                ],
+                                [
+                                    0.0,
+                                    0.0
+                                ],
+                                [
+                                    10.0,
+                                    10.0
+                                ]
+                            ],
+                            "children": [],
+                            "description": "",
+                            "displayDigits": 2,
+                            "displayScientific": false,
+                            "halPin": "",
+                            "max": 0.0,
+                            "min": 0.0,
+                            "name": "Flow",
+                            "type_info": "Analog_Output_Node",
+                            "units": ""
+                        },
+                        {
+                            "children": [],
+                            "description": "flag if its homed",
+                            "name": "is_homed",
+                            "offName": "homed",
+                            "onName": "not_homed",
+                            "type_info": "Bool_Var_Node",
+                            "userManualSet": true
+                        },
+                        {
+                            "children": [],
+                            "description": "",
+                            "max": 6.0,
+                            "min": 0.0,
+                            "name": "current_pocket",
+                            "type_info": "Int_Var_Node",
+                            "units": "",
+                            "userManualSet": false
+                        },
+                        {
+                            "children": [],
+                            "description": "",
+                            "max": 6.0,
+                            "min": 0.0,
+                            "name": "pocket",
+                            "type_info": "Int_Var_Node",
+                            "units": "",
+                            "userManualSet": true
+                        }
+                    ],
+                    "description": "100sccm MFC",
+                    "name": "SF6_MFC",
+                    "states": [
+                        "Flowing",
+                        "Stabilizing",
+                        "Fault",
+                        "Closed"
+                    ],
+                    "type_info": "Device_Node"
+                },
+                {
+                    "behaviorFiles": [],
+                    "children": [
+                        {
+                            "children": [],
+                            "defaultLayer": "2",
+                            "description": "",
+                            "fontColorHex": "#666666",
+                            "fontSize": 12,
+                            "hasText": false,
+                            "name": "Icon",
+                            "rotation": 0.0,
+                            "scale": 1.0,
+                            "svg": "opentoolcontroller/resources/icons/general/unknown.svg",
+                            "textX": 0.0,
+                            "textY": 0.0,
+                            "type_info": "Device_Icon_Node",
+                            "x": 50.0,
+                            "y": 50.0
+                        }
+                    ],
+                    "description": "",
+                    "name": "Pump",
+                    "states": [],
+                    "type_info": "Device_Node"
+                }
+            ],
+            "description": "This is part of a tool, like a chamber or loadlock.",
+            "name": "Chamber_A",
+            "type_info": "System_Node"
+        }
+    ],
+    "description": "This is the whole tool.",
+    "name": "Evaporators",
+    "type_info": "Tool_Node"
+}

@@ -1,0 +1,173 @@
+{
+    "children": [
+        {
+            "device_state": "Fault",
+            "pos": [
+                -832.1099999999999,
+                87.21000000000004
+            ],
+            "type_info": "Set_Device_State"
+        },
+        {
+            "children": [
+                {
+                    "setName": "setpoint",
+                    "setType": 49,
+                    "type_info": "Setpoint",
+                    "value": 0.0,
+                    "varName": "Flow"
+                },
+                {
+                    "setName": "tolerance",
+                    "setType": 64,
+                    "type_info": "Setpoint",
+                    "value": 22.0,
+                    "varName": "Flow"
+                }
+            ],
+            "pos": [
+                -705.4,
+                142.78
+            ],
+            "type_info": "Wait"
+        },
+        {
+            "children": [
+                {
+                    "setName": "output_valve",
+                    "setType": 1,
+                    "type_info": "Setpoint",
+                    "value": 1,
+                    "varName": ""
+                },
+                {
+                    "setName": "Flow",
+                    "setType": 2,
+                    "type_info": "Setpoint",
+                    "value": 0.0,
+                    "varName": "setpoint"
+                },
+                {
+                    "setName": "setpoint",
+                    "setType": 0,
+                    "type_info": "Setpoint",
+                    "value": 0.0,
+                    "varName": ""
+                },
+                {
+                    "setName": "tolerance",
+                    "setType": 0,
+                    "type_info": "Setpoint",
+                    "value": 0.0,
+                    "varName": ""
+                }
+            ],
+            "pos": [
+                -321.80912,
+                342.67406000000005
+            ],
+            "type_info": "Set"
+        },
+        {
+            "children": [
+                {
+                    "name": "icon_layer",
+                    "setType": 1,
+                    "type_info": "Property_Setpoint",
+                    "value": 0,
+                    "varName": null
+                },
+                {
+                    "name": "icon_x",
+                    "setType": 1,
+                    "type_info": "Property_Setpoint",
+                    "value": 0,
+                    "varName": "setpoint"
+                },
+                {
+                    "name": "icon_y",
+                    "setType": 1,
+                    "type_info": "Property_Setpoint",
+                    "value": 77,
+                    "varName": "setpoint"
+                },
+                {
+                    "name": "scale",
+                    "setType": 2,
+                    "type_info": "Property_Setpoint",
+                    "value": 0.0,
+                    "varName": "Flow"
+                },
+                {
+                    "name": "rotation",
+                    "setType": 2,
+                    "type_info": "Property_Setpoint",
+                    "value": 0.0,
+                    "varName": "setpoint"
+                },
+                {
+                    "name": "has_text",
+                    "setType": 1,
+                    "type_info": "Property_Setpoint",
+                    "value": 1,
+                    "varName": "output_valve"
+                },
+                {
+                    "name": "text",
+                    "setType": 0,
+                    "type_info": "Property_Setpoint",
+                    "value": 0,
+                    "varName": ""
+                },
+                {
+                    "name": "text_x",
+                    "setType": 0,
+                    "type_info": "Property_Setpoint",
+                    "value": 10000,
+                    "varName": "setpoint"
+                },
+                {
+                    "name": "text_y",
+                    "setType": 2,
+                    "type_info": "Property_Setpoint",
+                    "value": 10000,
+                    "varName": "Flow"
+                },
+                {
+                    "name": "font_size",
+                    "setType": 0,
+                    "type_info": "Property_Setpoint",
+                    "value": 1,
+                    "varName": ""
+                }
+            ],
+            "pos": [
+                416.16,
+                78.48999999999998
+            ],
+            "type_info": "Set_Icon"
+        },
+        {
+            "newLine": false,
+            "nodeName": null,
+            "setType": 1,
+            "text": "Tol (%)",
+            "type_info": "Behavior_Input"
+        },
+        {
+            "newLine": false,
+            "nodeName": null,
+            "setType": 1,
+            "text": "Tol (%)",
+            "type_info": "Behavior_Input"
+        }
+    ],
+    "manualButtonNewLine": false,
+    "name": "Flow",
+    "pos": [
+        -182.9499999999999,
+        -235.99999999999997
+    ],
+    "tick_rate_ms": 2000,
+    "type_info": "Root_Sequence"
+}

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 16.0.4, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 width="60px" height="30px" viewBox="-47.5 34 60 30" enable-background="new -47.5 34 60 30" xml:space="preserve">
+<rect x="-47.5" y="34" fill="#111133" width="60" height="30"/>
+<g id="closed">
+	
+		<polygon fill="#111133" stroke="#FCF9E5" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" points="
+		2,-9 52,-34 52,-9 2,-34 	"/>
+</g>
+<g id="closed-hover">
+	
+		<polygon fill="#111133" stroke="#0383F8" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" points="
+		2,27 52,2 52,27 2,2 	"/>
+</g>
+<g id="open">
+	
+		<polygon fill="#FCF9E5" stroke="#FCF9E5" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" points="
+		2,27 52,2 52,27 2,2 	"/>
+</g>
+<g id="open-selected">
+	
+		<polygon fill="#FCF9E5" stroke="#0383F8" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" points="
+		2,27 52,2 52,27 2,2 	"/>
+</g>
+<line fill="none" stroke="#FCF9E5" stroke-width="4" stroke-linejoin="round" stroke-miterlimit="10" x1="-47.5" y1="54" x2="-27.5" y2="54"/>
+<line fill="none" stroke="#FCF9E5" stroke-width="4" stroke-linejoin="round" stroke-miterlimit="10" x1="-7.5" y1="54" x2="12.5" y2="54"/>
+<line fill="none" stroke="#FCF9E5" stroke-width="4" stroke-linejoin="round" stroke-miterlimit="10" x1="-32.5" y1="45" x2="-2.5" y2="45"/>
+</svg>

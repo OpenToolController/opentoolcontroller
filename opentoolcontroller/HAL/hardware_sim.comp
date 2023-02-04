@@ -1,0 +1,13 @@
+component hardware_sim "Compute the derivative of the input function";
+pin out bit d_in_0;
+pin out bit d_in_1;
+pin out bit d_in_2;
+pin out bit d_in_3;
+pin in bit d_out_0;
+pin in bit d_out_1;
+pin in bit d_out_2;
+pin in bit d_out_3;
+
+function _;
+license "GPL"; // indicates GPL v2 or later
+;;
