@@ -36,134 +36,99 @@ class col():
     SET_OUTPUT_TEST = 111
 
     #NODE
-    NAME          = 0
-    TYPE_INFO     = 1
-    DESCRIPTION   = 2
+    NAME = 0
+    TYPE_INFO = 1
+    DESCRIPTION = 2
 
     #SystemNode
-    BACKGROUND_SVG = 10
-    MOVABLE_ICONS = 11
+    BACKGROUND_SVG = 3
+    MOVABLE_ICONS = 4
+
+    #BehaviorNode
+    STATE = 5
+    BEHAVIORS = 6
+    STATES = 7
 
     #DeviceNode
-    STATE = 10
-    BEHAVIORS = 11
-    STATES = 12
 
     #DeviceIconNode
-    SVG       = 10
-    LAYER     = 11
-    X         = 12
-    Y         = 13
-    SCALE     = 14
-    ROTATION  = 15
-    DEFAULT_LAYER = 16
-    HAS_TEXT  = 17
-    TEXT      = 18
-    TEXT_X    = 19
-    TEXT_Y    = 20
-    FONT_SIZE = 21
-    FONT_COLOR = 22
-    POS       = 23
+    SVG = 8
+    LAYER = 9
+    DEFAULT_LAYER = 10
+    X = 11
+    Y = 12
+    SCALE = 13
+    ROTATION = 14
 
-    ICON_POS = 27
-    ICON_SCALE = 28
-    ICON_ROTATION  = 29
+    HAS_TEXT = 15
+    TEXT = 16
+    TEXT_X = 17
+    TEXT_Y = 18
+    FONT_SIZE = 19
+    FONT_COLOR = 20
 
-    #SET_ICON_LAYER = 30
-    SET_ICON_X = 31
-    SET_ICON_Y = 32
-    SET_ICON_SCALE = 33
-    SET_ICON_ROTATION  = 34
-
-    SET_TYPE = 35
-    VAR_NODE_NAME = 36
-
-
-    #Value is always the value in terms of the GUI, where as there's also HAL_VALUE
-    #The variables use VALUE but the Hal nodes use display_value since it's a convertred number
-    #Need to keep the same (30) because we use the same display code for read only HAL and variables
-    VALUE = 30
-    #DISPLAY_VALUE = VALUE
-
-    HAL_VALUE = 20 #True/False
+    POS = 21
 
     #HalNode
-    HAL_PIN      = 40
-    HAL_PIN_TYPE = 41
+    HAL_PIN = 22
+    HAL_PIN_TYPE = 23
+
+    #FIXME
+    HAL_VALUE = 24 #True/False
+    VALUE = 25 #Value used in the gui
 
     #DigitalInputNode
-    VALUE_OFF = 23
-    VALUE_ON  = 24
+    VALUE_OFF = 26
+    VALUE_ON = 27
 
     #AnalogInputNode
-    UNITS                   = 22
-    DISPLAY_DIGITS          = 23
-    DISPLAY_SCIENTIFIC      = 24
-    CALIBRATION_TABLE_MODEL = 25
-
-
+    UNITS = 28
+    DISPLAY_DIGITS = 29
+    DISPLAY_SCIENTIFIC = 30
+    CALIBRATION_TABLE_MODEL = 31
 
     #All var nodes
-    USER_MANUAL_SET = 10
+    USER_MANUAL_SET = 32
 
     #BoolVarNode
-    OFF_NAME      = 11
-    ON_NAME       = 12
+    OFF_NAME = 33
+    ON_NAME = 34
 
     #IntVarNode and FloatVarNode
-    MIN           = 11
-    MAX           = 12
+    MIN = 35
+    MAX = 36
 
+    ######################
+    ### Behavior Model ###
+    BT_STATUS = 100
+    WAIT_TIME = 101
+    VAR_NODE_NAME = 102
 
+    #Message, Dialog, and Alert Nodes
+    SUCCESS_TEXT = 103
+    FAIL_TEXT = 104
+    TICK_RATE_MS = 105
 
-    #?
-    BT_STATUS = 1
-    WAIT_TIME = 30
-    HAL_NODE = 31
-
-    POS       = 220 #move all the pos things to this
-    XY         = 221
-
-    SET_NODE_SETPOINTS = 222
-
-    WAIT_NODE_WAITPOINTS = 223
-    WAIT_NODE_WAIT_TYPE = 224
-    WAIT_NODE_BUFFER_TYPE = 225
-    WAIT_NODE_TIMEOUT = 226
-
-    #used on Message, Dialog, and Alert Nodes
-    POSSIBLE_NODES = 227
-    MESSAGE_DATA = 228
-    SUCCESS_TEXT = 229
-    FAIL_TEXT = 230
-    ICON_LAYER = 231
-
-    TICK_RATE_MS = 232
-
-
-    #new message node stuff
-    POST_TO_ALERTS = 234
-    POST_TO_MESSAGE = 235
-
-    DEVICE_STATE = 236
-    NEW_LINE = 237
-    MAN_BTN_NEW_LINE = 238
-    MAN_BTN_SPAN_COL_END = 239
+    DEVICE_STATE = 106
+    NEW_LINE = 107
+    MAN_BTN_NEW_LINE = 108
+    MAN_BTN_SPAN_COL_END = 109
     
+    TIMEOUT_SEC = 110
+    NUMBER_REPEATS = 111 
+    IGNORE_FAILURE = 112 
 
-    TIMEOUT_SEC = 240
-    NUMBER_REPEATS = 241
-    IGNORE_FAILURE = 242
+    ALERT_TYPE = 113
+    SET_TYPE = 114
 
-    ALERT_TYPE = 243
+    COMPARE_2_NAME = 115
+    TOLERANCE_SCALE_VALUE = 116
+    TOLERANCE_SCALE_NAME = 117
+    TOLERANCE_OFFSET_VALUE = 118
+    TOLERANCE_OFFSET_NAME = 119
+    SET_TYPE_SCALE = 120
+    SET_TYPE_OFFSET = 121
 
-    COMPARE_2_NAME = 244
-    TOLERANCE_SCALE_VALUE = 245
-    TOLERANCE_SCALE_NAME = 246
-    TOLERANCE_OFFSET_VALUE = 247
-    TOLERANCE_OFFSET_NAME = 248
-    SET_TYPE_SCALE = 249
-    SET_TYPE_OFFSET = 250
 
 class typ():
     TOOL_NODE = 'Tool_Node'
