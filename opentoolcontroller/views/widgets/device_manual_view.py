@@ -4,8 +4,37 @@
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 from opentoolcontroller.strings import col, typ, bt
 from opentoolcontroller.views.widgets.scientific_spin import ScientificDoubleSpinBox
+from opentoolcontroller.views.widgets.behavior_editor_view import BTEditorWindow
 
 manual_device_view_base, manual_device_view_form = uic.loadUiType("opentoolcontroller/views/DeviceManualView.ui")
+
+
+class BehaviorButton(QtWidgets.QPushButton):
+    def __init__(self, parent=None):
+        super(BehaviorButton, self).__init__(parent)
+        self._behavior = None
+        self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.customContextMenuRequested.connect(self.buttonMenu)
+
+    def buttonMenu(self, pos):
+        menu = QtWidgets.QMenu()
+        menu.addAction('View Behavior', self.viewBehavior)
+        menu.exec_(QtGui.QCursor.pos())
+
+    def viewBehavior(self):
+        if self._behavior:
+            name = self._behavior.name()
+            editor = BTEditorWindow(self)
+            editor.setModel(self._behavior)
+            editor.setEditable(False)
+            editor.show()
+
+    def behavior(self):
+        return self._behavior
+
+    def setBehavior(self, behavior):
+        self._behavior = behavior
+
 
 class DeviceManualView(manual_device_view_base, manual_device_view_form):
     def __init__(self, parent=None):
@@ -14,22 +43,18 @@ class DeviceManualView(manual_device_view_base, manual_device_view_form):
 
         self._model = None
         self._mapper = QtWidgets.QDataWidgetMapper()
+        self._current_index = None
+        self._enable_device_behaviors = False
 
+    def viewBehavior(self):
+        print("view that behavior")
 
-    #def runBehavior(self, run_function, run_wids):
-    #    run_data = {}
-
-    #    for key in run_wids:
-    #        wid = run_wids[key]
-
-    #        if hasattr(wid, 'isChecked'):
-    #            run_data[key] = wid.isChecked()
-    #        elif hasattr(wid, 'value'):
-    #            run_data[key] = wid.value()
-
-    #    run_function(run_data)
+    def onContextMenu(self, point):
+        # show right click menu
+        self._behavior_menu.exec_()#self.button.mapToGlobal(point))
 
     def setSelection(self, index):
+        self._current_index = index
         self._sub_mappers = []
 
         #Clear out the layout with the Hal Nodes
@@ -69,6 +94,7 @@ class DeviceManualView(manual_device_view_base, manual_device_view_form):
                 wid.setModel(child_index.model())
                 wid.setRootIndex(index)
                 wid.setCurrentModelIndex(child_index)
+                wid.setEnabled(self._enable_device_behaviors)
                 self.ui_wids.addWidget(wid, ui_row, ui_col, 1, -1) #1 row, full width
                 ui_row += 1
        
@@ -92,8 +118,22 @@ class DeviceManualView(manual_device_view_base, manual_device_view_form):
                 ui_col_span = -1
 
 
-            btn = QtWidgets.QPushButton(behavior.name())
+            #btn = QtWidgets.QPushButton(behavior.name())
+            btn = BehaviorButton(behavior.name())
             btn.clicked.connect(behavior.run)
+            btn.setBehavior(behavior)
+            btn.setEnabled(self._enable_device_behaviors)
+            
+            #Right click button to view behavior
+            #btn.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+            #btn.customContextMenuRequested.connect(self.onContextMenu)
+            #self._behavior_menu = QtWidgets.QMenu(self)
+
+            #view_behavior_action = QtWidgets.QAction('View Behavior', self)
+            #view_behavior_action.triggered.connect(self.viewBehavior)
+            #self._behavior_menu.addAction(view_behavior_action)
+
+
             #btn.clicked.connect(lambda a, b=behavior.run, c=run_data: self.runBehavior(b, c))
             self.ui_wids.addWidget(btn, ui_row, ui_col, 1, ui_col_span)
             first_behavior = False
@@ -129,98 +169,10 @@ class DeviceManualView(manual_device_view_base, manual_device_view_form):
                 self.ui_wids.addWidget(wid, ui_row, ui_col, 1, -1) #1 row, full width
                 ui_row += 1
        
-        #self.ui_wids.setContentsMargins(0,0,0,0)
 
 
-        '''
-        #These involve sending data to a behavior, not used for the device
-        for behavior in node.behaviors():
-            run_data = {}
-
-            for behavior_input in behavior.indexesOfType(typ.BEHAVIOR_INPUT):
-                bi_node = behavior_input.internalPointer()
-                if bi_node.setType == bt.VAL:
-
-                    if bi_node.newLine:
-                        ui_row += 1
-                        ui_col = 0
-
-                    if len(bi_node.text) > 0:
-                        ui_col += 1
-                        label = QtWidgets.QLabel(bi_node.text)
-                        label.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-                        self.ui_wids.addWidget(label, ui_row, ui_col)
 
 
-                    ui_col += 1
-
-                    if bi_node.node().typeInfo() == typ.BOOL_VAR_NODE:
-                        data_wid = QtWidgets.QCheckBox()
-
-                    elif bi_node.node().typeInfo() == typ.FLOAT_VAR_NODE:
-                        data_wid = QtWidgets.QDoubleSpinBox()
-
-                    else:
-                        pass
-                        #TODO what if it's neither?
-
-
-                    self.ui_wids.addWidget(data_wid, ui_row, ui_col)
-                    run_data[bi_node.node().name] = data_wid
-
-
-            if behavior.rootIndex().internalPointer().manualButtonNewLine:
-                ui_col_stretch = ui_col + 1
-                ui_row += 1
-                ui_col = 0
-            else:
-                ui_col_stretch = 1
-                ui_col += 1
-
-
-            btn = QtWidgets.QPushButton(behavior.name())
-            btn.clicked.connect(lambda a, b=behavior.run, c=run_data: self.runBehavior(b, c))
-            self.ui_wids.addWidget(btn, ui_row, ui_col, 1, ui_col_stretch)
-
-        '''
-
-
-        #Look for any BoolVarNode or FloatVarNodes
-
-        #TURN this off for a bit
-        #Need to only use this for a differetn access level
-        #try:
-        #    for row in range(self._model.rowCount(index)):
-        #        child_index = index.child(row,0)
-        #        wid = None
-#
-        #        node =  child_index.internalPointer()
-#
-        #        #A user never directly sets IO
-        #        if node.typeInfo() == typ.D_IN_NODE:
-        #            wid = ManualBoolView()
-#
-        #        elif node.typeInfo() in [typ.A_IN_NODE, typ.A_OUT_NODE]:
-        #            wid = ManualFloatView()
-#
-        #        elif node.typeInfo() == typ.D_OUT_NODE:
-        #            wid = ManualBoolView() if node.viewOnly else ManualBoolSet()
-#
-        #        elif node.typeInfo() == typ.BOOL_VAR_NODE:
-        #            wid = ManualBoolView() if node.viewOnly else ManualBoolSet()
-#
-        #        elif node.typeInfo() == typ.FLOAT_VAR_NODE:
-        #            wid = ManualFloatView() if node.viewOnly else ManualFloatSet()
-#
-        #        if wid is not None:
-        #            wid.setModel(child_index.model())
-        #            wid.setRootIndex(index)
-        #            wid.setCurrentModelIndex(child_index)
-        #            self.ui_wids.addWidget(wid)
-        #except:
-        #    pass
-
-        ##self.ui_wids.addStretch(1)
 
     def setModel(self, model):
         if hasattr(model, 'mapToSource'):
@@ -234,6 +186,31 @@ class DeviceManualView(manual_device_view_base, manual_device_view_form):
 
     def model(self):
         return self._model
+    
+    def enableRunDeviceBehaviors(self, enable):
+        self._enable_device_behaviors = bool(enable)
+        if self._current_index:
+            self.setSelection(self._current_index)
+
+
+''' holding pen for behaviro code that references like a file?'''
+    #   n = QtWidgets.QPushButton(behavior.name())
+    #btn.clicked.connect(lambda a, b=behavior.run, c=run_data: self.runBehavior(b, c))
+    #self.ui_wids.addWidget(btn, ui_row, ui_col, 1, ui_col_stretch)
+
+    #def runBehavior(self, run_function, run_wids):
+    #   run_data = {}
+
+    #    for key in run_wids:
+    #        wid = run_wids[key]
+
+    #        if hasattr(wid, 'isChecked'):
+    #            run_data[key] = wid.isChecked()
+    #        elif hasattr(wid, 'value'):
+    #            run_data[key] = wid.value()
+
+    #    run_function(run_data)
+
 
 
 

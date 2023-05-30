@@ -8,6 +8,7 @@ from opentoolcontroller.tool_model import ToolModel
 from opentoolcontroller.tool_editor import ToolEditor
 from opentoolcontroller.tool_manual_view import ToolManualView
 from opentoolcontroller.alert_view import AlertView, AlertTableModel
+from opentoolcontroller.login import LoginView, LoginModel
 
 from opentoolcontroller.bt_model import BTModel
 
@@ -25,9 +26,14 @@ class Window(QtWidgets.QMainWindow):
         with open(file) as f:
             json_data = json.load(f)
 
+        self._login_model = LoginModel()
+        self._login_view = LoginView(self._login_model)
+        self._login_view.setWindowTitle('Login')
+
         self._alert_model =  AlertTableModel()
         self._alert_view = AlertView(self._alert_model)
         self._alert_view.setWindowTitle('Alerts')
+        self._login_model.addLoginChangedCallback(self._alert_view.enableClearAlerts, self._login_model.CLEAR_ALERTS)
 
 
 
@@ -43,30 +49,49 @@ class Window(QtWidgets.QMainWindow):
 
         self._manual_view = ToolManualView(self.tool_model)
         self._manual_view.setWindowTitle('Manual')
+        self._login_model.addLoginChangedCallback(self._manual_view.enableRunDeviceBehaviors, self._login_model.RUN_BEHAVIORS)
 
         self._tool_editor = ToolEditor()
         self._tool_editor.setModel(self.tool_model)
         self._tool_editor.setWindowTitle('Tool Editor')
+        self._login_model.addLoginChangedCallback(self._tool_editor.enableEditTool, self._login_model.EDIT_TOOL)
+        self._login_model.addLoginChangedCallback(self._tool_editor.enableEditBehavior, self._login_model.EDIT_BEHAVIOR)
 
         dock1 = QtWidgets.QDockWidget('Manual', self, objectName='manual')
         dock1.setWidget(self._manual_view)
+        dock1.setContextMenuPolicy(QtCore.Qt.PreventContextMenu)
+
 
         dock2 = QtWidgets.QDockWidget('Tool Editor', self, objectName='editor')
         dock2.setWidget(self._tool_editor)
+        dock2.setContextMenuPolicy(QtCore.Qt.PreventContextMenu)
 
         dock3 = QtWidgets.QDockWidget('Alerts', self, objectName='alerts')
         dock3.setWidget(self._alert_view)
+        dock3.setContextMenuPolicy(QtCore.Qt.PreventContextMenu)
 
-        self.addDockWidget(QtCore.Qt.RightDockWidgetArea, dock1)
-        self.addDockWidget(QtCore.Qt.RightDockWidgetArea, dock2)
-        self.addDockWidget(QtCore.Qt.RightDockWidgetArea, dock3)
+        dock4 = QtWidgets.QDockWidget('Login', self, objectName='login')
+        dock4.setWidget(self._login_view)
+        dock4.setContextMenuPolicy(QtCore.Qt.PreventContextMenu)
+        
+
+        dock1.setFeatures(QtWidgets.QDockWidget.DockWidgetFloatable | QtWidgets.QDockWidget.DockWidgetMovable)
+        dock2.setFeatures(QtWidgets.QDockWidget.DockWidgetFloatable | QtWidgets.QDockWidget.DockWidgetMovable)
+        dock3.setFeatures(QtWidgets.QDockWidget.DockWidgetFloatable | QtWidgets.QDockWidget.DockWidgetMovable)
+        dock4.setFeatures(QtWidgets.QDockWidget.DockWidgetFloatable | QtWidgets.QDockWidget.DockWidgetMovable)
+
+        self.addDockWidget(QtCore.Qt.TopDockWidgetArea, dock1)
+        self.addDockWidget(QtCore.Qt.TopDockWidgetArea, dock2)
+        self.addDockWidget(QtCore.Qt.TopDockWidgetArea, dock3)
+        self.addDockWidget(QtCore.Qt.TopDockWidgetArea, dock4)
         self.tabifyDockWidget(dock1, dock2)
         self.tabifyDockWidget(dock2, dock3)
+        self.tabifyDockWidget(dock3, dock4)
+        self.setDockNestingEnabled(True) #needed for left/right arranging
 
 
         #self.reader.setModel(self.tool_model)
         #self.reader.start()
-
 
         #Start the behavior tree
         #self.tool_model.runBehaviorTrees()
@@ -86,6 +111,7 @@ class Window(QtWidgets.QMainWindow):
         self.file_menu.addAction(extractAction)
         self.file_menu.addAction(self.toggleHalAction)
         self.file_menu.addAction(self.saveToolAction)
+
 
         #Add enable direct io control to the menu?
         #tool variable that when yes you get direct control of the hal nodes

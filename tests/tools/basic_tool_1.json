@@ -1,11 +1,18 @@
 {
+    "behaviorFiles": [
+        "/Users/wrightsh/Desktop/Open Tool Controller/tests/behaviors/generic.json"
+    ],
     "children": [
         {
             "backgroundSVG": "opentoolcontroller/resources/icons/evaporator_background.svg",
+            "behaviorFiles": [
+                "/Users/wrightsh/Desktop/Open Tool Controller/tests/behaviors/generic.json"
+            ],
             "children": [
                 {
                     "behaviorFiles": [
-                        "tests/behaviors/open.json"
+                        "tests/behaviors/open.json",
+                        "/Users/wrightsh/Desktop/Open Tool Controller/tests/behaviors/generic.json"
                     ],
                     "children": [
                         {
@@ -96,8 +103,8 @@
                         {
                             "children": [],
                             "description": "",
-                            "max": 6.0,
-                            "min": 0.0,
+                            "max": 6,
+                            "min": 0,
                             "name": "current_pocket",
                             "type_info": "Int_Var_Node",
                             "units": "",
@@ -106,8 +113,8 @@
                         {
                             "children": [],
                             "description": "",
-                            "max": 6.0,
-                            "min": 0.0,
+                            "max": 6,
+                            "min": 0,
                             "name": "pocket",
                             "type_info": "Int_Var_Node",
                             "units": "",
@@ -143,6 +150,15 @@
                             "type_info": "Device_Icon_Node",
                             "x": 50.0,
                             "y": 50.0
+                        },
+                        {
+                            "children": [],
+                            "description": "",
+                            "halPin": "",
+                            "name": "pump_on",
+                            "offName": "On",
+                            "onName": "Off",
+                            "type_info": "Digital_Output_Node"
                         }
                     ],
                     "description": "",
@@ -153,10 +169,41 @@
             ],
             "description": "This is part of a tool, like a chamber or loadlock.",
             "name": "Chamber_A",
+            "states": [],
+            "type_info": "System_Node"
+        },
+        {
+            "backgroundSVG": "opentoolcontroller/resources/icons/general/generic_system_background.svg",
+            "behaviorFiles": [],
+            "children": [
+                {
+                    "children": [],
+                    "description": "",
+                    "max": 1,
+                    "min": 0,
+                    "name": "Wafer_ID",
+                    "type_info": "Int_Var_Node",
+                    "units": "",
+                    "userManualSet": true
+                },
+                {
+                    "children": [],
+                    "description": "",
+                    "name": "Active",
+                    "offName": "no",
+                    "onName": "yea",
+                    "type_info": "Bool_Var_Node",
+                    "userManualSet": true
+                }
+            ],
+            "description": "",
+            "name": "Loadlock",
+            "states": [],
             "type_info": "System_Node"
         }
     ],
     "description": "This is the whole tool.",
     "name": "Evaporators",
+    "states": [],
     "type_info": "Tool_Node"
 }

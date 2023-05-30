@@ -23,15 +23,20 @@ class ToolModel(QtCore.QAbstractItemModel):
 
     #needs to happen after tool is loaded so all the tool nodes have their properties
     def loadBehaviors(self):
-        for device_index in self.indexesOfType(typ.DEVICE_NODE):
-            device_node = device_index.internalPointer()
-            device_node.loadBehaviors()
+        indexes = self.indexesOfType(typ.DEVICE_NODE)
+        indexes += self.indexesOfType(typ.SYSTEM_NODE)
+        indexes += [self._tool_index]
 
-            bt_models = device_node.behaviors()
+        for index in indexes:
+        #for index in self.indexesOfTypes([typ.DEVICE_NODE, typ.SYSTEM_NODE]):
+            node = index.internalPointer()
+            node.loadBehaviors()
+
+            bt_models = node.behaviors()
 
             for bt_model in bt_models:
                 bt_model.setToolModel(self)
-                bt_model.setToolIndex(device_index)
+                bt_model.setToolIndex(index)
                 bt_model.syncToTool()
 
 
@@ -216,6 +221,19 @@ class ToolModel(QtCore.QAbstractItemModel):
             if index.column() == col.POS and node.typeInfo() == typ.DEVICE_ICON_NODE:
                 self.dataChanged.emit(index.siblingAtColumn(col.X), index.siblingAtColumn(col.X))
                 self.dataChanged.emit(index.siblingAtColumn(col.Y), index.siblingAtColumn(col.Y))
+
+            if index.column() == col.BEHAVIORS and node.typeInfo() in [typ.DEVICE_NODE, typ.SYSTEM_NODE, typ. TOOL_NODE]:
+                for i, item in enumerate(value): 
+                    #If a string is inserted into the behavior list we convert that into a new bt model
+                    if isinstance(item, str):
+                        new_bt_model = BTModel()
+                        new_bt_model.setFile(item)
+                        new_bt_model.setToolModel(self)
+                        new_bt_model.setToolIndex(index)
+                        new_bt_model.syncToTool()
+                        value[i] = new_bt_model
+                node.setBehaviors(value)
+                self.dataChanged.emit(index, index)
 
             return True
 

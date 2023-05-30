@@ -7,7 +7,16 @@ class ToolTreeView(QtWidgets.QTreeView):
     def __init__(self, parent=None):
         QtWidgets.QTreeView.__init__(self, parent)
 
+        self._enable_context_menu = True
+
+    def setEnableContextMenu(self, enable):
+        self._enable_context_menu = bool(enable)
+
     def contextMenuEvent(self, event):
+        if not self._enable_context_menu:
+            event.accept()
+            return 
+
         if self.selectionModel().selection().indexes():
             item = self.selectedIndexes()[0]
             current_index = item.model().mapToSource(item)

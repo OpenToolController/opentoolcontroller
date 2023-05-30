@@ -4,7 +4,7 @@ import os
 
 from opentoolcontroller.views.widgets.tool_tree_view import ToolTreeView
 from opentoolcontroller.tool_model import LeafFilterProxyModel
-from opentoolcontroller.views.widgets.device_manual_view import DeviceManualView
+#from opentoolcontroller.views.widgets.device_manual_view import DeviceManualView
 
 tool_manual_view_base, tool_manual_view_form  = uic.loadUiType("opentoolcontroller/views/ToolManualView.ui")
 
@@ -47,3 +47,18 @@ class ToolManualView(tool_manual_view_base, tool_manual_view_form):
 
     def setGraphicSelection(self, index):
         self.ui_system_manual_view.setSelection(index)
+
+    def enableRunDeviceBehaviors(self, enable):
+        self.ui_button_group.enableRunDeviceBehaviors(enable)
+        pass
+
+    def enableRunSystemBehaviors(self, enable):
+        pass
+
+    def enableRunToolBehaviors(self, enable):
+        pass
+
+        #TODO cooddeeee
+        #self._node_editor.setEnabled(enable)
+        #for editor in self._specific_editors.values():
+        #    editor.setEnabled(enable)

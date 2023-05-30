@@ -67,6 +67,7 @@ class ToolEditor(tool_editor_base, tool_editor_form):
         self.restoreGeometry(geometry)
         self.restoreState(state)
         self.ui_splitter.restoreState(splitter_state)
+        self.enableEditTool(False)
 
 
     def hideEditors(self):
@@ -130,7 +131,16 @@ class ToolEditor(tool_editor_base, tool_editor_form):
         super().closeEvent(event)
 
 
+    def enableEditTool(self, enable):
+        self._node_editor.setEnabled(enable)
+        #self._behavior_state_editor.setEnabled(enable)
+        self.ui_tree.setEnableContextMenu(enable)
 
+        for editor in self._specific_editors.values():
+            editor.setEnabled(enable)
+
+    def enableEditBehavior(self, enable):
+        self._behavior_state_editor.enableEditBehaviors(enable)
 
 
 
@@ -205,6 +215,9 @@ class BehaviorStateEditor(QtWidgets.QWidget):
         self._mapper2 = QtWidgets.QDataWidgetMapper()
         self._behaviors = None #list of behavior models
 
+        self._edit_btns = [] #just used to enable/disable these easier
+        self._enable_edit_behaviors = False
+
         #behaviors
         self._grid = QtWidgets.QGridLayout()
         self._grid.setVerticalSpacing(5)
@@ -277,12 +290,12 @@ class BehaviorStateEditor(QtWidgets.QWidget):
     def insertBehavior(self, row):
         options = QtWidgets.QFileDialog.Options()
         options |= QtWidgets.QFileDialog.DontUseNativeDialog
-        file_name = QtWidgets.QFileDialog.getOpenFileName(self,"QFileDialog.getOpenFileName()", "opentoolcontroller/","JSON (*.json);;All Files (*)", options=options)
+        file_name = QtWidgets.QFileDialog.getOpenFileName(self,"QFileDialog.getOpenFileName()", 
+                                                          "opentoolcontroller/","JSON (*.json);;All Files (*)", options=options)
         file_name = file_name[0]
 
-        #FIXME
         if isinstance(file_name, str) and os.path.isfile(file_name):
-            #self.behavior.append(['behavior_name', file_name, 'placeholder']) #This needs to change
+            #the model takes care of loading the file into a BT Model
             self.behaviors.insert(row, file_name)
             self._mapper1.submit()
 
@@ -301,6 +314,17 @@ class BehaviorStateEditor(QtWidgets.QWidget):
             editor.setModel(behavior)
             editor.setEditable(True)
             editor.show()
+
+    def viewBehavior(self, row):
+        behavior = self.behaviors[row]
+        name = behavior.name()
+
+        if behavior:
+            editor = BTEditorWindow(self)
+            editor.setModel(behavior)
+            editor.setEditable(False)
+            editor.show()
+
 
     def removeBehavior(self, row):
         self.behaviors.pop(row)
@@ -348,6 +372,14 @@ class BehaviorStateEditor(QtWidgets.QWidget):
             pass
 
 
+    def enableEditBehaviors(self, enable=None):
+        if enable:
+            self._enable_edit_behaviors = bool(enable)
+
+        for edit_btn in self._edit_btns:
+            edit_btn.setEnabled(self._enable_edit_behaviors)
+
+
     @QtCore.pyqtProperty(list)
     def behaviors(self):
         return self._behaviors
@@ -358,6 +390,7 @@ class BehaviorStateEditor(QtWidgets.QWidget):
             self._behaviors = behaviors
 
         self._behavior_editors = []
+        self._edit_btns = []
 
         #clear the grid
         for i in reversed(range(self._list_grid.count())):
@@ -378,17 +411,25 @@ class BehaviorStateEditor(QtWidgets.QWidget):
             ui_name.setEnabled(False)
             ui_file_name = QtWidgets.QLineEdit(behavior.file())
             ui_file_name.setEnabled(False)
+            view_btn = QtWidgets.QPushButton('View')
             edit_btn = QtWidgets.QPushButton('Edit')
             rm_btn = QtWidgets.QPushButton('-') #Todo change to icons
             add_btn = QtWidgets.QPushButton('+')
 
+            
+            self._edit_btns.append(edit_btn)
+            self._edit_btns.append(rm_btn)
+            self._edit_btns.append(add_btn)
+
             self._behavior_editors.append([ui_name, ui_file_name])
             self._list_grid.addWidget(ui_name     , i, 0)
             self._list_grid.addWidget(ui_file_name, i, 1)
-            self._list_grid.addWidget(edit_btn    , i, 2)
-            self._list_grid.addWidget(rm_btn      , i, 3)
-            self._list_grid.addWidget(add_btn     , i, 4)
+            self._list_grid.addWidget(view_btn    , i, 2)
+            self._list_grid.addWidget(edit_btn    , i, 3)
+            self._list_grid.addWidget(rm_btn      , i, 4)
+            self._list_grid.addWidget(add_btn     , i, 5)
 
+            view_btn.clicked.connect(lambda a, b=i-1: self.viewBehavior(b)) #first parameter passed is False  from the btn
             edit_btn.clicked.connect(lambda a, b=i-1: self.editBehavior(b)) #first parameter passed is False  from the btn
             rm_btn.clicked.connect(lambda a, b=i-1: self.removeBehavior(b))
             add_btn.clicked.connect(lambda a, b=i-1: self.insertBehavior(b))
@@ -396,8 +437,10 @@ class BehaviorStateEditor(QtWidgets.QWidget):
 
             i += 1
         add_btn = QtWidgets.QPushButton('+')
+        self._edit_btns.append(add_btn)
         self._list_grid.addWidget(add_btn     , i, 4)
         add_btn.clicked.connect(lambda a, b=i-1: self.insertBehavior(b))
+        self.enableEditBehaviors()
 
     states = QtCore.pyqtProperty(QtCore.QVariant, getStates, setStates)
 

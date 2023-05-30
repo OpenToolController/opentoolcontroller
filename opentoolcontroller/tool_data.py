@@ -189,23 +189,15 @@ class BehaviorNode(Node):
     def setData(self, c, value):
         super().setData(c, value)
         if   c is col.STATE     : self._state = str(value)
-        elif c is col.BEHAVIORS :
-            print("~~~~ fix me!")
-            self._behaviors = value
-            #If a string is inserted into the behavior list we convert that into a new bt model
-            for i, item in enumerate(value):
-                if isinstance(item, str):
-                    new_bt_model = BTModel()
-                    new_bt_model.setFile(item)
-                    self._behaviors[i] = new_bt_model
-                    #self._behaviors.insert(i, new_bt_model)
-                    print("wow did that work?")
-            pass
-
-        if   c is col.STATES    : self._states = value
+        elif c is col.BEHAVIORS : pass #needs to be handled by the model to sync
+        elif c is col.STATES    : self._states = value
 
     def behaviors(self):
         return self._behaviors
+
+    def setBehaviors(self, value):
+        self._behaviors = value
+
 
     def loadBehaviors(self):
         self._behaviors = []
@@ -213,7 +205,6 @@ class BehaviorNode(Node):
             bt_model = BTModel()
             bt_model.setFile(file)
             self._behaviors.append(bt_model)
-
 
     def behaviorFiles():
         def fget(self):
@@ -223,16 +214,8 @@ class BehaviorNode(Node):
 
             return files
 
-        #need to do the load separate from the base json load
         def fset(self, behavior_files):
             self._behavior_files = behavior_files
-            #self._behaviors = []
-            #for file in behavior_files:
-            #    bt_model = BTModel()
-            #    bt_model.setFile(file)
-            #    self._behaviors.append(bt_model)
-            #print("fset")
-            #print(self._behaviors)
 
         return locals()
     behaviorFiles = property(**behaviorFiles())

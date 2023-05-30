@@ -261,8 +261,10 @@ class BTModel(QtCore.QAbstractItemModel):
 
         if isinstance(file_name, str) and os.path.isfile(file_name):
             with open(file_name) as f:
+                print("json start")
                 json_data = json.load(f)
                 self.loadJSON(json_data)
+                print("json loaded")
 
 
 

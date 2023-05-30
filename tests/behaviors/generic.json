@@ -1,0 +1,68 @@
+{
+    "children": [
+        {
+            "children": [
+                {
+                    "children": [
+                        {
+                            "pos": [
+                                -914.6030242732155,
+                                637.4461779678409
+                            ],
+                            "type_info": "Success"
+                        },
+                        {
+                            "children": [
+                                {
+                                    "pos": [
+                                        -785.9496594026019,
+                                        985.5132601255236
+                                    ],
+                                    "type_info": "Failure"
+                                }
+                            ],
+                            "pos": [
+                                -740.1485406451409,
+                                765.3723990009531
+                            ],
+                            "type_info": "Sequence"
+                        },
+                        {
+                            "pos": [
+                                -627.77547910302,
+                                634.4704971172158
+                            ],
+                            "type_info": "Failure"
+                        }
+                    ],
+                    "pos": [
+                        -799.6649887775513,
+                        429.7623186926844
+                    ],
+                    "type_info": "Selector"
+                },
+                {
+                    "pos": [
+                        -573.0457680232153,
+                        442.96517796784065
+                    ],
+                    "type_info": "Success"
+                }
+            ],
+            "pos": [
+                -702.9419680232153,
+                210.80348421784055
+            ],
+            "type_info": "Sequence"
+        }
+    ],
+    "manualButtonNewLine": false,
+    "manualButtonSpanColEnd": false,
+    "name": "Generic",
+    "pos": [
+        -570.2659949318581,
+        -81.67910626436634
+    ],
+    "tick_rate_ms": 500,
+    "type_info": "Root_Sequence"
+}

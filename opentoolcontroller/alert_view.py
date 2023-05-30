@@ -7,6 +7,7 @@ class AlertView(QtWidgets.QMainWindow):
         super().__init__()
 
         self._alert_model = alert_model
+        self._allow_clear = False
 
         #For the filter
         self._proxy_model = QtCore.QSortFilterProxyModel()
@@ -34,14 +35,23 @@ class AlertView(QtWidgets.QMainWindow):
         grid.addWidget(self._alert_search_bar, 0, 0, 1, 5)
         grid.addWidget(self._table, 1, 0, 1, 5)
 
-        clear_btn = QtWidgets.QPushButton('Clear All')
-        clear_btn.clicked.connect(self.clearAlerts)
-        grid.addWidget(clear_btn, 2, 4)
+        self._clear_btn = QtWidgets.QPushButton('Clear All')
+        self._clear_btn.clicked.connect(self.clearAlerts)
+        grid.addWidget(self._clear_btn, 2, 4)
+
+
+        self.enableClearAlerts(False)
+
 
 
     def clearAlerts(self):
         self._alert_model.clearAlerts()
 
+    def enableClearAlerts(self, enable):
+        if enable:
+            self._clear_btn.setEnabled(True)
+        else:
+            self._clear_btn.setEnabled(False)
         
 
 

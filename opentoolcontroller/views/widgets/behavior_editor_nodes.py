@@ -149,6 +149,7 @@ class NodeGraphicsItem(QtWidgets.QGraphicsItem):
 
     def setEditable(self, value):
         self._editable = bool(value)
+        self.setEnabled(self._editable)
 
         try:
             self._drag_square.setEditable(self._editable)
