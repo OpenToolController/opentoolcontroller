@@ -16,7 +16,6 @@ class BTEditorWindow(QtWidgets.QMainWindow):
         super().__init__(parent)
         self._bt_editor = BTEditor(self)
         self.setCentralWidget(self._bt_editor)
-        self.initToolbar()
         self.initMenu()
 
         self._settings = QtCore.QSettings('OpenToolController', 'test1')
@@ -61,7 +60,7 @@ class BTEditorWindow(QtWidgets.QMainWindow):
         file_menu.addAction(self.exit_action)
 
 
-    def initToolbar(self):
+    def initToolbar(self, node_typeInfo):
         toolbar = QtWidgets.QToolBar(self)
         self.addToolBar(toolbar)
         self.setStatusBar(QtWidgets.QStatusBar(self))
@@ -69,21 +68,56 @@ class BTEditorWindow(QtWidgets.QMainWindow):
         self._button_group = QtWidgets.QActionGroup(toolbar)
         self._button_group.setExclusive(True)
 
-        menu_data = [('opentoolcontroller/resources/icons/menu/behavior_tree/sequencer.png',"Sequencer", typ.SEQUENCE_NODE),
-                     ('opentoolcontroller/resources/icons/menu/behavior_tree/repeat.png',"Repeat", typ.REPEAT_NODE),
-                     ('opentoolcontroller/resources/icons/menu/behavior_tree/selector.png',"Selector", typ.SELECTOR_NODE),
-                     ('opentoolcontroller/resources/icons/menu/behavior_tree/wait_time.png',"Wait Time", typ.WAIT_TIME_NODE),
-                     ('opentoolcontroller/resources/icons/menu/behavior_tree/set.png',"Set", typ.SET_NODE),
-                     ('opentoolcontroller/resources/icons/menu/behavior_tree/wait.png',"Wait", typ.WAIT_NODE),
-                     ('opentoolcontroller/resources/icons/menu/behavior_tree/tolerance.png',"Wait", typ.TOLERANCE_NODE),
-                     ('opentoolcontroller/resources/icons/menu/behavior_tree/alert.png',"Alert", typ.ALERT_NODE),
-                     ('opentoolcontroller/resources/icons/menu/behavior_tree/alert_sequence.png',"Alert Sequence", typ.ALERT_SEQUENCE_NODE),
-                     ('opentoolcontroller/resources/icons/menu/behavior_tree/message.png',"Message", typ.MESSAGE_NODE),
-                     ('opentoolcontroller/resources/icons/menu/behavior_tree/dialog.png',"Dialog", typ.DIALOG_NODE),
-                     ('opentoolcontroller/resources/icons/menu/behavior_tree/set_icon_layer.png',"Set Icon", typ.SET_ICON_NODE),
-                     ('opentoolcontroller/resources/icons/menu/behavior_tree/set_device_state.png',"Set Device State", typ.SET_DEVICE_STATE_NODE),
-                     ('opentoolcontroller/resources/icons/menu/behavior_tree/success.png',"Success", typ.SUCCESS_NODE),
-                     ('opentoolcontroller/resources/icons/menu/behavior_tree/failure.png',"Failure", typ.FAILURE_NODE)]
+        menu_data = []
+
+        if node_typeInfo == typ.TOOL_NODE:
+            menu_data = [('opentoolcontroller/resources/icons/menu/behavior_tree/sequencer.png',"Sequencer", typ.SEQUENCE_NODE),
+                 ('opentoolcontroller/resources/icons/menu/behavior_tree/repeat.png',"Repeat", typ.REPEAT_NODE),
+                 ('opentoolcontroller/resources/icons/menu/behavior_tree/selector.png',"Selector", typ.SELECTOR_NODE),
+                 ('opentoolcontroller/resources/icons/menu/behavior_tree/wait_time.png',"Wait Time", typ.WAIT_TIME_NODE),
+                 ('opentoolcontroller/resources/icons/menu/behavior_tree/alert.png',"Alert", typ.ALERT_NODE),
+                 ('opentoolcontroller/resources/icons/menu/behavior_tree/alert_sequence.png',"Alert Sequence", typ.ALERT_SEQUENCE_NODE),
+                 ('opentoolcontroller/resources/icons/menu/behavior_tree/message.png',"Message", typ.MESSAGE_NODE),
+                 ('opentoolcontroller/resources/icons/menu/behavior_tree/dialog.png',"Dialog", typ.DIALOG_NODE),
+                 ('opentoolcontroller/resources/icons/menu/behavior_tree/set.png',"Run Behavior", typ.RUN_BEHAVIOR_NODE),
+                 ('opentoolcontroller/resources/icons/menu/behavior_tree/wait.png',"Wait for State", typ.WAIT_STATE_NODE),
+                 ('opentoolcontroller/resources/icons/menu/behavior_tree/success.png',"Success", typ.SUCCESS_NODE),
+                 ('opentoolcontroller/resources/icons/menu/behavior_tree/failure.png',"Failure", typ.FAILURE_NODE)]
+
+
+        elif node_typeInfo == typ.SYSTEM_NODE:
+            menu_data = [('opentoolcontroller/resources/icons/menu/behavior_tree/sequencer.png',"Sequencer", typ.SEQUENCE_NODE),
+                 ('opentoolcontroller/resources/icons/menu/behavior_tree/repeat.png',"Repeat", typ.REPEAT_NODE),
+                 ('opentoolcontroller/resources/icons/menu/behavior_tree/selector.png',"Selector", typ.SELECTOR_NODE),
+                 ('opentoolcontroller/resources/icons/menu/behavior_tree/wait_time.png',"Wait Time", typ.WAIT_TIME_NODE),
+                 ('opentoolcontroller/resources/icons/menu/behavior_tree/alert.png',"Alert", typ.ALERT_NODE),
+                 ('opentoolcontroller/resources/icons/menu/behavior_tree/alert_sequence.png',"Alert Sequence", typ.ALERT_SEQUENCE_NODE),
+                 ('opentoolcontroller/resources/icons/menu/behavior_tree/message.png',"Message", typ.MESSAGE_NODE),
+                 ('opentoolcontroller/resources/icons/menu/behavior_tree/dialog.png',"Dialog", typ.DIALOG_NODE),
+                 ('opentoolcontroller/resources/icons/menu/behavior_tree/set.png',"Run Behavior", typ.RUN_BEHAVIOR_NODE),
+                 ('opentoolcontroller/resources/icons/menu/behavior_tree/wait.png',"Wait for State", typ.WAIT_STATE_NODE),
+                 ('opentoolcontroller/resources/icons/menu/behavior_tree/success.png',"Success", typ.SUCCESS_NODE),
+                 ('opentoolcontroller/resources/icons/menu/behavior_tree/failure.png',"Failure", typ.FAILURE_NODE)]
+
+        elif node_typeInfo == typ.DEVICE_NODE:
+            menu_data = [('opentoolcontroller/resources/icons/menu/behavior_tree/sequencer.png',"Sequencer", typ.SEQUENCE_NODE),
+                 ('opentoolcontroller/resources/icons/menu/behavior_tree/repeat.png',"Repeat", typ.REPEAT_NODE),
+                 ('opentoolcontroller/resources/icons/menu/behavior_tree/selector.png',"Selector", typ.SELECTOR_NODE),
+                 ('opentoolcontroller/resources/icons/menu/behavior_tree/wait_time.png',"Wait Time", typ.WAIT_TIME_NODE),
+                 ('opentoolcontroller/resources/icons/menu/behavior_tree/set.png',"Set", typ.SET_NODE),
+                 ('opentoolcontroller/resources/icons/menu/behavior_tree/wait.png',"Wait", typ.WAIT_NODE),
+                 ('opentoolcontroller/resources/icons/menu/behavior_tree/tolerance.png',"Wait", typ.TOLERANCE_NODE),
+                 ('opentoolcontroller/resources/icons/menu/behavior_tree/alert.png',"Alert", typ.ALERT_NODE),
+                 ('opentoolcontroller/resources/icons/menu/behavior_tree/alert_sequence.png',"Alert Sequence", typ.ALERT_SEQUENCE_NODE),
+                 ('opentoolcontroller/resources/icons/menu/behavior_tree/message.png',"Message", typ.MESSAGE_NODE),
+                 ('opentoolcontroller/resources/icons/menu/behavior_tree/dialog.png',"Dialog", typ.DIALOG_NODE),
+                 ('opentoolcontroller/resources/icons/menu/behavior_tree/set_icon_layer.png',"Set Icon", typ.SET_ICON_NODE),
+                 ('opentoolcontroller/resources/icons/menu/behavior_tree/set_device_state.png',"Set Device State", typ.SET_DEVICE_STATE_NODE),
+                 ('opentoolcontroller/resources/icons/menu/behavior_tree/success.png',"Success", typ.SUCCESS_NODE),
+                 ('opentoolcontroller/resources/icons/menu/behavior_tree/failure.png',"Failure", typ.FAILURE_NODE)]
+
+
+
 
         for file, name, btn_typ in menu_data:
             button_action = QtWidgets.QAction(QtGui.QIcon(file), "Insert a " + str(name) + " node", self)
@@ -96,6 +130,10 @@ class BTEditorWindow(QtWidgets.QMainWindow):
     def setModel(self, model):
         self._bt_editor.setModel(model)
         self.setTitle(file_changed=False)
+        self.initToolbar(model.toolIndex().internalPointer().typeInfo())
+
+    def model(self):
+        return self._bt_editor.model()
 
     def setEditable(self, value):
         value = bool(value)
@@ -342,6 +380,14 @@ class BTEditor(QtWidgets.QAbstractItemView):
         
         elif type == typ.SET_NODE:
             item = SetNodeGraphicsItem(type, node.children())
+            item.setModelAndIndex(self.model(), index)
+
+        elif type == typ.RUN_BEHAVIOR_NODE:
+            item = RunBehaviorNodeGraphicsItem(type, node.children())
+            item.setModelAndIndex(self.model(), index)
+
+        elif type == typ.WAIT_STATE_NODE:
+            item = WaitStateNodeGraphicsItem(type, node.children())
             item.setModelAndIndex(self.model(), index)
 
         elif type == typ.WAIT_NODE:

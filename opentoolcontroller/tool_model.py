@@ -274,13 +274,13 @@ class ToolModel(QtCore.QAbstractItemModel):
             return self.createIndex(row, column, self._tool_node)
 
 
-    def indexesOfTypes(self, index_types, parent_index=None):
+    def indexesOfTypes(self, index_types, parent_index=None, depth=10):
         indexes = []
         for index_type in index_types:
-            indexes += self.indexesOfType(index_type, parent_index)
+            indexes += self.indexesOfType(index_type, parent_index, depth)
         return indexes
 
-    def indexesOfType(self, index_type, parent_index=None):
+    def indexesOfType(self, index_type, parent_index=None, depth=10):
         if parent_index is None:
             parent_index = self._tool_index
 
@@ -290,13 +290,14 @@ class ToolModel(QtCore.QAbstractItemModel):
 
         indexes = []
 
-        for row in range(self.rowCount(parent_index)):
-            index = parent_index.child(row, 0)
+        if depth>0:
+            for row in range(self.rowCount(parent_index)):
+                index = parent_index.child(row, 0)
 
-            if index.internalPointer().typeInfo() == index_type:
-                indexes.append(index)
+                if index.internalPointer().typeInfo() == index_type:
+                    indexes.append(index)
 
-            indexes += self.indexesOfType(index_type, index)
+                indexes += self.indexesOfType(index_type, index, depth-1)
 
         return indexes
 

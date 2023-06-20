@@ -139,7 +139,7 @@ class ToolEditor(tool_editor_base, tool_editor_form):
         for editor in self._specific_editors.values():
             editor.setEnabled(enable)
 
-    def enableEditBehavior(self, enable):
+    def enableEditBehaviors(self, enable):
         self._behavior_state_editor.enableEditBehaviors(enable)
 
 

@@ -474,6 +474,66 @@ class WaitTimeNode(Node):
     wait_time = property(**wait_time())
 
 
+'''
+
+Setpoint
+    set_type  : no_set / equal / not equal / greater / less
+    set_index : the tool index that is set
+    set_name  : save
+    value     : a hard coded value that is used
+    var_index : the tool index that is used to get a dynamic value
+    var_name  : save
+
+PropertySetpoint
+    set_type  : no_set / equal / not equal / greater / less
+    name      : name of the property that is set
+    value     : a hard coded value that is used
+    var_index : the tool index that is used to get a dynamic value
+    var_name  : the name of the tool index, used for saving
+
+
+RunBehaviorSetpoint
+    set_type      : no_set / equal / not equal / greater / less
+    device_index  : 
+    device_name   : save
+    behavior      :
+    behavior_name : save
+
+WaitDeviceStateSetpoint
+Waitpoint // this could be a Setpoint where state_name is just 'value' and we don't use var_index and var_name
+    set_type      : no_set / equal / not equal / greater / less
+    device_index  : 
+    device_name   : save
+    state_name    :
+
+
+
+Tolerancepoint
+    set_type        : no_set / equal / not equal / greater / less
+    set_type_scale  : no_set / equal / not equal / greater / less
+    set_type_offset : no_set / equal / not equal / greater / less
+
+
+    #abs(compare_1 - compare_2) < (compare_2*tol_scale + tol_offset)
+    compare_1_index  : tool index of value that we compare to  
+    compare_1_name   : save
+    compare_2_index  : tool index of value that we compare to  
+    compare_2_name   : save
+
+    tolerance_scale_index :
+    tolerance_scale_name  :  save
+    tolerance_scale_value : hard coded value
+
+    tolerance_offset_index : = None
+    tolerance_offset_name  : save
+    tolerance_offset_value : hard coded value 
+
+
+
+'''
+
+
+
 #A set node has a setpoint for each IO that can be set
 class Setpoint(BaseNode):
     def __init__(self, parent=None):
@@ -495,12 +555,6 @@ class Setpoint(BaseNode):
 
     def treeType(self):
         return bt.PROPERTY
-
-    #def toolModel(self):
-    #    return self._tool_model
-
-    #def setToolModel(self, model):
-    #    self._tool_model = model
 
     def setSetIndex(self, index):
         self._set_index = index
@@ -560,6 +614,81 @@ class Setpoint(BaseNode):
             self._var_name = value
         return locals()
     varName = property(**varName())
+
+class RunBehaviorSetpoint(BaseNode):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        #Runs a behavior of a device
+        #need to store device and behavior name in order to load and sync from file
+        
+        self._tool_model = None
+
+        self._set_type = bt.NO_SET
+
+        self._device_index = None
+        self._device_name = ''
+
+        self._behavior = None
+        self._behavior_name = ''
+
+    def typeInfo(self):
+        return typ.SETPOINT
+
+    def treeType(self):
+        return bt.PROPERTY
+
+    def setDeviceIndex(self, index):
+        self._device_index = index
+
+    def deviceIndex(self):
+        return self._device_index
+
+    def setBehavior(self, value):
+        self._behavior = value
+
+    def behavior(self):
+        return self._behavior
+
+    def data(self, column):
+        r = super().data(column)
+        if   column is col.SET_TYPE      : r = self.setType
+        elif column is col.DEVICE_NAME   : r = self.deviceName
+        elif column is col.BEHAVIOR_NAME : r = self.behaviorName
+        return r
+
+    def setData(self, column, value):
+        super().setData(column, value)
+        if   column is col.SET_TYPE      : self.setType = value
+        elif column is col.DEVICE_NAME   : self.deviceName = value
+        elif column is col.BEHAVIOR_NAME : self.behaviorName = value
+
+    def setType():
+        def fget(self): return self._set_type
+        def fset(self, v): self._set_type = v
+        return locals()
+    setType = property(**setType())
+
+    def deviceName():
+        def fget(self):
+            try:
+                return self._device_index.internalPointer().name
+            except:
+                return self._device_name
+        def fset(self, value):
+            self._device_name = value
+        return locals()
+    deviceName = property(**deviceName())
+
+    def behaviorName():
+        def fget(self):
+            try:
+                return self._behavior.name()
+            except:
+                return self._behavior_name
+        def fset(self, value):
+            self._behavior_name = value
+        return locals()
+    behaviorName = property(**behaviorName())
 
 
 #Used to set properties instead of IO.  SetIcon node has a PropertySetpoint for each property that is set
@@ -681,6 +810,8 @@ class SetNode(Node):
 
         self._status = bt.SUCCESS
         return self._status
+
+
 
 
 class WaitNode(Node):
@@ -1144,7 +1275,71 @@ class SetIconNode(Node):
         self._status = bt.SUCCESS
         return self._status
 
+class RunBehaviorNode(Node):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self._tool_model = None
+        self._icon_index = None
+        self._tool_value_methods = {} #Stores tool .value() methods so they can be called at runtime
 
+    def typeInfo(self):
+        return typ.RUN_BEHAVIOR_NODE
+
+    def treeType(self):
+        return bt.LEAF
+
+    def toolTypes(self):
+        return [typ.SYSTEM_NODE, typ.DEVICE_NODE]
+        
+    def toolModel(self):
+        return  self._tool_model
+
+    def setToolModel(self, model):
+        self._tool_model = model
+
+    def tick(self):
+        if self._status != bt.SUCCESS:
+            for child in self.children():
+                if child.setType == bt.VAL:
+                    try:
+                        print("runnnn")
+                        child.behavior().run()
+                    except:
+                        pass
+
+
+
+
+        self._status = bt.SUCCESS
+        return self._status
+
+class WaitStateNode(Node):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self._tool_model = None
+        self._icon_index = None
+        self._tool_value_methods = {} #Stores tool .value() methods so they can be called at runtime
+
+    def typeInfo(self):
+        return typ.WAIT_STATE_NODE
+
+    def treeType(self):
+        return bt.LEAF
+
+    def toolTypes(self):
+        return [typ.SYSTEM_NODE, typ.DEVICE_NODE]
+        
+    def toolModel(self):
+        return  self._tool_model
+
+    def setToolModel(self, model):
+        self._tool_model = model
+
+    def tick(self):
+        #copy Set node style?
+        self._status = bt.SUCCESS
+
+        return self._status
 
 class AlertNode(Node):
     def __init__(self, parent=None):
@@ -1591,6 +1786,7 @@ class SetDeviceStateNode(Node):
         def fset(self, value): self._device_state = str(value)
         return locals()
     device_state = property(**device_state())
+
 
 
 

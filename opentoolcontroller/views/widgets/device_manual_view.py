@@ -15,18 +15,30 @@ class BehaviorButton(QtWidgets.QPushButton):
         self._behavior = None
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.buttonMenu)
+        self._enable_edit_behaviors = False
 
     def buttonMenu(self, pos):
         menu = QtWidgets.QMenu()
         menu.addAction('View Behavior', self.viewBehavior)
+        
+        if self._enable_edit_behaviors:
+            menu.addAction('Edit Behavior', self.editBehavior)
         menu.exec_(QtGui.QCursor.pos())
 
     def viewBehavior(self):
         if self._behavior:
             name = self._behavior.name()
-            editor = BTEditorWindow(self)
+            editor = BTEditorWindow(self.parent())
             editor.setModel(self._behavior)
             editor.setEditable(False)
+            editor.show()
+
+    def editBehavior(self):
+        if self._behavior:
+            name = self._behavior.name()
+            editor = BTEditorWindow(self.parent())
+            editor.setModel(self._behavior)
+            editor.setEditable(True)
             editor.show()
 
     def behavior(self):
@@ -34,6 +46,12 @@ class BehaviorButton(QtWidgets.QPushButton):
 
     def setBehavior(self, behavior):
         self._behavior = behavior
+
+    def enableEditBehaviors(self, enable):
+        self._enable_edit_behaviors = enable
+
+
+
 
 
 class DeviceManualView(manual_device_view_base, manual_device_view_form):
@@ -45,13 +63,8 @@ class DeviceManualView(manual_device_view_base, manual_device_view_form):
         self._mapper = QtWidgets.QDataWidgetMapper()
         self._current_index = None
         self._enable_device_behaviors = False
+        self._enable_edit_behaviors = False
 
-    def viewBehavior(self):
-        print("view that behavior")
-
-    def onContextMenu(self, point):
-        # show right click menu
-        self._behavior_menu.exec_()#self.button.mapToGlobal(point))
 
     def setSelection(self, index):
         self._current_index = index
@@ -67,8 +80,12 @@ class DeviceManualView(manual_device_view_base, manual_device_view_form):
             index = index.model().mapToSource(index)
 
         device_node = index.internalPointer()
+
         if device_node is not None:
             typeInfo = device_node.typeInfo()
+
+        if typeInfo not in [typ.TOOL_NODE, typ.SYSTEM_NODE, typ.DEVICE_NODE]:
+            return
 
         parent_index = index.parent()
         self._mapper.setRootIndex(parent_index)
@@ -118,21 +135,12 @@ class DeviceManualView(manual_device_view_base, manual_device_view_form):
                 ui_col_span = -1
 
 
-            #btn = QtWidgets.QPushButton(behavior.name())
             btn = BehaviorButton(behavior.name())
+            btn.enableEditBehaviors(self._enable_edit_behaviors)
             btn.clicked.connect(behavior.run)
             btn.setBehavior(behavior)
             btn.setEnabled(self._enable_device_behaviors)
             
-            #Right click button to view behavior
-            #btn.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-            #btn.customContextMenuRequested.connect(self.onContextMenu)
-            #self._behavior_menu = QtWidgets.QMenu(self)
-
-            #view_behavior_action = QtWidgets.QAction('View Behavior', self)
-            #view_behavior_action.triggered.connect(self.viewBehavior)
-            #self._behavior_menu.addAction(view_behavior_action)
-
 
             #btn.clicked.connect(lambda a, b=behavior.run, c=run_data: self.runBehavior(b, c))
             self.ui_wids.addWidget(btn, ui_row, ui_col, 1, ui_col_span)
@@ -181,7 +189,7 @@ class DeviceManualView(manual_device_view_base, manual_device_view_form):
 
         self._mapper.setModel(model)
         self._mapper.addMapping(self.ui_name, col.NAME, bytes("text",'ascii'))
-        self._mapper.addMapping(self.ui_description, col.DESCRIPTION, bytes("text",'ascii'))
+        #self._mapper.addMapping(self.ui_description, col.DESCRIPTION, bytes("text",'ascii'))
         self._mapper.addMapping(self.ui_state, col.STATE, bytes("text",'ascii'))
 
     def model(self):
@@ -191,6 +199,15 @@ class DeviceManualView(manual_device_view_base, manual_device_view_form):
         self._enable_device_behaviors = bool(enable)
         if self._current_index:
             self.setSelection(self._current_index)
+
+    def enableEditBehaviors(self, enable):
+        self._enable_edit_behaviors = enable
+        if self._current_index:
+            self.setSelection(self._current_index)
+            
+
+        #loop through buttonsself.ui_wids.addWidget(btn, ui_row, ui_col, 1, ui_col_span)
+
 
 
 ''' holding pen for behaviro code that references like a file?'''

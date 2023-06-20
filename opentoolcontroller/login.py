@@ -246,7 +246,8 @@ class LoginModel(QtCore.QAbstractTableModel):
             if self._current_user_privileges:
                 callback(self._current_user_privileges[privilege])
             else:
-                callback(False)
+                callback(True) #TODO for testing other stuff w/out logging in
+                #callback(False)
 
 
     #TODO check the method!

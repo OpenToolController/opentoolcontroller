@@ -4,7 +4,6 @@ import os
 
 from opentoolcontroller.views.widgets.tool_tree_view import ToolTreeView
 from opentoolcontroller.tool_model import LeafFilterProxyModel
-#from opentoolcontroller.views.widgets.device_manual_view import DeviceManualView
 
 tool_manual_view_base, tool_manual_view_form  = uic.loadUiType("opentoolcontroller/views/ToolManualView.ui")
 
@@ -42,10 +41,10 @@ class ToolManualView(tool_manual_view_base, tool_manual_view_form):
             index = self._proxy_model.mapFromSource(index)
 
         self.ui_tree.setCurrentIndex(index)
-        #self.ui_tree.selectionModel().setCurrentIndex(index, QtCore.QItemSelectionModel.ClearAndSelect)
         self.ui_button_group.setSelection(index)
 
     def setGraphicSelection(self, index):
+        self.ui_button_group.setSelection(index) #TODO make sure this isn't causing a loop of selection
         self.ui_system_manual_view.setSelection(index)
 
     def enableRunDeviceBehaviors(self, enable):
@@ -58,7 +57,6 @@ class ToolManualView(tool_manual_view_base, tool_manual_view_form):
     def enableRunToolBehaviors(self, enable):
         pass
 
-        #TODO cooddeeee
-        #self._node_editor.setEnabled(enable)
-        #for editor in self._specific_editors.values():
-        #    editor.setEnabled(enable)
+    def enableEditBehaviors(self, enable):
+        self.ui_button_group.enableEditBehaviors(enable)
+

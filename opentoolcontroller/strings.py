@@ -128,6 +128,11 @@ class col():
     TOLERANCE_OFFSET_NAME = 119
     SET_TYPE_SCALE = 120
     SET_TYPE_OFFSET = 121
+    
+
+    #Run Behavior Node
+    DEVICE_NAME = 122
+    BEHAVIOR_NAME = 123
 
 
 class typ():
@@ -163,8 +168,12 @@ class typ():
     FAILURE_NODE = 'Failure'
     SET_ICON_NODE = 'Set_Icon'
     SET_DEVICE_STATE_NODE = 'Set_Device_State'
+    RUN_BEHAVIOR_NODE = 'Run_Behavior'
+    WAIT_STATE_NODE = 'Wait_State'
 
     SETPOINT = 'Setpoint'
+    RUN_BEHAVIOR_SETPOINT = 'Run_Behavior_Setpoint'
+    WAIT_STATE_SETPOINT = 'Wait_State_Setpoint'
     TOLERANCEPOINT = 'Tolerancepoint'
     PROPERTY_SETPOINT = 'Property_Setpoint'
     BEHAVIOR_INPUT = 'Behavior_Input'

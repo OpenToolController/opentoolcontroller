@@ -50,12 +50,13 @@ class Window(QtWidgets.QMainWindow):
         self._manual_view = ToolManualView(self.tool_model)
         self._manual_view.setWindowTitle('Manual')
         self._login_model.addLoginChangedCallback(self._manual_view.enableRunDeviceBehaviors, self._login_model.RUN_BEHAVIORS)
+        self._login_model.addLoginChangedCallback(self._manual_view.enableEditBehaviors, self._login_model.EDIT_BEHAVIOR)
 
         self._tool_editor = ToolEditor()
         self._tool_editor.setModel(self.tool_model)
         self._tool_editor.setWindowTitle('Tool Editor')
         self._login_model.addLoginChangedCallback(self._tool_editor.enableEditTool, self._login_model.EDIT_TOOL)
-        self._login_model.addLoginChangedCallback(self._tool_editor.enableEditBehavior, self._login_model.EDIT_BEHAVIOR)
+        self._login_model.addLoginChangedCallback(self._tool_editor.enableEditBehaviors, self._login_model.EDIT_BEHAVIOR)
 
         dock1 = QtWidgets.QDockWidget('Manual', self, objectName='manual')
         dock1.setWidget(self._manual_view)
@@ -122,6 +123,7 @@ class Window(QtWidgets.QMainWindow):
         self.restoreGeometry(geometry)
         self.restoreState(state)
 
+        self._login_model.runLoginChangedCallbacks()
 
     def saveTool(self):
         data = self.tool_model.asJSON()

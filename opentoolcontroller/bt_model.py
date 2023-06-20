@@ -10,7 +10,6 @@ import pprint
 pp = pprint.PrettyPrinter(width=82, compact=True)
 
 class BTModel(QtCore.QAbstractItemModel):
-    #Behavior tree model
     def __init__(self, parent=None):
         super().__init__(parent)
         self._root_node = RootSequenceNode()
@@ -53,14 +52,13 @@ class BTModel(QtCore.QAbstractItemModel):
 
 
 
-
     def syncLeafSetpoints(self, leaf_index):
         leaf_node = leaf_index.internalPointer()
         leaf_node.setToolModel(self.toolModel())
         names = []
 
         # Add ones we don't have and set the models
-        for tool_index in self.toolModel().indexesOfTypes(leaf_node.toolTypes(), self.toolIndex()):
+        for tool_index in self.toolModel().indexesOfTypes(leaf_node.toolTypes(), self.toolIndex(), 1):
             tool_node = tool_index.internalPointer()
             names.append(tool_node.name)
 
@@ -93,13 +91,62 @@ class BTModel(QtCore.QAbstractItemModel):
                     setpoint_node.setVarIndex(tool_index)
 
 
+    def syncLeafRunBehaviorSetpoints(self, leaf_index):
+        #One of these for each device, has the behavior index that it can run
+        leaf_node = leaf_index.internalPointer()
+        leaf_node.setToolModel(self.toolModel())
+        names = []
+
+        # Need one for each device of the system (or each system of the tool
+        # Add ones we don't have and set the models
+        for tool_index in self.toolModel().indexesOfTypes(leaf_node.toolTypes(), self.toolIndex(), 1):
+            tool_node = tool_index.internalPointer()
+            names.append(tool_node.name)
+
+            for runpoint_index in self.indexesOfType(typ.RUN_BEHAVIOR_SETPOINT, leaf_index):
+                runpoint_node = runpoint_index.internalPointer()
+
+                if runpoint_node.deviceName == tool_node.name:
+                    runpoint_node.setDeviceIndex(tool_index)
+                    break
+
+            else:
+                new_runpoint_index = self.insertChild(leaf_index, typ.RUN_BEHAVIOR_SETPOINT)
+                runpoint_node = new_runpoint_index.internalPointer()
+                runpoint_node.setDeviceIndex(tool_index)
+
+
+        #Remove the ones that arent part of the tool model
+        for runpoint_index in self.indexesOfType(typ.RUN_BEHAVIOR_SETPOINT, leaf_index):
+            runpoint_node = runpoint_index.internalPointer()
+            if not runpoint_node.deviceName in names:
+                self.removeRows(runpoint_index.row(), 1, runpoint_index.parent())
+
+
+        #Now set the behavior via the saved behavior name
+        for runpoint_index in self.indexesOfType(typ.RUN_BEHAVIOR_SETPOINT, leaf_index):
+            runpoint_node = runpoint_index.internalPointer()
+
+            #Check if we have a behavior that matches
+            for behavior in runpoint_node.deviceIndex().internalPointer().behaviors():
+                if behavior.name == runpoint_node.behaviorName:
+                    runpoint_node.setBehavior(behavior)
+
+
+    def syncLeafWaitStateSetpoints(self, leaf_index):
+        #FIXME
+        
+        pass
+
+
+
     def syncLeafTolerancepoints(self, leaf_index):
         leaf_node = leaf_index.internalPointer()
         leaf_node.setToolModel(self.toolModel())
         names = []
 
         # Add ones we don't have and set the models
-        for tool_index in self.toolModel().indexesOfTypes(leaf_node.toolTypes(), self.toolIndex()):
+        for tool_index in self.toolModel().indexesOfTypes(leaf_node.toolTypes(), self.toolIndex(), 1):
             tool_node = tool_index.internalPointer()
             names.append(tool_node.name)
 
@@ -149,7 +196,7 @@ class BTModel(QtCore.QAbstractItemModel):
         names = []
 
         #Add ones we don't have and set the models
-        for tool_index in self.toolModel().indexesOfTypes(leaf_node.toolTypes(), self.toolIndex()):
+        for tool_index in self.toolModel().indexesOfTypes(leaf_node.toolTypes(), self.toolIndex(), 1):
             has_setpoint = False
             tool_node = tool_index.internalPointer()
             names.append(tool_node.name)
@@ -224,6 +271,12 @@ class BTModel(QtCore.QAbstractItemModel):
 
         for index in self.indexesOfType(typ.SET_NODE):
             self.syncLeafSetpoints(index)
+
+        for index in self.indexesOfType(typ.RUN_BEHAVIOR_NODE):
+            self.syncLeafRunBehaviorSetpoints(index)
+
+        for index in self.indexesOfType(typ.WAIT_STATE_NODE):
+            self.syncLeafWaitDeviceStateSetpoint(index)
 
         for index in self.indexesOfType(typ.WAIT_NODE):
             self.syncLeafSetpoints(index)
@@ -363,6 +416,8 @@ class BTModel(QtCore.QAbstractItemModel):
             elif  child_type == typ.SELECTOR_NODE         : parent_node.insertChild(insert_row, SelectorNode())
             elif  child_type == typ.WHILE_NODE            : parent_node.insertChild(insert_row, WhileNode())
             elif  child_type == typ.SET_NODE              : parent_node.insertChild(insert_row, SetNode())
+            elif  child_type == typ.RUN_BEHAVIOR_NODE     : parent_node.insertChild(insert_row, RunBehaviorNode())
+            elif  child_type == typ.WAIT_STATE_NODE       : parent_node.insertChild(insert_row, WaitStateNode())
             elif  child_type == typ.WAIT_NODE             : parent_node.insertChild(insert_row, WaitNode())
             elif  child_type == typ.TOLERANCE_NODE        : parent_node.insertChild(insert_row, ToleranceNode())
             elif  child_type == typ.ALERT_NODE            : parent_node.insertChild(insert_row, AlertNode())
@@ -375,6 +430,8 @@ class BTModel(QtCore.QAbstractItemModel):
             elif  child_type == typ.FAILURE_NODE          : parent_node.insertChild(insert_row, FailureNode())
             elif  child_type == typ.SET_ICON_NODE         : parent_node.insertChild(insert_row, SetIconNode())
             elif  child_type == typ.SETPOINT              : parent_node.insertChild(insert_row, Setpoint())
+            elif  child_type == typ.RUN_BEHAVIOR_SETPOINT : parent_node.insertChild(insert_row, RunBehaviorSetpoint())
+            elif  child_type == typ.WAIT_STATE_SETPOINT   : parent_node.insertChild(insert_row, WaitStateSetpoint())
             elif  child_type == typ.TOLERANCEPOINT        : parent_node.insertChild(insert_row, Tolerancepoint())
             elif  child_type == typ.PROPERTY_SETPOINT     : parent_node.insertChild(insert_row, PropertySetpoint())
             elif  child_type == typ.BEHAVIOR_INPUT        : parent_node.insertChild(insert_row, BehaviorInput())
@@ -405,6 +462,12 @@ class BTModel(QtCore.QAbstractItemModel):
 
                 elif child_type == typ.SET_NODE:
                     self.syncLeafSetpoints(new_child_index)
+
+                elif child_type == typ.RUN_BEHAVIOR_NODE:
+                    self.syncLeafRunBehaviorSetpoints(new_child_index)
+
+                elif child_type == typ.WAIT_STATE_NODE:
+                    self.syncLeafWaitStateSetpoints(new_child_index)
 
                 elif child_type == typ.WAIT_NODE:
                     self.syncLeafSetpoints(new_child_index)
@@ -530,12 +593,18 @@ class BTModel(QtCore.QAbstractItemModel):
         if index.isValid() and role == QtCore.Qt.EditRole:
             node.setData(index.column(), value)
 
-            if index.column() == col.VAR_NODE_NAME:
 
+            if index.column() == col.VAR_NODE_NAME:
                 for tool_index in self.toolModel().childrenIndexes(self.toolIndex()):
                     if tool_index.internalPointer().name == value:
                         node.setVarIndex(tool_index)
             
+            elif index.column() == col.BEHAVIOR_NAME: #Only for Tool/System RUN BEHAVIOR nodes TODO refine
+                device_node = node.deviceIndex().internalPointer()
+                for behavior in device_node.behaviors():
+                    if behavior.name() == value:
+                        node.setBehavior(behavior)
+
 
             self.dataChanged.emit(index, index)
 

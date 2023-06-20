@@ -4,7 +4,8 @@ from PyQt5 import QtGui, QtCore, QtWidgets, QtSvg
 from opentoolcontroller.strings import typ, col
 from opentoolcontroller.views.widgets.device_icon_widget import DeviceIconWidget
 
-
+'''Need to display button for the system and tool! '''
+#TODO Change name to SystemGraphicView ???
 class SystemManualView(QtWidgets.QAbstractItemView):
     def __init__(self, parent=None):
         super().__init__(parent)

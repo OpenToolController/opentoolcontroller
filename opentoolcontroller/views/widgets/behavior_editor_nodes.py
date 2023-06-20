@@ -850,6 +850,161 @@ class WaitNodeGraphicsItem(NodeGraphicsItem):
 
 
 
+
+
+'''
+ () () Device [list of behaviors]
+
+'''
+class RunBehaviorNodeGraphicsItem(NodeGraphicsItem):
+    def __init__(self, type=typ.RUN_BEHAVIOR_NODE, children=[]):
+        super().__init__(type)
+        #UI Stuff
+        self._grid = QtWidgets.QGridLayout() #setLayout sets parent
+        self._grid.setVerticalSpacing(1)
+        self._wid = QtWidgets.QWidget()
+        self._wid.setLayout(self._grid)
+
+        #check its a list?
+        self._children = children
+        self._runpoints = []
+
+        #for each device make the stuf
+        for i, child in enumerate(children):
+            name = child.deviceName
+            item = MappedDualStateListSet(self._wid)
+
+            self._grid.addWidget(QtWidgets.QLabel(name, self._wid), i, 0)
+            self._grid.addWidget(item, i, 1)
+            self._runpoints.append(item)
+
+        #Have to make the proxy after the wid otherwise size wont update right
+        self._prox = QtWidgets.QGraphicsProxyWidget(self)
+        self._prox.setWidget(self._wid)
+        self._prox.setPos(15, 40)
+
+
+    def setModelAndIndex(self, model, index):
+        if hasattr(model, 'sourceModel'):model = model.sourceModel()
+
+        #Need to populate the node list before mapping the value
+        node = index.internalPointer()
+        self._mappers = []
+
+        for row in range(model.rowCount(index)):
+            runpoint_wid = self._runpoints[row]
+            device_node = self._children[row].deviceIndex().internalPointer()
+
+
+            behavior_names =  [behavior.name() for behavior in device_node.behaviors()]
+            runpoint_wid.setValues(behavior_names)
+            
+
+            mapper_1 = QtWidgets.QDataWidgetMapper()
+            mapper_2 = QtWidgets.QDataWidgetMapper()
+
+            mapper_1.setModel(model)
+            mapper_2.setModel(model)
+
+            mapper_1.addMapping(runpoint_wid, col.SET_TYPE, bytes('setType', 'ascii'))
+            mapper_2.addMapping(runpoint_wid, col.BEHAVIOR_NAME, bytes('value', 'ascii'))
+
+            mapper_1.setRootIndex(index) 
+            mapper_2.setRootIndex(index)
+
+            mapper_1.setCurrentModelIndex(model.index(row, col.SET_TYPE, index))
+            mapper_2.setCurrentModelIndex(model.index(row, col.BEHAVIOR_NAME, index))
+
+            self._mappers.append(mapper_1)
+            self._mappers.append(mapper_2)
+
+class WaitStateNodeGraphicsItem(NodeGraphicsItem):
+    def __init__(self, type=typ.WAIT_STATE_NODE, children=[]):
+        super().__init__(type)
+        #UI Stuff
+        self._grid = QtWidgets.QGridLayout() #setLayout sets parent
+        self._grid.setVerticalSpacing(1)
+        self._wid = QtWidgets.QWidget()
+        self._wid.setLayout(self._grid)
+        self._timeout_mapper = QtWidgets.QDataWidgetMapper()
+
+        ui_row = 0
+
+        #Timeout Sec
+        self._grid.addWidget(QtWidgets.QLabel('Timeout (sec)', self._wid), ui_row, 0)
+        self._ui_timeout_sec = QtWidgets.QDoubleSpinBox(self._wid)
+        self._ui_timeout_sec.setMinimum(0)
+        self._ui_timeout_sec.setMaximum(3600)
+        self._ui_timeout_sec.setSingleStep(1)
+        self._ui_timeout_sec.valueChanged.connect(self._timeout_mapper.submit)
+        self._grid.addWidget(self._ui_timeout_sec, ui_row, 1)
+
+
+        ui_row += 1
+        divider_line = QtWidgets.QFrame()
+        divider_line.setFrameShadow(QtWidgets.QFrame.Sunken)
+        divider_line.setFrameShape(QtWidgets.QFrame.HLine)
+        divider_line.setFixedHeight(20)
+        self._grid.addWidget(divider_line, ui_row, 0,1,-1)
+
+        ui_row += 1
+
+        #check its a list?
+        self._children = children
+        self._runpoints = []
+
+
+        #TODO change this so it has the equal / not equal part going on :) 
+        ''' '''
+        #for each device make the stuf
+        for i, child in enumerate(children):
+            name = child.deviceName
+            item = MappedDualStateListWait(self._wid)
+
+            self._grid.addWidget(QtWidgets.QLabel(name, self._wid), ui_row+i, 0)
+            self._grid.addWidget(item, ui_row+i, 1)
+            self._runpoints.append(item)
+
+        #Have to make the proxy after the wid otherwise size wont update right
+        self._prox = QtWidgets.QGraphicsProxyWidget(self)
+        self._prox.setWidget(self._wid)
+        self._prox.setPos(15, 40)
+
+
+    def setModelAndIndex(self, model, index):
+        if hasattr(model, 'sourceModel'):model = model.sourceModel()
+
+        #Need to populate the node list before mapping the value
+
+        node = index.internalPointer()
+        self._mappers = []
+
+        for row in range(model.rowCount(index)):
+            runpoint_wid = self._runpoints[row]
+            device_node = self._children[row].deviceIndex().internalPointer()
+
+            runpoint_wid.setValues(device_node.states)
+            
+
+
+            mapper_1 = QtWidgets.QDataWidgetMapper()
+            mapper_2 = QtWidgets.QDataWidgetMapper()
+
+            mapper_1.setModel(model)
+            mapper_2.setModel(model)
+
+            mapper_1.addMapping(runpoint_wid, col.SET_TYPE, bytes('setType', 'ascii'))
+            mapper_2.addMapping(runpoint_wid, col.DEVICE_STATE, bytes('value', 'ascii'))
+
+            mapper_1.setRootIndex(index) 
+            mapper_2.setRootIndex(index)
+
+            mapper_1.setCurrentModelIndex(model.index(row, col.SET_TYPE, index))
+            mapper_2.setCurrentModelIndex(model.index(row, col.BEHAVIOR_NAME, index))
+
+            self._mappers.append(mapper_1)
+            self._mappers.append(mapper_2)
+
 #TODO we dont use all the children hereeee
 class ToleranceNodeGraphicsItem(NodeGraphicsItem):
     def __init__(self, type=typ.WAIT_NODE, children=None):
@@ -1817,6 +1972,100 @@ class MappedDualStateListSet(MappedBase):
             self._value_box.setVisible(True)
 
         self._button_group.button(bt.set_type(set_type)).setChecked(True)
+        self.parent().adjustSize()
+
+    def getDataValue(self):
+        return self._value_box.currentText()
+
+    def setDataValue(self, value):
+        if self._value_box.findText(str(value)) >= 0:
+            self._value_box.setCurrentText(value)
+
+        if self._value_callback is not None:
+            self._value_callback(str(self._value_box.currentText()))
+
+    def getDataVarNodeName(self):
+        return None
+
+    def setDataVarNodeName(self, value):
+        pass
+
+    setType = QtCore.pyqtProperty(QtCore.QVariant, getDataSetType, setDataSetType)
+    value = QtCore.pyqtProperty(QtCore.QVariant, getDataValue, setDataValue)
+    varNodeName = QtCore.pyqtProperty(QtCore.QVariant, getDataVarNodeName, setDataVarNodeName)
+
+class MappedDualStateListWait(MappedBase):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self._value_callback = None
+
+    def setupUI(self):
+        self._button_group = QtWidgets.QButtonGroup()
+        self._layout = QtWidgets.QHBoxLayout()
+
+        self.addButton("", bt.NO_SET)
+        self.addButton("", bt.VAL)
+
+        self._equality_box = QtWidgets.QComboBox()
+        self._equality_box.currentIndexChanged.connect(self.postData)
+        self._equality_box.addItem("=")
+        self._equality_box.addItem("!=")
+        self._layout.addWidget(self._equality_box)
+        self._layout.addStretch()
+
+        third_button_spacer = QtWidgets.QSpacerItem(28, 1, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+        self._layout.addItem(third_button_spacer) #28 pixels seems clos3
+
+        self._value_box = QtWidgets.QComboBox()
+        self._value_box.setMinimumWidth(150)
+        self._value_box.currentIndexChanged.connect(self.postData)
+        self._layout.addWidget(self._value_box)
+        self._layout.addStretch()
+
+        self._layout.setContentsMargins(0,0,0,0)
+        self.setLayout(self._layout)
+
+
+    def setValueCallback(self, callback):
+        self._value_callback = callback
+
+    def setValues(self, value):
+        self._value_box.clear()
+        self._value_box.addItems(value)
+
+    def getDataSetType(self):
+        set_type = self._button_group.checkedId()
+        if set_type >= 0:
+            if   self._equality_box.currentText() ==  "=": set_type += bt.EQUAL
+            elif self._equality_box.currentText() == "!=": set_type += bt.NOT_EQUAL
+
+        return set_type
+
+    def setDataSetType(self, set_type):
+        self._value_box.setEnabled(False)
+        self._value_box.setVisible(False)
+        self._equality_box.setEnabled(False)
+        self._equality_box.setVisible(False)
+
+        if bt.set_type(set_type) == bt.VAL:
+            self._value_box.setEnabled(True)
+            self._value_box.setVisible(True)
+
+        self._button_group.button(bt.set_type(set_type)).setChecked(True)
+
+
+        if bt.set_type(set_type) == bt.VAL:
+            self._equality_box.blockSignals(True)
+            self._equality_box.setEnabled(True)
+            self._equality_box.setVisible(True)
+
+            equal_type = bt.equality(set_type)
+            if   equal_type == bt.EQUAL              : self._equality_box.setCurrentText( "=")
+            elif equal_type == bt.NOT_EQUAL          : self._equality_box.setCurrentText("!=")
+            self._equality_box.blockSignals(False)
+
+
+
         self.parent().adjustSize()
 
     def getDataValue(self):

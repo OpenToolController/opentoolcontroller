@@ -247,7 +247,6 @@ class SystemNode(BehaviorNode):
 
     def data(self, c):
         r = super().data(c)
-
         if   c is col.BACKGROUND_SVG: r = self.backgroundSVG
         elif c is col.MOVABLE_ICONS : r = self.movableIcons()
         return r
@@ -269,25 +268,6 @@ class SystemNode(BehaviorNode):
                 self._background_svg =  defaults.SYSTEM_BACKGROUND
         return locals()
     backgroundSVG = property(**backgroundSVG())
-
-
-'''
-Device Children:
-    - hal Nodes
-    - buffered com nodes like serial
-
-    - variables --> table owned by the device or children?
-        - digital and analog
-        - has min and max
-        - manual view of variables lets you set them
-
-- Has a list of behavior trees
-- Each BT can be run manually w/ a button
-- a behavior tree
-- a devices bt has to know the children of the device
-- on load it needs to check if everything it has in it actually exists
-- the hardware  file will be going through evaluating the branches/leaves
-'''
 
 
 # This has to be fixed after the IO nodes are fixed
