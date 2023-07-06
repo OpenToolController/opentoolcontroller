@@ -1,0 +1,63 @@
+{
+    "children": [
+        {
+            "pos": [
+                -574.9419680232154,
+                -79.0
+            ],
+            "type_info": "Sequence"
+        },
+        {
+            "children": [
+                {
+                    "behaviorName": "",
+                    "setName": "Pump",
+                    "setType": 0,
+                    "type_info": "Run_Behavior_Setpoint"
+                },
+                {
+                    "behaviorName": "Stop_Flow",
+                    "setName": "SF6_MFC",
+                    "setType": 1,
+                    "type_info": "Run_Behavior_Setpoint"
+                }
+            ],
+            "pos": [
+                -367.0,
+                -79.0
+            ],
+            "type_info": "Run_Behavior"
+        },
+        {
+            "children": [
+                {
+                    "setName": "Pump",
+                    "setType": 16,
+                    "state": "",
+                    "type_info": "Wait_State_Setpoint"
+                },
+                {
+                    "setName": "SF6_MFC",
+                    "setType": 17,
+                    "state": "Fault",
+                    "type_info": "Wait_State_Setpoint"
+                }
+            ],
+            "pos": [
+                -25.0,
+                -79.0
+            ],
+            "timeoutSec": 15.0,
+            "type_info": "Wait_State"
+        }
+    ],
+    "manualButtonNewLine": false,
+    "manualButtonSpanColEnd": false,
+    "name": "Pump to Base",
+    "pos": [
+        -337.26599493185813,
+        -335.67910626436634
+    ],
+    "tick_rate_ms": 500,
+    "type_info": "Root_Sequence"
+}

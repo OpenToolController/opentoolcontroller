@@ -353,7 +353,12 @@ class BTEditor(QtWidgets.QAbstractItemView):
         type = node.typeInfo()
 
 
-        if type in [typ.SETPOINT, typ.TOLERANCEPOINT, typ.PROPERTY_SETPOINT, typ.BEHAVIOR_INPUT]:
+        if type in [typ.SETPOINT,
+                    typ.TOLERANCEPOINT,
+                    typ.WAIT_STATE_SETPOINT,
+                    typ.RUN_BEHAVIOR_SETPOINT, 
+                    typ.PROPERTY_SETPOINT,
+                    typ.BEHAVIOR_INPUT]:
             return
 
         elif type == typ.ROOT_SEQUENCE_NODE:

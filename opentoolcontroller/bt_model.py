@@ -52,17 +52,18 @@ class BTModel(QtCore.QAbstractItemModel):
 
 
 
-    def syncLeafSetpoints(self, leaf_index):
+    def syncLeafSetpointBase(self, leaf_index, setpoint_type):
         leaf_node = leaf_index.internalPointer()
         leaf_node.setToolModel(self.toolModel())
+
         names = []
 
-        # Add ones we don't have and set the models
+        # Add ones we don't have
         for tool_index in self.toolModel().indexesOfTypes(leaf_node.toolTypes(), self.toolIndex(), 1):
             tool_node = tool_index.internalPointer()
             names.append(tool_node.name)
 
-            for setpoint_index in self.indexesOfType(typ.SETPOINT, leaf_index):
+            for setpoint_index in self.indexesOfType(setpoint_type, leaf_index):
                 setpoint_node = setpoint_index.internalPointer()
 
                 if setpoint_node.setName == tool_node.name:
@@ -70,19 +71,24 @@ class BTModel(QtCore.QAbstractItemModel):
                     break
 
             else:
-                new_setpoint_index = self.insertChild(leaf_index, typ.SETPOINT)
+                new_setpoint_index = self.insertChild(leaf_index, setpoint_type)
                 setpoint_node = new_setpoint_index.internalPointer()
                 setpoint_node.setSetIndex(tool_index)
 
 
         #Remove the ones that arent part of the tool model
-        for setpoint_index in self.indexesOfType(typ.SETPOINT, leaf_index):
+        for setpoint_index in self.indexesOfType(setpoint_type, leaf_index):
             setpoint_node = setpoint_index.internalPointer()
             if not setpoint_node.setName in names:
                 self.removeRows(setpoint_index.row(), 1, setpoint_index.parent())
 
 
-        #After all the sets are usable then we need to sync the varNodeIndexes
+
+
+    def syncLeafSetpoints(self, leaf_index):
+        self.syncLeafSetpointBase(leaf_index, typ.SETPOINT)
+
+        #Sync the varNodeIndexes
         for setpoint_index in self.indexesOfType(typ.SETPOINT, leaf_index):
             setpoint_node = setpoint_index.internalPointer()
 
@@ -91,52 +97,33 @@ class BTModel(QtCore.QAbstractItemModel):
                     setpoint_node.setVarIndex(tool_index)
 
 
+
+
     def syncLeafRunBehaviorSetpoints(self, leaf_index):
-        #One of these for each device, has the behavior index that it can run
-        leaf_node = leaf_index.internalPointer()
-        leaf_node.setToolModel(self.toolModel())
-        names = []
-
-        # Need one for each device of the system (or each system of the tool
-        # Add ones we don't have and set the models
-        for tool_index in self.toolModel().indexesOfTypes(leaf_node.toolTypes(), self.toolIndex(), 1):
-            tool_node = tool_index.internalPointer()
-            names.append(tool_node.name)
-
-            for runpoint_index in self.indexesOfType(typ.RUN_BEHAVIOR_SETPOINT, leaf_index):
-                runpoint_node = runpoint_index.internalPointer()
-
-                if runpoint_node.deviceName == tool_node.name:
-                    runpoint_node.setDeviceIndex(tool_index)
-                    break
-
-            else:
-                new_runpoint_index = self.insertChild(leaf_index, typ.RUN_BEHAVIOR_SETPOINT)
-                runpoint_node = new_runpoint_index.internalPointer()
-                runpoint_node.setDeviceIndex(tool_index)
-
-
-        #Remove the ones that arent part of the tool model
-        for runpoint_index in self.indexesOfType(typ.RUN_BEHAVIOR_SETPOINT, leaf_index):
-            runpoint_node = runpoint_index.internalPointer()
-            if not runpoint_node.deviceName in names:
-                self.removeRows(runpoint_index.row(), 1, runpoint_index.parent())
-
+        self.syncLeafSetpointBase(leaf_index, typ.RUN_BEHAVIOR_SETPOINT)
 
         #Now set the behavior via the saved behavior name
         for runpoint_index in self.indexesOfType(typ.RUN_BEHAVIOR_SETPOINT, leaf_index):
             runpoint_node = runpoint_index.internalPointer()
 
             #Check if we have a behavior that matches
-            for behavior in runpoint_node.deviceIndex().internalPointer().behaviors():
+            for behavior in runpoint_node.setIndex().internalPointer().behaviors():
                 if behavior.name == runpoint_node.behaviorName:
                     runpoint_node.setBehavior(behavior)
 
 
+
     def syncLeafWaitStateSetpoints(self, leaf_index):
-        #FIXME
-        
-        pass
+        self.syncLeafSetpointBase(leaf_index, typ.WAIT_STATE_SETPOINT)
+
+        #Now set the behavior via the saved behavior name
+        for setpoint_index in self.indexesOfType(typ.WAIT_STATE_SETPOINT, leaf_index):
+            setpoint_node = setpoint_index.internalPointer()
+
+            #Check if we have a state that matches
+            #if state in setpoint_node.setIndex().internalPointer().states:
+            #    setpoint_node.state = state
+
 
 
 
@@ -276,7 +263,7 @@ class BTModel(QtCore.QAbstractItemModel):
             self.syncLeafRunBehaviorSetpoints(index)
 
         for index in self.indexesOfType(typ.WAIT_STATE_NODE):
-            self.syncLeafWaitDeviceStateSetpoint(index)
+            self.syncLeafWaitStateSetpoints(index)
 
         for index in self.indexesOfType(typ.WAIT_NODE):
             self.syncLeafSetpoints(index)
@@ -314,10 +301,8 @@ class BTModel(QtCore.QAbstractItemModel):
 
         if isinstance(file_name, str) and os.path.isfile(file_name):
             with open(file_name) as f:
-                print("json start")
                 json_data = json.load(f)
                 self.loadJSON(json_data)
-                print("json loaded")
 
 
 
@@ -478,9 +463,8 @@ class BTModel(QtCore.QAbstractItemModel):
 
 
 
-            ''' Shoud this go above the sync block????'''
+            #Shoud this go above the sync block?
             self.endInsertRows()
-            #self.modelReset.emit()
 
             return new_child_index
 
@@ -600,7 +584,7 @@ class BTModel(QtCore.QAbstractItemModel):
                         node.setVarIndex(tool_index)
             
             elif index.column() == col.BEHAVIOR_NAME: #Only for Tool/System RUN BEHAVIOR nodes TODO refine
-                device_node = node.deviceIndex().internalPointer()
+                device_node = node.setIndex().internalPointer()
                 for behavior in device_node.behaviors():
                     if behavior.name() == value:
                         node.setBehavior(behavior)

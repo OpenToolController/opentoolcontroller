@@ -192,6 +192,9 @@ class BehaviorNode(Node):
         elif c is col.BEHAVIORS : pass #needs to be handled by the model to sync
         elif c is col.STATES    : self._states = value
 
+    def state(self):
+        return self._state
+
     def behaviors(self):
         return self._behaviors
 

@@ -1,6 +1,14 @@
 {
     "children": [
         {
+            "device_state": "Stabilizing",
+            "pos": [
+                -1423.0,
+                45.0
+            ],
+            "type_info": "Set_Device_State"
+        },
+        {
             "children": [
                 {
                     "setName": "output_valve",
@@ -252,8 +260,8 @@
     "manualButtonSpanColEnd": false,
     "name": "Flow",
     "pos": [
-        -570.2659949318581,
-        -81.67910626436634
+        -647.2659949318581,
+        -294.67910626436634
     ],
     "tick_rate_ms": 500,
     "type_info": "Root_Sequence"

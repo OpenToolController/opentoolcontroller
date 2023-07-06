@@ -133,6 +133,7 @@ class col():
     #Run Behavior Node
     DEVICE_NAME = 122
     BEHAVIOR_NAME = 123
+    STATE_SETPOINT= 124
 
 
 class typ():

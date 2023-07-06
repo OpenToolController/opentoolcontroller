@@ -475,15 +475,6 @@ class WaitTimeNode(Node):
 
 
 '''
-
-Setpoint
-    set_type  : no_set / equal / not equal / greater / less
-    set_index : the tool index that is set
-    set_name  : save
-    value     : a hard coded value that is used
-    var_index : the tool index that is used to get a dynamic value
-    var_name  : save
-
 PropertySetpoint
     set_type  : no_set / equal / not equal / greater / less
     name      : name of the property that is set
@@ -492,28 +483,25 @@ PropertySetpoint
     var_name  : the name of the tool index, used for saving
 
 
-RunBehaviorSetpoint
-    set_type      : no_set / equal / not equal / greater / less
-    device_index  : 
-    device_name   : save
+
+SetpointBase
+    set_type  : no_set / equal / not equal / greater / less
+    set_index : the tool index that is being done to
+    set_name  : save
+
+Setpoint(SetpointBase)
+    value     : a hard coded value that is used
+    var_index : the tool index that is used to get a dynamic value
+    var_name  : save
+
+RunBehaviorSetpoint(SetpointBase)
     behavior      :
     behavior_name : save
 
-WaitDeviceStateSetpoint
-Waitpoint // this could be a Setpoint where state_name is just 'value' and we don't use var_index and var_name
-    set_type      : no_set / equal / not equal / greater / less
-    device_index  : 
-    device_name   : save
+WaitStateSetpoint(SetpointBase)  
     state_name    :
 
-
-
-Tolerancepoint
-    set_type        : no_set / equal / not equal / greater / less
-    set_type_scale  : no_set / equal / not equal / greater / less
-    set_type_offset : no_set / equal / not equal / greater / less
-
-
+Tolerancepoint(SetpointBase)
     #abs(compare_1 - compare_2) < (compare_2*tol_scale + tol_offset)
     compare_1_index  : tool index of value that we compare to  
     compare_1_name   : save
@@ -528,33 +516,15 @@ Tolerancepoint
     tolerance_offset_name  : save
     tolerance_offset_value : hard coded value 
 
-
-
 '''
 
 
-
-#A set node has a setpoint for each IO that can be set
-class Setpoint(BaseNode):
+class SetpointBase(BaseNode):
     def __init__(self, parent=None):
         super().__init__(parent)
-        #We set a node (set_index) to either a value or to the value of another node (var_index)
-        
-        self._tool_model = None
-
         self._set_type = bt.NO_SET
         self._set_index = None
         self._set_name = ""
-        self._value = 0
-        self._var_index = None
-        self._var_name = ""
-
-
-    def typeInfo(self):
-        return typ.SETPOINT
-
-    def treeType(self):
-        return bt.PROPERTY
 
     def setSetIndex(self, index):
         self._set_index = index
@@ -562,36 +532,20 @@ class Setpoint(BaseNode):
     def setIndex(self):
         return self._set_index
 
-    def setVarIndex(self, index):
-        self._var_index = index
-
-    def varIndex(self):
-        return self._var_index
-
     def data(self, column):
         r = super().data(column)
-        if   column is col.SET_TYPE      : r = self.setType
-        elif column is col.VALUE         : r = self.value
-        elif column is col.VAR_NODE_NAME : r = self.varName
+        if   column is col.SET_TYPE : r = self.setType
         return r
 
     def setData(self, column, value):
         super().setData(column, value)
-        if   column is col.SET_TYPE      : self.setType = value
-        elif column is col.VALUE         : self.value = value
-        elif column is col.VAR_NODE_NAME : self.varName = value
+        if   column is col.SET_TYPE : self.setType = value
 
     def setType():
         def fget(self): return self._set_type
         def fset(self, v): self._set_type = v
         return locals()
     setType = property(**setType())
-
-    def value():
-        def fget(self): return self._value
-        def fset(self,value): self._value = value
-        return locals()
-    value = property(**value())
 
     def setName():
         def fget(self):
@@ -604,6 +558,44 @@ class Setpoint(BaseNode):
         return locals()
     setName = property(**setName())
 
+
+#A set node has a setpoint for each IO that can be set
+class Setpoint(SetpointBase):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self._value = 0
+        self._var_index = None
+        self._var_name = ""
+
+    def typeInfo(self):
+        return typ.SETPOINT
+
+    def treeType(self):
+        return bt.PROPERTY
+
+    def setVarIndex(self, index):
+        self._var_index = index
+
+    def varIndex(self):
+        return self._var_index
+
+    def data(self, column):
+        r = super().data(column)
+        if   column is col.VALUE         : r = self.value
+        elif column is col.VAR_NODE_NAME : r = self.varName
+        return r
+
+    def setData(self, column, value):
+        super().setData(column, value)
+        if   column is col.VALUE         : self.value = value
+        elif column is col.VAR_NODE_NAME : self.varName = value
+
+    def value():
+        def fget(self): return self._value
+        def fset(self,value): self._value = value
+        return locals()
+    value = property(**value())
+
     def varName():
         def fget(self):
             try:
@@ -615,33 +607,20 @@ class Setpoint(BaseNode):
         return locals()
     varName = property(**varName())
 
-class RunBehaviorSetpoint(BaseNode):
+class RunBehaviorSetpoint(SetpointBase):
     def __init__(self, parent=None):
         super().__init__(parent)
         #Runs a behavior of a device
         #need to store device and behavior name in order to load and sync from file
         
-        self._tool_model = None
-
-        self._set_type = bt.NO_SET
-
-        self._device_index = None
-        self._device_name = ''
-
         self._behavior = None
         self._behavior_name = ''
 
     def typeInfo(self):
-        return typ.SETPOINT
+        return typ.RUN_BEHAVIOR_SETPOINT
 
     def treeType(self):
         return bt.PROPERTY
-
-    def setDeviceIndex(self, index):
-        self._device_index = index
-
-    def deviceIndex(self):
-        return self._device_index
 
     def setBehavior(self, value):
         self._behavior = value
@@ -651,33 +630,12 @@ class RunBehaviorSetpoint(BaseNode):
 
     def data(self, column):
         r = super().data(column)
-        if   column is col.SET_TYPE      : r = self.setType
-        elif column is col.DEVICE_NAME   : r = self.deviceName
-        elif column is col.BEHAVIOR_NAME : r = self.behaviorName
+        if column is col.BEHAVIOR_NAME : r = self.behaviorName
         return r
 
     def setData(self, column, value):
         super().setData(column, value)
-        if   column is col.SET_TYPE      : self.setType = value
-        elif column is col.DEVICE_NAME   : self.deviceName = value
-        elif column is col.BEHAVIOR_NAME : self.behaviorName = value
-
-    def setType():
-        def fget(self): return self._set_type
-        def fset(self, v): self._set_type = v
-        return locals()
-    setType = property(**setType())
-
-    def deviceName():
-        def fget(self):
-            try:
-                return self._device_index.internalPointer().name
-            except:
-                return self._device_name
-        def fset(self, value):
-            self._device_name = value
-        return locals()
-    deviceName = property(**deviceName())
+        if column is col.BEHAVIOR_NAME : self.behaviorName = value
 
     def behaviorName():
         def fget(self):
@@ -690,6 +648,31 @@ class RunBehaviorSetpoint(BaseNode):
         return locals()
     behaviorName = property(**behaviorName())
 
+class WaitStateSetpoint(SetpointBase):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self._state = ''
+
+    def typeInfo(self):
+        return typ.WAIT_STATE_SETPOINT
+
+    def treeType(self):
+        return bt.PROPERTY
+
+    def data(self, column):
+        r = super().data(column)
+        if column is col.STATE_SETPOINT : r = self.state
+        return r
+
+    def setData(self, column, value):
+        super().setData(column, value)
+        if column is col.STATE_SETPOINT : self.state = value
+
+    def state():
+        def fget(self): return self._state
+        def fset(self, value): self._state = value
+        return locals()
+    state = property(**state())
 
 #Used to set properties instead of IO.  SetIcon node has a PropertySetpoint for each property that is set
 #maybe use property as part of this class name? SetProperty?
@@ -760,7 +743,6 @@ class PropertySetpoint(BaseNode):
 
 #The SetNode gets a list of tool nodes then we check if any are in save_values, and if so use the setpoint
 # Having the node reference lets it actually set the node
-#class SetNode(NodeControlsToolNodes):
 class SetNode(Node):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -781,24 +763,20 @@ class SetNode(Node):
     def setToolModel(self, model):
         self._tool_model = model
 
-
-
     def tick(self):
         if self._status != bt.SUCCESS:
             for child in self.children():
                 type_info = child.setIndex().internalPointer().typeInfo()
                 tool_model = self.toolModel()
-                #tool_model = child.toolModel()
-
 
                 if child.setType == bt.VAL:
                     if type_info in [typ.BOOL_VAR_NODE, typ.FLOAT_VAR_NODE]:
                         tool_model.setData(child.setIndex().siblingAtColumn(col.VALUE), child.value)
 
                     elif type_info == typ.D_OUT_NODE:
-                        pass #FIXME HAL
+                        pass #FIXME  TODO HAL
                     elif type_info == typ.A_OUT_NODE:
-                        pass #FIXME HAL
+                        pass #FIXME TODO HAL
                         #hal que stuff
                         #node.halQueuePut(setpoint)
 
@@ -807,20 +785,15 @@ class SetNode(Node):
                         tool_model.setData(child.setIndex().siblingAtColumn(col.VALUE), child.varIndex().internalPointer().value())
 
 
-
         self._status = bt.SUCCESS
         return self._status
 
-
-
-
-class WaitNode(Node):
+class WaitNode(Node): #This one is used by the device on IO
     def __init__(self, parent=None):
         super().__init__(parent)
         self._tool_model = None
         self._timeout_sec = 0
         self._start_time = 0
-
 
     def typeInfo(self):
         return typ.WAIT_NODE
@@ -836,7 +809,6 @@ class WaitNode(Node):
 
     def setToolModel(self, model):
         self._tool_model = model
-
 
     def data(self, column):
         r = super().data(column)
@@ -858,7 +830,6 @@ class WaitNode(Node):
 
             for child in self.children():
                 type_info = child.setIndex().internalPointer().typeInfo()
-                #tool_model = child.toolModel()
                 tool_model = self.toolModel()
 
                 #Decode the two column hex value
@@ -908,9 +879,9 @@ class WaitNode(Node):
                 #        tool_model.setData(child.setIndex().siblingAtColumn(col.VALUE), child.value)
 
                 #    elif type_info == typ.D_OUT_NODE:
-                #        pass #FIXME HAL
+                #        pass #FIXME TODO HAL
                 #    elif type_info == typ.A_OUT_NODE:
-                #        pass #FIXME HAL
+                #        pass #FIXME TODO HAL
                 #        #hal que stuff
                 #        #node.halQueuePut(setpoint)
 
@@ -956,7 +927,6 @@ class Tolerancepoint(BaseNode):
         self._tolerance_offset_index = None
         self._tolerance_offset_name = None
         self._tolerance_offset_value = 1.0
-
 
 
     def typeInfo(self):
@@ -1280,7 +1250,6 @@ class RunBehaviorNode(Node):
         super().__init__(parent)
         self._tool_model = None
         self._icon_index = None
-        self._tool_value_methods = {} #Stores tool .value() methods so they can be called at runtime
 
     def typeInfo(self):
         return typ.RUN_BEHAVIOR_NODE
@@ -1302,13 +1271,10 @@ class RunBehaviorNode(Node):
             for child in self.children():
                 if child.setType == bt.VAL:
                     try:
-                        print("runnnn")
                         child.behavior().run()
                     except:
+                        #TODO Add error logging
                         pass
-
-
-
 
         self._status = bt.SUCCESS
         return self._status
@@ -1317,8 +1283,8 @@ class WaitStateNode(Node):
     def __init__(self, parent=None):
         super().__init__(parent)
         self._tool_model = None
-        self._icon_index = None
-        self._tool_value_methods = {} #Stores tool .value() methods so they can be called at runtime
+        self._timeout_sec = 0
+        self._start_time = 0
 
     def typeInfo(self):
         return typ.WAIT_STATE_NODE
@@ -1335,11 +1301,63 @@ class WaitStateNode(Node):
     def setToolModel(self, model):
         self._tool_model = model
 
+    def data(self, column):
+        r = super().data(column)
+        if   column is col.TIMEOUT_SEC: r = self.timeoutSec
+        return r
+
+    def setData(self, column, value):
+        super().setData(column, value)
+        if   column is col.TIMEOUT_SEC: self.timeoutSec = value
+
     def tick(self):
-        #copy Set node style?
-        self._status = bt.SUCCESS
+        if not self._status:
+            self._start_time = time.time()
+            self._status = bt.RUNNING
+
+
+        if self._status == bt.RUNNING:
+            children_results = {}
+
+            for child in self.children():
+                type_info = child.setIndex().internalPointer().typeInfo()
+                tool_model = self.toolModel()
+
+                #Decode the two column hex value
+                wait_type = bt.set_type(child.setType)
+                equal_type = bt.equality(child.setType)
+
+                result = False
+                current_state = child.setIndex().internalPointer().state()
+                state_setpoint = child.state
+
+                if wait_type != bt.NO_SET:
+                    if equal_type == bt.EQUAL and current_state == state_setpoint:
+                        result = True
+                    elif equal_type == bt.NOT_EQUAL and current_state != state_setpoint:
+                        result = True
+                else:
+                    result = True
+
+                children_results[child.setName] = result
+
+            if all(child_result == True for child_result in children_results.values()):
+                self._status = bt.SUCCESS
+
+
+        #Check timeout after incase it's at 0 so it doesn't fail the first round
+        if self._status == bt.RUNNING:
+            if (time.time() - self._start_time)  > self._timeout_sec:
+                self._status = bt.FAILURE
 
         return self._status
+
+    def timeoutSec():
+        def fget(self): return self._timeout_sec
+        def fset(self,value): self._timeout_sec = value
+        return locals()
+    timeoutSec = property(**timeoutSec())
+
 
 class AlertNode(Node):
     def __init__(self, parent=None):
@@ -1795,7 +1813,7 @@ class SetDeviceStateNode(Node):
 
 
 
-#not used right now
+#~~not used right now~~
 class BehaviorInput(BaseNode):
     def __init__(self, name=None, parent=None):
         super().__init__(parent)

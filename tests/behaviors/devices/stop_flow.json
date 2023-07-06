@@ -1,0 +1,152 @@
+{
+    "children": [
+        {
+            "pos": [
+                -1545.199674424639,
+                341.2964875592481
+            ],
+            "type_info": "Wait_Time",
+            "wait_time": 2.0
+        },
+        {
+            "device_state": "Fault",
+            "pos": [
+                -1249.223342125024,
+                335.81160402359376
+            ],
+            "type_info": "Set_Device_State"
+        },
+        {
+            "children": [
+                {
+                    "setName": "output_valve",
+                    "setType": 0,
+                    "type_info": "Setpoint",
+                    "value": 0,
+                    "varName": "is_homed"
+                },
+                {
+                    "setName": "is_homed",
+                    "setType": 1,
+                    "type_info": "Setpoint",
+                    "value": 0,
+                    "varName": "output_valve"
+                },
+                {
+                    "setName": "Flow",
+                    "setType": 0,
+                    "type_info": "Setpoint",
+                    "value": 0.0,
+                    "varName": "setpoint"
+                },
+                {
+                    "setName": "setpoint",
+                    "setType": 0,
+                    "type_info": "Setpoint",
+                    "value": 0.0,
+                    "varName": "Flow"
+                },
+                {
+                    "setName": "tolerance",
+                    "setType": 0,
+                    "type_info": "Setpoint",
+                    "value": 0.0,
+                    "varName": "Flow"
+                }
+            ],
+            "pos": [
+                -795.0,
+                234.0
+            ],
+            "type_info": "Set"
+        },
+        {
+            "children": [
+                {
+                    "name": "LAYER",
+                    "setType": 1,
+                    "type_info": "Property_Setpoint",
+                    "value": "closed",
+                    "varName": null
+                },
+                {
+                    "name": "X",
+                    "setType": 0,
+                    "type_info": "Property_Setpoint",
+                    "value": 455,
+                    "varName": "Flow"
+                },
+                {
+                    "name": "Y",
+                    "setType": 0,
+                    "type_info": "Property_Setpoint",
+                    "value": 625,
+                    "varName": "Flow"
+                },
+                {
+                    "name": "SCALE",
+                    "setType": 0,
+                    "type_info": "Property_Setpoint",
+                    "value": 1.1,
+                    "varName": "Flow"
+                },
+                {
+                    "name": "ROTATION",
+                    "setType": 0,
+                    "type_info": "Property_Setpoint",
+                    "value": 90.0,
+                    "varName": "tolerance"
+                },
+                {
+                    "name": "HAS_TEXT",
+                    "setType": 0,
+                    "type_info": "Property_Setpoint",
+                    "value": 0,
+                    "varName": "output_valve"
+                },
+                {
+                    "name": "TEXT",
+                    "setType": 1,
+                    "type_info": "Property_Setpoint",
+                    "value": "{setpoint:0.1f} mTorr",
+                    "varName": null
+                },
+                {
+                    "name": "TEXT_X",
+                    "setType": 0,
+                    "type_info": "Property_Setpoint",
+                    "value": 0,
+                    "varName": "Flow"
+                },
+                {
+                    "name": "TEXT_Y",
+                    "setType": 0,
+                    "type_info": "Property_Setpoint",
+                    "value": 0,
+                    "varName": "Flow"
+                },
+                {
+                    "name": "FONT_SIZE",
+                    "setType": 0,
+                    "type_info": "Property_Setpoint",
+                    "value": 48,
+                    "varName": ""
+                }
+            ],
+            "pos": [
+                -348.1574560768231,
+                217.61
+            ],
+            "type_info": "Set_Icon"
+        }
+    ],
+    "manualButtonNewLine": false,
+    "manualButtonSpanColEnd": false,
+    "name": "Stop_Flow",
+    "pos": [
+        -570.2659949318581,
+        -81.67910626436634
+    ],
+    "tick_rate_ms": 500,
+    "type_info": "Root_Sequence"
+}

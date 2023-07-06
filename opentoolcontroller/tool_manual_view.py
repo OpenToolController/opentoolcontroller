@@ -33,6 +33,7 @@ class ToolManualView(tool_manual_view_base, tool_manual_view_form):
         self.ui_splitter_horizontal.setSizes([self.width()*0.6, self.width()*0.4])
         self.ui_splitter_vertical.setSizes([self.height()*0.4, self.height()*0.6])
         self.ui_tree.setColumnWidth(0,200)
+        self.ui_tree.expandToDepth(1)
         self.vlayout = QtWidgets.QVBoxLayout()
 
 

@@ -1,18 +1,18 @@
 {
     "behaviorFiles": [
-        "/Users/wrightsh/Desktop/Open Tool Controller/tests/behaviors/generic.json"
+        "/Users/wrightsh/Desktop/Open Tool Controller/tests/behaviors/tool/tool_test.json"
     ],
     "children": [
         {
             "backgroundSVG": "opentoolcontroller/resources/icons/evaporator_background.svg",
             "behaviorFiles": [
-                "/Users/wrightsh/Desktop/Open Tool Controller/tests/behaviors/generic.json"
+                "/Users/wrightsh/Desktop/Open Tool Controller/tests/behaviors/systems/pump_to_base.json"
             ],
             "children": [
                 {
                     "behaviorFiles": [
-                        "tests/behaviors/open.json",
-                        "/Users/wrightsh/Desktop/Open Tool Controller/tests/behaviors/generic.json"
+                        "/Users/wrightsh/Desktop/Open Tool Controller/tests/behaviors/devices/flow.json",
+                        "/Users/wrightsh/Desktop/Open Tool Controller/tests/behaviors/devices/stop_flow.json"
                     ],
                     "children": [
                         {

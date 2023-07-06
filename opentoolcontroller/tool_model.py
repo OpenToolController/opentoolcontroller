@@ -28,7 +28,6 @@ class ToolModel(QtCore.QAbstractItemModel):
         indexes += [self._tool_index]
 
         for index in indexes:
-        #for index in self.indexesOfTypes([typ.DEVICE_NODE, typ.SYSTEM_NODE]):
             node = index.internalPointer()
             node.loadBehaviors()
 

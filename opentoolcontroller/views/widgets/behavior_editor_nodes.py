@@ -776,7 +776,7 @@ class WaitNodeGraphicsItem(NodeGraphicsItem):
                 item = MappedTriStateFloatWait(self._wid)
 
             else:
-                pass #raise error, generic wid??
+                pass #TODO raise error, generic wid??
 
 
             self._grid.addWidget(QtWidgets.QLabel(name, self._wid), ui_row, 0)
@@ -852,10 +852,6 @@ class WaitNodeGraphicsItem(NodeGraphicsItem):
 
 
 
-'''
- () () Device [list of behaviors]
-
-'''
 class RunBehaviorNodeGraphicsItem(NodeGraphicsItem):
     def __init__(self, type=typ.RUN_BEHAVIOR_NODE, children=[]):
         super().__init__(type)
@@ -871,7 +867,7 @@ class RunBehaviorNodeGraphicsItem(NodeGraphicsItem):
 
         #for each device make the stuf
         for i, child in enumerate(children):
-            name = child.deviceName
+            name = child.setName #deviceName
             item = MappedDualStateListSet(self._wid)
 
             self._grid.addWidget(QtWidgets.QLabel(name, self._wid), i, 0)
@@ -893,7 +889,7 @@ class RunBehaviorNodeGraphicsItem(NodeGraphicsItem):
 
         for row in range(model.rowCount(index)):
             runpoint_wid = self._runpoints[row]
-            device_node = self._children[row].deviceIndex().internalPointer()
+            device_node = self._children[row].setIndex().internalPointer()
 
 
             behavior_names =  [behavior.name() for behavior in device_node.behaviors()]
@@ -953,12 +949,9 @@ class WaitStateNodeGraphicsItem(NodeGraphicsItem):
         self._children = children
         self._runpoints = []
 
-
-        #TODO change this so it has the equal / not equal part going on :) 
-        ''' '''
         #for each device make the stuf
         for i, child in enumerate(children):
-            name = child.deviceName
+            name = child.setName #deviceName
             item = MappedDualStateListWait(self._wid)
 
             self._grid.addWidget(QtWidgets.QLabel(name, self._wid), ui_row+i, 0)
@@ -974,19 +967,22 @@ class WaitStateNodeGraphicsItem(NodeGraphicsItem):
     def setModelAndIndex(self, model, index):
         if hasattr(model, 'sourceModel'):model = model.sourceModel()
 
-        #Need to populate the node list before mapping the value
+        self._timeout_mapper.setModel(model)
+        self._timeout_mapper.setRootIndex(index.parent())
+        self._timeout_mapper.addMapping(self._ui_timeout_sec, col.TIMEOUT_SEC)
+        self._timeout_mapper.setCurrentModelIndex(index)
+
+        #Populate the node list before mapping the value
 
         node = index.internalPointer()
         self._mappers = []
 
         for row in range(model.rowCount(index)):
             runpoint_wid = self._runpoints[row]
-            device_node = self._children[row].deviceIndex().internalPointer()
+            device_node = self._children[row].setIndex().internalPointer()
 
             runpoint_wid.setValues(device_node.states)
             
-
-
             mapper_1 = QtWidgets.QDataWidgetMapper()
             mapper_2 = QtWidgets.QDataWidgetMapper()
 
@@ -994,7 +990,7 @@ class WaitStateNodeGraphicsItem(NodeGraphicsItem):
             mapper_2.setModel(model)
 
             mapper_1.addMapping(runpoint_wid, col.SET_TYPE, bytes('setType', 'ascii'))
-            mapper_2.addMapping(runpoint_wid, col.DEVICE_STATE, bytes('value', 'ascii'))
+            mapper_2.addMapping(runpoint_wid, col.STATE_SETPOINT, bytes('value', 'ascii'))
 
             mapper_1.setRootIndex(index) 
             mapper_2.setRootIndex(index)
