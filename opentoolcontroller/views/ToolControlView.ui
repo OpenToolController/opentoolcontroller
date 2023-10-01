@@ -32,7 +32,7 @@
          <number>9</number>
         </property>
         <item>
-         <widget class="SystemManualView" name="ui_system_manual_view" native="true"/>
+         <widget class="SystemControlView" name="ui_system_control_view" native="true"/>
         </item>
        </layout>
       </widget>
@@ -66,11 +66,7 @@
             </item>
            </layout>
           </widget>
-           <layout class="QVBoxLayout" name="verticalLayout">
-            <item>
-              <widget class="DeviceManualView" name="ui_button_group" native="true"/>
-            </item>
-           </layout>
+          <widget class="NodeControlView" name="ui_node_control_view" native="true"/>
          </widget>
         </item>
        </layout>
@@ -87,14 +83,14 @@
    <header>opentoolcontroller/views/widgets/tool_tree_view</header>
   </customwidget>
   <customwidget>
-   <class>SystemManualView</class>
+   <class>SystemControlView</class>
    <extends>QWidget</extends>
-   <header>opentoolcontroller/views/widgets/system_manual_view</header>
+   <header>opentoolcontroller/views/widgets/system_control_view</header>
   </customwidget>
   <customwidget>
-   <class>DeviceManualView</class>
+   <class>NodeControlView</class>
    <extends>QWidget</extends>
-   <header>opentoolcontroller/views/widgets/device_manual_view</header>
+   <header>opentoolcontroller/views/widgets/node_control_view</header>
   </customwidget>
  </customwidgets>
  <resources/>

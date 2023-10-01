@@ -5,11 +5,11 @@ import os
 from opentoolcontroller.views.widgets.tool_tree_view import ToolTreeView
 from opentoolcontroller.tool_model import LeafFilterProxyModel
 
-tool_manual_view_base, tool_manual_view_form  = uic.loadUiType("opentoolcontroller/views/ToolManualView.ui")
+tool_control_view_base, tool_control_view_form  = uic.loadUiType("opentoolcontroller/views/ToolControlView.ui")
 
-class ToolManualView(tool_manual_view_base, tool_manual_view_form):
+class ToolControlView(tool_control_view_base, tool_control_view_form):
     def __init__(self, model, parent=None):
-        super(tool_manual_view_base, self).__init__(parent)
+        super(tool_control_view_base, self).__init__(parent)
         self.setupUi(self)
 
         self._model = model
@@ -24,11 +24,11 @@ class ToolManualView(tool_manual_view_base, tool_manual_view_form):
 
         self.ui_tree.setModel(self._proxy_model)
         self.ui_tree.selectionModel().currentChanged.connect(self.setGraphicSelection)
-        self.ui_system_manual_view.setModel(self._model) #TODO Used to be _proxy_mode
-        self.ui_system_manual_view.selectionModel().currentChanged.connect(self.setTreeSelection)
+        self.ui_system_control_view.setModel(self._model) #TODO Used to be _proxy_mode
+        self.ui_system_control_view.selectionModel().currentChanged.connect(self.setTreeSelection)
 
-        self.ui_button_group.setModel(self._model)
-        self.ui_button_group.show()
+        self.ui_node_control_view.setModel(self._model)
+        self.ui_node_control_view.show()
 
         self.ui_splitter_horizontal.setSizes([self.width()*0.6, self.width()*0.4])
         self.ui_splitter_vertical.setSizes([self.height()*0.4, self.height()*0.6])
@@ -42,14 +42,14 @@ class ToolManualView(tool_manual_view_base, tool_manual_view_form):
             index = self._proxy_model.mapFromSource(index)
 
         self.ui_tree.setCurrentIndex(index)
-        self.ui_button_group.setSelection(index)
+        self.ui_node_control_view.setSelection(index)
 
     def setGraphicSelection(self, index):
-        self.ui_button_group.setSelection(index) #TODO make sure this isn't causing a loop of selection
-        self.ui_system_manual_view.setSelection(index)
+        self.ui_node_control_view.setSelection(index) #TODO make sure this isn't causing a loop of selection
+        self.ui_system_control_view.setSelection(index)
 
     def enableRunDeviceBehaviors(self, enable):
-        self.ui_button_group.enableRunDeviceBehaviors(enable)
+        self.ui_node_control_view.enableRunDeviceBehaviors(enable)
         pass
 
     def enableRunSystemBehaviors(self, enable):
@@ -59,5 +59,5 @@ class ToolManualView(tool_manual_view_base, tool_manual_view_form):
         pass
 
     def enableEditBehaviors(self, enable):
-        self.ui_button_group.enableEditBehaviors(enable)
+        self.ui_node_control_view.enableEditBehaviors(enable)
 

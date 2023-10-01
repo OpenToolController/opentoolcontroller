@@ -1,4 +1,12 @@
 
+
+class tool():
+    AUTO = 'AUTO' 
+    MANUAL = 'MANUAL'
+    FULL_MANUAL = 'FULL_MANUAL'
+
+
+
 class bt():
     SUCCESS = 'SUCCESS' #1
     FAILURE = 'FAILURE' #2
@@ -135,6 +143,10 @@ class col():
     BEHAVIOR_NAME = 123
     STATE_SETPOINT= 124
 
+
+    #system
+    SYSTEM_IS_ONLINE = 125
+    DEVICE_MANUAL_CONTROL = 126
 
 class typ():
     TOOL_NODE = 'Tool_Node'

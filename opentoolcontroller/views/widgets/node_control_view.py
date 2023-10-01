@@ -6,7 +6,7 @@ from opentoolcontroller.strings import col, typ, bt
 from opentoolcontroller.views.widgets.scientific_spin import ScientificDoubleSpinBox
 from opentoolcontroller.views.widgets.behavior_editor_view import BTEditorWindow
 
-manual_device_view_base, manual_device_view_form = uic.loadUiType("opentoolcontroller/views/DeviceManualView.ui")
+node_control_view_base, node_control_view_form = uic.loadUiType("opentoolcontroller/views/NodeControlView.ui")
 
 
 class BehaviorButton(QtWidgets.QPushButton):
@@ -52,49 +52,102 @@ class BehaviorButton(QtWidgets.QPushButton):
 
 
 
-
-
-class DeviceManualView(manual_device_view_base, manual_device_view_form):
+class NodeControlView(node_control_view_base, node_control_view_form):
     def __init__(self, parent=None):
-        super(manual_device_view_base, self).__init__()
+        super(node_control_view_base, self).__init__(parent)
         self.setupUi(self)
 
         self._model = None
         self._mapper = QtWidgets.QDataWidgetMapper()
         self._current_index = None
-        self._enable_device_behaviors = False
-        self._enable_edit_behaviors = False
+
+        self._enable_run_tool_behaviors = True #False
+        self._enable_run_system_behaviors = True #False
+        self._enable_run_device_behaviors = True #False
+        self._enable_edit_behaviors = True #False
+
+        self.ui_system_is_online.stateChanged.connect(self._mapper.submit)
+        self.ui_system_is_online.stateChanged.connect(self.resetSelection)
+        self.ui_device_manual_control.stateChanged.connect(self._mapper.submit)
+        self.ui_system_is_online.hide()
 
 
+
+    def resetSelection(self):
+        if self._current_index:
+            self.setSelection(self._current_index)
+        
     def setSelection(self, index):
         self._current_index = index
         self._sub_mappers = []
 
-        #Clear out the layout with the Hal Nodes
-        for i in reversed(range(self.ui_wids.count())):
-            wid = self.ui_wids.takeAt(i).widget()
-            if wid is not None:
-                wid.deleteLater()
-
         if hasattr(index.model(), 'mapToSource'):
             index = index.model().mapToSource(index)
 
-        device_node = index.internalPointer()
+        node = index.internalPointer()
 
-        if device_node is not None:
-            typeInfo = device_node.typeInfo()
+        self.clearWids()
+
+        if node is not None:
+            typeInfo = node.typeInfo()
 
         if typeInfo not in [typ.TOOL_NODE, typ.SYSTEM_NODE, typ.DEVICE_NODE]:
             return
+
 
         parent_index = index.parent()
         self._mapper.setRootIndex(parent_index)
         self._mapper.setCurrentModelIndex(index)
 
+
+        if typeInfo is typ.SYSTEM_NODE:
+            self.ui_system_is_online.show()
+            self.ui_device_manual_control.show()
+
+            if node.systemIsOnline:
+                self.ui_device_manual_control.setEnabled(False)
+            else:
+                self.ui_device_manual_control.setEnabled(True)
+        else:
+            self.ui_system_is_online.hide()
+            self.ui_device_manual_control.hide()
+
+
+
+
+        if typeInfo is typ.TOOL_NODE:
+            self.addVarViews(index, True)
+            if self._enable_run_tool_behaviors: 
+                self.addBehaviorButtions(index)
+
+        elif typeInfo is typ.SYSTEM_NODE:
+            if node.systemIsOnline: 
+                self.addVarViews(index, False)
+            else:
+                self.addVarViews(index, True)
+                if self._enable_run_system_behaviors: 
+                    self.addBehaviorButtions(index)
+
+        elif typeInfo is typ.DEVICE_NODE:
+            self.addIOViews(index)
+
+            if index.parent().internalPointer().deviceManualControl:
+                self.addVarViews(index, True)
+                if self._enable_run_device_behaviors: 
+                    self.addBehaviorButtions(index)
+
+            else:
+                self.addVarViews(index, False)
+
+
+
+
+
+
+    def addVarViews(self, index, setable=False):
         ui_row, ui_col = 0,0 #grid layout positions
+        node = index.internalPointer()
 
-
-        #First add any BOOL/INT/FLOAT_VAR_NODES
         for row in range(self._model.rowCount(index)):
             child_index = index.child(row,0)
             node =  child_index.internalPointer()
@@ -103,23 +156,30 @@ class DeviceManualView(manual_device_view_base, manual_device_view_form):
 
             if node.typeInfo() in [typ.BOOL_VAR_NODE, typ.INT_VAR_NODE, typ.FLOAT_VAR_NODE]:
                 if node.userManualSet:
-                    if   node.typeInfo() == typ.BOOL_VAR_NODE  : wid = ManualBoolSet()
-                    elif node.typeInfo() == typ.INT_VAR_NODE   : wid = ManualIntSet()
-                    elif node.typeInfo() == typ.FLOAT_VAR_NODE : wid = ManualFloatSet()
+                    if setable:
+                        if   node.typeInfo() == typ.BOOL_VAR_NODE  : wid = ManualBoolSet()
+                        elif node.typeInfo() == typ.INT_VAR_NODE   : wid = ManualIntSet()
+                        elif node.typeInfo() == typ.FLOAT_VAR_NODE : wid = ManualFloatSet()
+                    else:
+                        if   node.typeInfo() == typ.BOOL_VAR_NODE  : wid = ManualBoolView()
+                        elif node.typeInfo() == typ.INT_VAR_NODE   : wid = ManualIntView()
+                        elif node.typeInfo() == typ.FLOAT_VAR_NODE : wid = ManualFloatView()
 
             if wid is not None:
                 wid.setModel(child_index.model())
                 wid.setRootIndex(index)
                 wid.setCurrentModelIndex(child_index)
-                wid.setEnabled(self._enable_device_behaviors)
-                self.ui_wids.addWidget(wid, ui_row, ui_col, 1, -1) #1 row, full width
+                self.ui_var_views.addWidget(wid, ui_row, ui_col, 1, -1) #1 row, full width
                 ui_row += 1
        
 
 
+    def addBehaviorButtions(self, index):
+        ui_row, ui_col = 0,0 #grid layout positions
+        node = index.internalPointer()
         first_behavior = True
         #Then add in a button for each behavior
-        for behavior in device_node.behaviors():
+        for behavior in node.behaviors():
             if first_behavior:
                 ui_col = 0
 
@@ -139,17 +199,15 @@ class DeviceManualView(manual_device_view_base, manual_device_view_form):
             btn.enableEditBehaviors(self._enable_edit_behaviors)
             btn.clicked.connect(behavior.run)
             btn.setBehavior(behavior)
-            btn.setEnabled(self._enable_device_behaviors)
+            #btn.setEnabled(self._enable_device_behaviors)
             
-
             #btn.clicked.connect(lambda a, b=behavior.run, c=run_data: self.runBehavior(b, c))
-            self.ui_wids.addWidget(btn, ui_row, ui_col, 1, ui_col_span)
+            self.ui_behavior_buttons.addWidget(btn, ui_row, ui_col, 1, ui_col_span)
             first_behavior = False
 
 
-        #Finally the viewers for the IO
-        ui_row += 1
-        ui_col = 0
+    def addIOViews(self, index):
+        ui_row, ui_col = 0,0 #grid layout positions
         for row in range(self._model.rowCount(index)):
             child_index = index.child(row,0)
             node =  child_index.internalPointer()
@@ -174,9 +232,20 @@ class DeviceManualView(manual_device_view_base, manual_device_view_form):
                 wid.setModel(child_index.model())
                 wid.setRootIndex(index)
                 wid.setCurrentModelIndex(child_index)
-                self.ui_wids.addWidget(wid, ui_row, ui_col, 1, -1) #1 row, full width
+                self.ui_io_views.addWidget(wid, ui_row, ui_col, 1, -1) #1 row, full width
                 ui_row += 1
        
+
+
+
+    def clearWids(self):
+        wid_layouts = [self.ui_var_views, self.ui_behavior_buttons, self.ui_io_views, self.ui_bottom_wids]
+
+        for layout in wid_layouts:
+            for i in reversed(range(layout.count())):
+                wid = layout.takeAt(i).widget()
+                if wid is not None:
+                    wid.deleteLater()
 
 
 
@@ -191,22 +260,35 @@ class DeviceManualView(manual_device_view_base, manual_device_view_form):
         self._mapper.addMapping(self.ui_name, col.NAME, bytes("text",'ascii'))
         #self._mapper.addMapping(self.ui_description, col.DESCRIPTION, bytes("text",'ascii'))
         self._mapper.addMapping(self.ui_state, col.STATE, bytes("text",'ascii'))
+        self._mapper.addMapping(self.ui_system_is_online, col.SYSTEM_IS_ONLINE)
+        self._mapper.addMapping(self.ui_device_manual_control, col.DEVICE_MANUAL_CONTROL)
 
     def model(self):
         return self._model
     
+    def enableRunToolBehaviors(self, enable):
+        self._enable_run_tool_behaviors = bool(enable)
+        self.resetSelection()
+
+    def enableRunSystemBehaviors(self, enable):
+        self._enable_run_system_behaviors = bool(enable)
+        self.resetSelection()
+
     def enableRunDeviceBehaviors(self, enable):
-        self._enable_device_behaviors = bool(enable)
-        if self._current_index:
-            self.setSelection(self._current_index)
+        self._enable_run_device_behaviors = bool(enable)
+        self.resetSelection()
 
     def enableEditBehaviors(self, enable):
         self._enable_edit_behaviors = enable
-        if self._current_index:
-            self.setSelection(self._current_index)
+        self.resetSelection()
             
 
-        #loop through buttonsself.ui_wids.addWidget(btn, ui_row, ui_col, 1, ui_col_span)
+
+
+
+
+
+
 
 
 

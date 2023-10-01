@@ -195,6 +195,42 @@ class BehaviorNode(Node):
     def state(self):
         return self._state
 
+    #TODO the system needs the same interfaces as the user for aborting and keeping track of what behavior is running 
+    # maybe make a flat display of running behaviors? and allow visibilty of tool /system / device levels?
+    # or make that display part of the tree?
+    # Should be able to abort behaviros, orat least tool and system ones?
+    # Abort button? should that just be a tool behavior?
+    # Idle tool? (or similar) that's just a tool behavior?
+    # When we can run device behaviors by hand then must disable system / tool behaviors
+    # # Get a list of running behaviors with abort option of the category you can start?
+
+    # - probably make a runningBehavior() function? hmm
+
+    '''
+    should device behaviors be abortable? ~~ probably, but only when you can manually operate devices
+    system can be either in manual or auto (maintenance / online)?
+    online systems can by used by tool behaviors, need system behaviors to be able to check that state
+    
+    SystemOperationMode
+        what if this is a switch on the system graphic?
+        - Online for process
+            This is full auto, user can't run system or device behaviors, the tool Behaviors can start system behaviors
+        - Manual
+            User is allowed to start system behaviors
+        - Manual
+            User is allowed to start device behaviors
+            User is allowed to start system and device behaviors
+
+
+    actually 3 states
+        - online for process
+        - offline for maintenance
+        - manual
+
+
+
+    '''
+
     def behaviors(self):
         return self._behaviors
 
@@ -244,20 +280,26 @@ class SystemNode(BehaviorNode):
         super().__init__(parent)
         self._background_svg = defaults.SYSTEM_BACKGROUND
         self._movable_icons = False
+        self._system_is_online = False
+        self._device_manual_control = False
 
     def typeInfo(self):
         return typ.SYSTEM_NODE
 
     def data(self, c):
         r = super().data(c)
-        if   c is col.BACKGROUND_SVG: r = self.backgroundSVG
-        elif c is col.MOVABLE_ICONS : r = self.movableIcons()
+        if   c is col.BACKGROUND_SVG        : r = self.backgroundSVG
+        elif c is col.MOVABLE_ICONS         : r = self.movableIcons()
+        elif c is col.SYSTEM_IS_ONLINE      : r = self.systemIsOnline
+        elif c is col.DEVICE_MANUAL_CONTROL : r = self.deviceManualControl
         return r
 
     def setData(self, c, value):
         super().setData(c, value)
-        if   c is col.BACKGROUND_SVG: self.backgroundSVG = value
-        elif c is col.MOVABLE_ICONS : self._movable_icons = value
+        if   c is col.BACKGROUND_SVG        : self.backgroundSVG = value
+        elif c is col.MOVABLE_ICONS         : self._movable_icons = value
+        elif c is col.SYSTEM_IS_ONLINE      : self.systemIsOnline = value
+        elif c is col.DEVICE_MANUAL_CONTROL : self.deviceManualControl = value
 
     def movableIcons(self):
         return self._movable_icons
@@ -271,6 +313,22 @@ class SystemNode(BehaviorNode):
                 self._background_svg =  defaults.SYSTEM_BACKGROUND
         return locals()
     backgroundSVG = property(**backgroundSVG())
+
+
+    def systemIsOnline():
+        def fget(self): return self._system_is_online
+        def fset(self, value): self._system_is_online = bool(value)
+        return locals()
+    systemIsOnline = property(**systemIsOnline())
+
+    def deviceManualControl():
+        def fget(self): return self._device_manual_control
+        def fset(self, value): self._device_manual_control = bool(value)
+        return locals()
+    deviceManualControl = property(**deviceManualControl())
+
+
+
 
 
 # This has to be fixed after the IO nodes are fixed

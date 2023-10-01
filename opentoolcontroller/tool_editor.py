@@ -178,6 +178,7 @@ class SystemEditor(system_base, system_form):
         self.file_signal.connect(self.mapper.submit)
         self.ui_select_image.clicked.connect(self.selectSVG)
         self.ui_background_svg.textChanged.connect(lambda update_system_svg: self.ui_svg_widget.load(self.ui_background_svg.text()))
+        self.ui_movable_icons.stateChanged.connect(self.mapper.submit)
 
     def setModel(self, model):
         if hasattr(model, 'sourceModel'):

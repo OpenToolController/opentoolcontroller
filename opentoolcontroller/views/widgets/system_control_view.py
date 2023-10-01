@@ -6,7 +6,7 @@ from opentoolcontroller.views.widgets.device_icon_widget import DeviceIconWidget
 
 '''Need to display button for the system and tool! '''
 #TODO Change name to SystemGraphicView ???
-class SystemManualView(QtWidgets.QAbstractItemView):
+class SystemControlView(QtWidgets.QAbstractItemView):
     def __init__(self, parent=None):
         super().__init__(parent)
         self._scene_box = QtCore.QRectF(0, 0, 1000, 1000)

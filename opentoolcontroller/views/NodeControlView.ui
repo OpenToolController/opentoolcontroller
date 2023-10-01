@@ -41,7 +41,7 @@
         </font>
        </property>
        <property name="text">
-        <string>Device Name</string>
+        <string>Name</string>
        </property>
       </widget>
      </item>
@@ -57,7 +57,7 @@
        <item>
         <widget class="QLabel" name="ui_state">
          <property name="text">
-          <string>device_status</string>
+          <string>status</string>
          </property>
         </widget>
        </item>
@@ -77,14 +77,17 @@
       </layout>
      </item>
      <item>
-      <layout class="QGridLayout" name="ui_wids">
+      <layout class="QGridLayout" name="ui_var_views">
        <property name="sizeConstraint">
         <enum>QLayout::SetMinimumSize</enum>
        </property>
       </layout>
      </item>
      <item>
-      <layout class="QHBoxLayout" name="horizontalLayout"/>
+      <layout class="QGridLayout" name="ui_behavior_buttons"/>
+     </item>
+     <item>
+      <layout class="QGridLayout" name="ui_io_views"/>
      </item>
      <item>
       <spacer name="verticalSpacer">

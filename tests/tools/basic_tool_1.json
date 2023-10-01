@@ -168,8 +168,10 @@
                 }
             ],
             "description": "This is part of a tool, like a chamber or loadlock.",
+            "deviceManualControl": false,
             "name": "Chamber_A",
             "states": [],
+            "systemIsOnline": false,
             "type_info": "System_Node"
         },
         {
@@ -197,8 +199,10 @@
                 }
             ],
             "description": "",
+            "deviceManualControl": false,
             "name": "Loadlock",
             "states": [],
+            "systemIsOnline": false,
             "type_info": "System_Node"
         }
     ],

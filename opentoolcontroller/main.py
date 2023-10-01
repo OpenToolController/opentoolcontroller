@@ -6,7 +6,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 import xml.etree.ElementTree as ET
 from opentoolcontroller.tool_model import ToolModel
 from opentoolcontroller.tool_editor import ToolEditor
-from opentoolcontroller.tool_manual_view import ToolManualView
+from opentoolcontroller.tool_control_view import ToolControlView
 from opentoolcontroller.alert_view import AlertView, AlertTableModel
 from opentoolcontroller.login import LoginView, LoginModel
 
@@ -17,7 +17,7 @@ from opentoolcontroller.hardware import HalReader
 import gc, pprint
 
 # sudo halcompile --install opentoolcontroller/HAL/hardware_sim.comp
-# clear; pytest 'tests/test_device_manual_view.py' -k 'test_two' -s
+# clear; pytest 'tests/test_device_control_view.py' -k 'test_two' -s
 
 class Window(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
@@ -47,10 +47,10 @@ class Window(QtWidgets.QMainWindow):
         self.resize(800,600)
 
 
-        self._manual_view = ToolManualView(self.tool_model)
-        self._manual_view.setWindowTitle('Manual')
-        self._login_model.addLoginChangedCallback(self._manual_view.enableRunDeviceBehaviors, self._login_model.RUN_BEHAVIORS)
-        self._login_model.addLoginChangedCallback(self._manual_view.enableEditBehaviors, self._login_model.EDIT_BEHAVIOR)
+        self._control_view = ToolControlView(self.tool_model)
+        self._control_view.setWindowTitle('Control')
+        self._login_model.addLoginChangedCallback(self._control_view.enableRunDeviceBehaviors, self._login_model.RUN_BEHAVIORS)
+        self._login_model.addLoginChangedCallback(self._control_view.enableEditBehaviors, self._login_model.EDIT_BEHAVIOR)
 
         self._tool_editor = ToolEditor()
         self._tool_editor.setModel(self.tool_model)
@@ -58,8 +58,8 @@ class Window(QtWidgets.QMainWindow):
         self._login_model.addLoginChangedCallback(self._tool_editor.enableEditTool, self._login_model.EDIT_TOOL)
         self._login_model.addLoginChangedCallback(self._tool_editor.enableEditBehaviors, self._login_model.EDIT_BEHAVIOR)
 
-        dock1 = QtWidgets.QDockWidget('Manual', self, objectName='manual')
-        dock1.setWidget(self._manual_view)
+        dock1 = QtWidgets.QDockWidget('Control', self, objectName='control')
+        dock1.setWidget(self._control_view)
         dock1.setContextMenuPolicy(QtCore.Qt.PreventContextMenu)
 
 
@@ -145,7 +145,7 @@ class Window(QtWidgets.QMainWindow):
     #fast close for testing
     def closeEvent(self, event):
         self._tool_editor.close()
-        self._manual_view.close()
+        self._control_view.close()
         self._alert_view.close()
         geometry = self.saveGeometry()
         self._settings.setValue('main_window_geometry', geometry)
@@ -162,7 +162,7 @@ class Window(QtWidgets.QMainWindow):
             #self.reader.stop()
 
             self._tool_editor.close()
-            self._manual_view.close()
+            self._control_view.close()
             self._alert_view.close()
 
             geometry = self.saveGeometry()

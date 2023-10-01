@@ -234,6 +234,13 @@ class ToolModel(QtCore.QAbstractItemModel):
                 node.setBehaviors(value)
                 self.dataChanged.emit(index, index)
 
+
+            #If the system is put online the devices must not be in manual control
+            if index.column() == col.SYSTEM_IS_ONLINE and node.typeInfo() == typ.SYSTEM_NODE:
+                if value == True:
+                    node.setData(col.DEVICE_MANUAL_CONTROL, False)
+                    self.dataChanged.emit(index.siblingAtColumn(col.DEVICE_MANUAL_CONTROL), index.siblingAtColumn(col.DEVICE_MANUAL_CONTROL))
+
             return True
 
         return False
