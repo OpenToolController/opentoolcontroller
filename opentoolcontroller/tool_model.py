@@ -241,6 +241,8 @@ class ToolModel(QtCore.QAbstractItemModel):
                     node.setData(col.DEVICE_MANUAL_CONTROL, False)
                     self.dataChanged.emit(index.siblingAtColumn(col.DEVICE_MANUAL_CONTROL), index.siblingAtColumn(col.DEVICE_MANUAL_CONTROL))
 
+            '''Add something for single behavior running per system? '''
+
             return True
 
         return False

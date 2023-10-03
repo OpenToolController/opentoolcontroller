@@ -429,6 +429,7 @@ class BTModel(QtCore.QAbstractItemModel):
 
 
 
+
             if from_load == False:
                 if child_type == typ.SET_DEVICE_STATE_NODE:
                     self.syncDeviceStateIndex(new_child_index)
@@ -666,6 +667,8 @@ class BTModel(QtCore.QAbstractItemModel):
     def tick(self):
         #result = self._root_node.child(0).tick()
         result = self._root_node.tick()
+        info_text = self._root_node.infoText()
+        self.toolModel().setData(self.toolIndex().siblingAtColumn(col.BEHAVIOR_INFO_TEXT), info_text)
 
         #TODO For the BT_STATUS column it will just update the status from all of them
         #Might want to change that to update all of them that are in view at some point
@@ -674,6 +677,7 @@ class BTModel(QtCore.QAbstractItemModel):
 
         if result == bt.SUCCESS or result == bt.FAILURE:
             self._timer.stop()
+            self.toolModel().setData(self.toolIndex().siblingAtColumn(col.BEHAVIOR_INFO_TEXT), "")
 
         #if result != bt.RUNNING and result != bt.FAILURE:
         #    self._root_node.reset()

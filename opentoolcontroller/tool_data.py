@@ -169,7 +169,22 @@ class Node:
         return locals()
     description = property(**description())
 
+'''
+Things you might want to do with a behavior:
+  - Run it
+  - See what it's reporting out
+  - Abort it (forced and controled)
+  - send it an endpoint signal? (for behaviors with files with steps)
 
+  parts that routh through the model for display
+    - list of behaviors to make buttons
+    - currently running behaviors name
+    - currently running behavior
+    - currently running behaviors info text (or nodes status???)
+
+.... so we're gonna generate text from the behavior nodes then display it
+
+'''
 
 class BehaviorNode(Node):
     def __init__(self, parent=None):
@@ -178,12 +193,16 @@ class BehaviorNode(Node):
         self._behaviors = []
         self._behavior_files = []
         self._states = []
+        self._running_behavior = None
+        self._behavior_info_text = ''
 
     def data(self, c):
         r = super().data(c)
         if   c is col.STATE     : r = self._state
         elif c is col.BEHAVIORS : r = self._behaviors
+        #elif c is col.RUNNING_BEHAVIOR_NAME : r = self._running_behavior_name
         elif c is col.STATES    : r = self._states
+        elif c is col.BEHAVIOR_INFO_TEXT : r = self._behavior_info_text
         return r
 
     def setData(self, c, value):
@@ -191,6 +210,7 @@ class BehaviorNode(Node):
         if   c is col.STATE     : self._state = str(value)
         elif c is col.BEHAVIORS : pass #needs to be handled by the model to sync
         elif c is col.STATES    : self._states = value
+        elif c is col.BEHAVIOR_INFO_TEXT : self._behavior_info_text = value
 
     def state(self):
         return self._state
@@ -237,6 +257,8 @@ class BehaviorNode(Node):
     def setBehaviors(self, value):
         self._behaviors = value
 
+    def runningBehavior(self):
+        return self._running_behavior
 
     def loadBehaviors(self):
         self._behaviors = []

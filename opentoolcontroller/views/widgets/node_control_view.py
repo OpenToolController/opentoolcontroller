@@ -239,7 +239,7 @@ class NodeControlView(node_control_view_base, node_control_view_form):
 
 
     def clearWids(self):
-        wid_layouts = [self.ui_var_views, self.ui_behavior_buttons, self.ui_io_views, self.ui_bottom_wids]
+        wid_layouts = [self.ui_var_views, self.ui_behavior_buttons, self.ui_io_views]#, self.ui_bottom_wids]
 
         for layout in wid_layouts:
             for i in reversed(range(layout.count())):
@@ -262,6 +262,7 @@ class NodeControlView(node_control_view_base, node_control_view_form):
         self._mapper.addMapping(self.ui_state, col.STATE, bytes("text",'ascii'))
         self._mapper.addMapping(self.ui_system_is_online, col.SYSTEM_IS_ONLINE)
         self._mapper.addMapping(self.ui_device_manual_control, col.DEVICE_MANUAL_CONTROL)
+        self._mapper.addMapping(self.ui_behavior_info, col.BEHAVIOR_INFO_TEXT, bytes("text",'ascii'))
 
     def model(self):
         return self._model

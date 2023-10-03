@@ -147,6 +147,7 @@ class col():
     #system
     SYSTEM_IS_ONLINE = 125
     DEVICE_MANUAL_CONTROL = 126
+    BEHAVIOR_INFO_TEXT = 127
 
 class typ():
     TOOL_NODE = 'Tool_Node'

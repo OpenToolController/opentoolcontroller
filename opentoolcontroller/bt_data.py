@@ -11,21 +11,22 @@ import pprint
 pp = pprint.PrettyPrinter(width=82, compact=True)
 
 class BaseNode:
+    info_text = ''
     def __init__(self, parent=None):
         super().__init__()
-        self._root_node = None
+        #self._root_node = None
         self._parent = parent
         self._children = []
 
         '''Do we need this???'''
         if parent is not None:
             parent.addChild(self)
+        
+    def setInfoText(self, text):
+        BaseNode.info_text = text
 
-    def setRootNode(self, node):
-        self._root_node = node
-
-    def rootNode(self):
-        return self._root_node
+    def infoText(self):
+        return BaseNode.info_text
 
     def reset(self):
         pass
@@ -218,6 +219,7 @@ class SequenceNode(Node):
             return self._status
 
 
+
 class SelectorNode(Node):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -264,6 +266,7 @@ class RootSequenceNode(SequenceNode):
         self._manual_button_new_line = False
         self._manual_button_span_col_end = False
 
+
     def typeInfo(self):
         return typ.ROOT_SEQUENCE_NODE
 
@@ -273,7 +276,6 @@ class RootSequenceNode(SequenceNode):
     def setFile(self, value):
         print("RootSquence file: ", value)
         self._file = value
-
 
     def treeType(self):
         return bt.BRANCH
@@ -437,6 +439,8 @@ class WaitTimeNode(Node):
         super().__init__(parent)
         self._wait_time = 0
         self._timer = QtCore.QTimer()
+        self._timer.setSingleShot(True)
+        self._timer.timeout.connect(self.tmr)
 
     def typeInfo(self):
         return typ.WAIT_TIME_NODE
@@ -456,11 +460,20 @@ class WaitTimeNode(Node):
     def tmr(self):
         self._status = bt.SUCCESS
 
+    def setInfoText(self, value):
+        text = "Wait: %0.1f sec" % value
+        super().setInfoText(text)
+
     def tick(self):
         if self._status == None:
-            self._timer.singleShot(self._wait_time * 1000, self.tmr)
+            self._timer.setInterval(self._wait_time * 1000)
+            self._timer.start()
             self._status = bt.RUNNING
+            self.setInfoText(self._wait_time)
             return self._status
+
+        if self._status == bt.RUNNING:
+            self.setInfoText(self._timer.remainingTime()*0.001)
 
         return self._status
 
@@ -763,15 +776,25 @@ class SetNode(Node):
     def setToolModel(self, model):
         self._tool_model = model
 
+    def setInfoText(self, names):
+        text = "Setting: " + names
+        super().setInfoText(text)
+
     def tick(self):
         if self._status != bt.SUCCESS:
+            info_names = ''
+
             for child in self.children():
                 type_info = child.setIndex().internalPointer().typeInfo()
                 tool_model = self.toolModel()
+                child_name, value = None, None
 
                 if child.setType == bt.VAL:
+                    child_name = child.setName
+
                     if type_info in [typ.BOOL_VAR_NODE, typ.FLOAT_VAR_NODE]:
-                        tool_model.setData(child.setIndex().siblingAtColumn(col.VALUE), child.value)
+                        value = child.value
+                        tool_model.setData(child.setIndex().siblingAtColumn(col.VALUE), value)
 
                     elif type_info == typ.D_OUT_NODE:
                         pass #FIXME  TODO HAL
@@ -781,9 +804,18 @@ class SetNode(Node):
                         #node.halQueuePut(setpoint)
 
                 elif child.setType == bt.VAR:
-                    if type_info in [typ.BOOL_VAR_NODE, typ.FLOAT_VAR_NODE, typ.D_OUT_NODE, typ.A_OUT_NODE]:
-                        tool_model.setData(child.setIndex().siblingAtColumn(col.VALUE), child.varIndex().internalPointer().value())
+                    child_name = child.setName
 
+                    if type_info in [typ.BOOL_VAR_NODE, typ.FLOAT_VAR_NODE, typ.D_OUT_NODE, typ.A_OUT_NODE]:
+                        value = child.varIndex().internalPointer().value() 
+                        tool_model.setData(child.setIndex().siblingAtColumn(col.VALUE), value)#child.varIndex().internalPointer().value())
+
+                if child_name:
+                    if len(info_names) > 0:
+                        info_names += ', '
+                    info_names += str(child_name) + ': ' + str(value)
+
+                self.setInfoText(info_names)
 
         self._status = bt.SUCCESS
         return self._status
