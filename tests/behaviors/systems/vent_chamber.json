@@ -1,0 +1,28 @@
+{
+    "children": [
+        {
+            "pos": [
+                -409.0,
+                -47.0
+            ],
+            "type_info": "Wait_Time",
+            "wait_time": 2.0
+        },
+        {
+            "pos": [
+                -55.0,
+                -23.0
+            ],
+            "type_info": "Success"
+        }
+    ],
+    "manualButtonNewLine": false,
+    "manualButtonSpanColEnd": false,
+    "name": "Vent Chamber",
+    "pos": [
+        -337.26599493185813,
+        -335.67910626436634
+    ],
+    "tick_rate_ms": 500,
+    "type_info": "Root_Sequence"
+}

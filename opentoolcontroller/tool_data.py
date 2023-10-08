@@ -194,14 +194,16 @@ class BehaviorNode(Node):
         self._behavior_files = []
         self._states = []
         self._running_behavior = None
+        self._running_behavior_name = ''
         self._behavior_info_text = ''
 
     def data(self, c):
         r = super().data(c)
         if   c is col.STATE     : r = self._state
         elif c is col.BEHAVIORS : r = self._behaviors
-        #elif c is col.RUNNING_BEHAVIOR_NAME : r = self._running_behavior_name
         elif c is col.STATES    : r = self._states
+        elif c is col.RUNNING_BEHAVIOR_NAME : r = self._running_behavior_name
+        elif c is col.RUNNING_BEHAVIOR : r = self._running_behavior
         elif c is col.BEHAVIOR_INFO_TEXT : r = self._behavior_info_text
         return r
 
@@ -210,6 +212,10 @@ class BehaviorNode(Node):
         if   c is col.STATE     : self._state = str(value)
         elif c is col.BEHAVIORS : pass #needs to be handled by the model to sync
         elif c is col.STATES    : self._states = value
+        elif c is col.RUNNING_BEHAVIOR_NAME : self._running_behavior_name = value
+        elif c is col.RUNNING_BEHAVIOR :
+            print("HMM: ", value)
+            self._running_behavior = value
         elif c is col.BEHAVIOR_INFO_TEXT : self._behavior_info_text = value
 
     def state(self):

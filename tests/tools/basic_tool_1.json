@@ -6,7 +6,9 @@
         {
             "backgroundSVG": "opentoolcontroller/resources/icons/evaporator_background.svg",
             "behaviorFiles": [
-                "/Users/wrightsh/Desktop/Open Tool Controller/tests/behaviors/systems/pump_to_base.json"
+                "/Users/wrightsh/Desktop/Open Tool Controller/tests/behaviors/systems/idle.json",
+                "/Users/wrightsh/Desktop/Open Tool Controller/tests/behaviors/systems/vent_chamber.json",
+                "/Users/wrightsh/Desktop/Open Tool Controller/tests/behaviors/systems/pump_chamber.json"
             ],
             "children": [
                 {
@@ -132,7 +134,9 @@
                     "type_info": "Device_Node"
                 },
                 {
-                    "behaviorFiles": [],
+                    "behaviorFiles": [
+                        "/Users/wrightsh/Desktop/Open Tool Controller/tests/behaviors/generic.json"
+                    ],
                     "children": [
                         {
                             "children": [],

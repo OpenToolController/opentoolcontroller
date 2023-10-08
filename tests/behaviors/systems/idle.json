@@ -1,0 +1,28 @@
+{
+    "children": [
+        {
+            "pos": [
+                -674.0,
+                -11.0
+            ],
+            "type_info": "Wait_Time",
+            "wait_time": 4.0
+        },
+        {
+            "pos": [
+                -338.0,
+                -102.0
+            ],
+            "type_info": "Success"
+        }
+    ],
+    "manualButtonNewLine": false,
+    "manualButtonSpanColEnd": false,
+    "name": "Idle",
+    "pos": [
+        -337.26599493185813,
+        -335.67910626436634
+    ],
+    "tick_rate_ms": 500,
+    "type_info": "Root_Sequence"
+}

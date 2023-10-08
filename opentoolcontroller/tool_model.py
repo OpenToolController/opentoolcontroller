@@ -203,8 +203,9 @@ class ToolModel(QtCore.QAbstractItemModel):
             value = value.toPyObject()
 
         #TODO this might break something
-        if index.isValid() and role == QtCore.Qt.EditRole and value is not None:
-        #if index.isValid() and role == QtCore.Qt.EditRole:
+        #if index.isValid() and role == QtCore.Qt.EditRole and value is not None:
+        #need to set the running behavior to None, not sure why I forced value to not be None, proabbly gonna break something 10/7/23
+        if index.isValid() and role == QtCore.Qt.EditRole:
             node = index.internalPointer()
             old_value = node.data(index.column())
             node.setData(index.column(), value)

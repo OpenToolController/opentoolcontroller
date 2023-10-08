@@ -17,6 +17,7 @@ class BehaviorButton(QtWidgets.QPushButton):
         self.customContextMenuRequested.connect(self.buttonMenu)
         self._enable_edit_behaviors = False
 
+
     def buttonMenu(self, pos):
         menu = QtWidgets.QMenu()
         menu.addAction('View Behavior', self.viewBehavior)
@@ -46,9 +47,53 @@ class BehaviorButton(QtWidgets.QPushButton):
 
     def setBehavior(self, behavior):
         self._behavior = behavior
+        self.setText(behavior.name())
+        self.clicked.connect(self._behavior.runAbortOthers)
 
     def enableEditBehaviors(self, enable):
         self._enable_edit_behaviors = enable
+
+
+class BehaviorButtonAborting(BehaviorButton):
+    def __init__(self, parent=None):
+        super(BehaviorButtonAborting, self).__init__(parent)
+        self._running_behavior = None
+
+    def getRunningBehavior(self):
+        return self._running_behavior
+
+    def setRunningBehavior(self, behavior):
+        self._running_behavior = behavior
+
+        if self._running_behavior == self._behavior:
+            self.setText("Abort")
+            self.reconnect(self.clicked, self._behavior.abort, self._behavior.runAbortOthers)
+
+        elif self._running_behavior is None:
+            self.setText(self._behavior.name())
+            self.setEnabled(True)
+            self.reconnect(self.clicked, self._behavior.runAbortOthers, self._behavior.abort)
+
+        else:
+            self.setText(self._behavior.name())
+            self.setEnabled(False)
+            self.reconnect(self.clicked, self._behavior.runAbortOthers, self._behavior.abort)
+
+
+    def reconnect(self, signal, newhandler=None, oldhandler=None):        
+        try:
+            if oldhandler is not None:
+                while True:
+                    signal.disconnect(oldhandler)
+            else:
+                signal.disconnect()
+        except TypeError:
+            pass
+        if newhandler is not None:
+            signal.connect(newhandler)
+
+
+    runningBehavior = QtCore.pyqtProperty(QtCore.QVariant, getRunningBehavior, setRunningBehavior)
 
 
 
@@ -99,6 +144,8 @@ class NodeControlView(node_control_view_base, node_control_view_form):
         self._mapper.setRootIndex(parent_index)
         self._mapper.setCurrentModelIndex(index)
 
+        self._behavior_button_mapper = QtWidgets.QDataWidgetMapper()
+        self._behavior_button_mapper.setModel(self._model)
 
         if typeInfo is typ.SYSTEM_NODE:
             self.ui_system_is_online.show()
@@ -140,6 +187,8 @@ class NodeControlView(node_control_view_base, node_control_view_form):
                 self.addVarViews(index, False)
 
 
+        self._behavior_button_mapper.setRootIndex(parent_index)
+        self._behavior_button_mapper.setCurrentModelIndex(index)
 
 
 
@@ -178,6 +227,10 @@ class NodeControlView(node_control_view_base, node_control_view_form):
         ui_row, ui_col = 0,0 #grid layout positions
         node = index.internalPointer()
         first_behavior = True
+
+
+
+
         #Then add in a button for each behavior
         for behavior in node.behaviors():
             if first_behavior:
@@ -195,15 +248,20 @@ class NodeControlView(node_control_view_base, node_control_view_form):
                 ui_col_span = -1
 
 
-            btn = BehaviorButton(behavior.name())
+            if node.typeInfo() in [typ.TOOL_NODE, typ.SYSTEM_NODE]:
+                btn = BehaviorButtonAborting()
+                btn.setBehavior(behavior)
+                self._behavior_button_mapper.addMapping(btn, col.RUNNING_BEHAVIOR, bytes('runningBehavior', 'ascii'))
+            else:
+                btn = BehaviorButton()
+                btn.setBehavior(behavior)
+
+
             btn.enableEditBehaviors(self._enable_edit_behaviors)
-            btn.clicked.connect(behavior.run)
-            btn.setBehavior(behavior)
-            #btn.setEnabled(self._enable_device_behaviors)
-            
-            #btn.clicked.connect(lambda a, b=behavior.run, c=run_data: self.runBehavior(b, c))
             self.ui_behavior_buttons.addWidget(btn, ui_row, ui_col, 1, ui_col_span)
             first_behavior = False
+            
+            #btn.clicked.connect(lambda a, b=behavior.run, c=run_data: self.runBehavior(b, c))
 
 
     def addIOViews(self, index):
@@ -262,7 +320,9 @@ class NodeControlView(node_control_view_base, node_control_view_form):
         self._mapper.addMapping(self.ui_state, col.STATE, bytes("text",'ascii'))
         self._mapper.addMapping(self.ui_system_is_online, col.SYSTEM_IS_ONLINE)
         self._mapper.addMapping(self.ui_device_manual_control, col.DEVICE_MANUAL_CONTROL)
+        self._mapper.addMapping(self.ui_behavior_name, col.RUNNING_BEHAVIOR_NAME, bytes("text",'ascii'))
         self._mapper.addMapping(self.ui_behavior_info, col.BEHAVIOR_INFO_TEXT, bytes("text",'ascii'))
+
 
     def model(self):
         return self._model

@@ -108,7 +108,7 @@ class BTModel(QtCore.QAbstractItemModel):
 
             #Check if we have a behavior that matches
             for behavior in runpoint_node.setIndex().internalPointer().behaviors():
-                if behavior.name == runpoint_node.behaviorName:
+                if behavior.name() == runpoint_node.behaviorName:
                     runpoint_node.setBehavior(behavior)
 
 
@@ -678,6 +678,8 @@ class BTModel(QtCore.QAbstractItemModel):
         if result == bt.SUCCESS or result == bt.FAILURE:
             self._timer.stop()
             self.toolModel().setData(self.toolIndex().siblingAtColumn(col.BEHAVIOR_INFO_TEXT), "")
+            self.toolModel().setData(self.toolIndex().siblingAtColumn(col.RUNNING_BEHAVIOR_NAME), '')
+            self.toolModel().setData(self.toolIndex().siblingAtColumn(col.RUNNING_BEHAVIOR), None)
 
         #if result != bt.RUNNING and result != bt.FAILURE:
         #    self._root_node.reset()
@@ -693,9 +695,27 @@ class BTModel(QtCore.QAbstractItemModel):
         #        #if key in self.indexesOfTypes([typ.BOOL_VAR_NODE, typ.FLOAT_VAR_NODE])
 
 
+        self._timer.stop()
         self._root_node.reset()
         self._timer.start(self._root_node.tick_rate_ms)
+        self.toolModel().setData(self.toolIndex().siblingAtColumn(col.RUNNING_BEHAVIOR_NAME), self._root_node.name)
+        self.toolModel().setData(self.toolIndex().siblingAtColumn(col.RUNNING_BEHAVIOR), self)
+        #print(self.toolIndex().internalPointer().name)
         #TODO this timer might not be the most consistent
         self.tick()
 
+
+    def runAbortOthers(self):
+        tool_node = self.toolIndex().internalPointer()
+        for behavior in tool_node.behaviors():
+            if behavior is not self:
+                behavior.abort()
+
+        self.run()
+
+    def abort(self):
+        self._timer.stop()
+        self.toolModel().setData(self.toolIndex().siblingAtColumn(col.BEHAVIOR_INFO_TEXT), '')
+        self.toolModel().setData(self.toolIndex().siblingAtColumn(col.RUNNING_BEHAVIOR_NAME), '')
+        self.toolModel().setData(self.toolIndex().siblingAtColumn(col.RUNNING_BEHAVIOR), None)
 

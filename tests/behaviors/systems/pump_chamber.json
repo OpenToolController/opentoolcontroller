@@ -2,10 +2,11 @@
     "children": [
         {
             "pos": [
-                -574.9419680232154,
-                -79.0
+                -646.0,
+                -58.0
             ],
-            "type_info": "Sequence"
+            "type_info": "Wait_Time",
+            "wait_time": 2.0
         },
         {
             "children": [
@@ -29,31 +30,16 @@
             "type_info": "Run_Behavior"
         },
         {
-            "children": [
-                {
-                    "setName": "Pump",
-                    "setType": 16,
-                    "state": "",
-                    "type_info": "Wait_State_Setpoint"
-                },
-                {
-                    "setName": "SF6_MFC",
-                    "setType": 17,
-                    "state": "Fault",
-                    "type_info": "Wait_State_Setpoint"
-                }
-            ],
             "pos": [
-                96.0,
-                -78.0
+                -35.0,
+                -25.0
             ],
-            "timeoutSec": 15.0,
-            "type_info": "Wait_State"
+            "type_info": "Success"
         }
     ],
     "manualButtonNewLine": false,
     "manualButtonSpanColEnd": false,
-    "name": "Pump to Base",
+    "name": "Pump Chamber",
     "pos": [
         -337.26599493185813,
         -335.67910626436634

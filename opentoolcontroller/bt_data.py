@@ -11,22 +11,29 @@ import pprint
 pp = pprint.PrettyPrinter(width=82, compact=True)
 
 class BaseNode:
-    info_text = ''
     def __init__(self, parent=None):
         super().__init__()
         #self._root_node = None
         self._parent = parent
         self._children = []
 
+        self._root_node = None
+
         '''Do we need this???'''
         if parent is not None:
             parent.addChild(self)
         
     def setInfoText(self, text):
-        BaseNode.info_text = text
+        self._root_node.setInfoText(text)
 
     def infoText(self):
-        return BaseNode.info_text
+        return self._root_node.infoText()
+
+    def setRootNode(self, node):
+        self._root_node = node
+    
+    def rootNode(self):
+        return self._root_node
 
     def reset(self):
         pass
@@ -91,6 +98,8 @@ class BaseNode:
 
         self._children.insert(position, child)
         child._parent = self
+        child.setRootNode(self.rootNode())
+
         return True
 
     def children(self):
@@ -265,6 +274,15 @@ class RootSequenceNode(SequenceNode):
         self._file = "" 
         self._manual_button_new_line = False
         self._manual_button_span_col_end = False
+
+        self._info_text = ''
+        self.setRootNode(self)
+
+    def setInfoText(self, text):
+        self._info_text = text
+
+    def infoText(self):
+        return self._info_text
 
 
     def typeInfo(self):
@@ -851,6 +869,20 @@ class WaitNode(Node): #This one is used by the device on IO
         super().setData(column, value)
         if   column is col.TIMEOUT_SEC: self.timeoutSec = value
 
+    def setInfoText(self, children_text):
+        text = ''
+
+        #children_text[child.setName] = (tool_value, text_compare, value)
+        for name in children_text:
+            (tool_value, text_compare, value) = children_text[name]
+            if len(text) > 0:
+                text += ", "
+            text += str(name) + ": " + str(tool_value) + str(text_compare) + str(value)
+
+        print(text)
+
+        super().setInfoText("Waiting for: " + text)
+
     def tick(self):
         if not self._status:
             self._start_time = time.time()
@@ -859,6 +891,8 @@ class WaitNode(Node): #This one is used by the device on IO
 
         if self._status == bt.RUNNING:
             children_results = {}
+            children_text = {}
+            info_names = ''
 
             for child in self.children():
                 type_info = child.setIndex().internalPointer().typeInfo()
@@ -881,30 +915,40 @@ class WaitNode(Node): #This one is used by the device on IO
                     result = False
                     
                     if equal_type == bt.EQUAL:
+                        text_compare = "="
                         if tool_value == value:
                             result = True
                     elif equal_type == bt.NOT_EQUAL:
+                        text_compare = "!="
                         if tool_value != value:
                             result = True
                     elif equal_type == bt.GREATER_THAN:
+                        text_compare = ">"
                         if tool_value > value:
                             result = True
                     elif equal_type == bt.GREATER_THAN_EQUAL:
+                        text_compare = "≥"
                         if tool_value >= value:
                             result = True
                     elif equal_type == bt.LESS_THAN:
+                        text_compare = "<"
                         if tool_value < value:
                             result = True
                     elif equal_type == bt.LESS_THAN_EQUAL:
+                        text_compare = "≤"
                         if tool_value <= value:
                             result = True
 
                     children_results[child.setName] = result
+                    if not result:
+                        children_text[child.setName] = (tool_value, text_compare, value)
+
 
 
             if all(child_result == True for child_result in children_results.values()):
                 self._status = bt.SUCCESS
 
+            self.setInfoText(children_text)
 
                 #if child.setType == bt.VAL:
                 #    if type_info in [typ.BOOL_VAR_NODE, typ.FLOAT_VAR_NODE]:
@@ -1298,15 +1342,29 @@ class RunBehaviorNode(Node):
     def setToolModel(self, model):
         self._tool_model = model
 
+    def setInfoText(self, behavior_names):
+        text = ''
+
+        for node_name, behavior_name in behavior_names:
+            if len(text)>0:
+                text += ', '
+            text += node_name + ":" + behavior_name
+
+        super().setInfoText(text)
+
     def tick(self):
         if self._status != bt.SUCCESS:
+            behavior_names = []
+
             for child in self.children():
                 if child.setType == bt.VAL:
                     try:
-                        child.behavior().run()
+                        child.behavior().runAbortOthers()
+                        behavior_names.append((child.behavior().toolIndex().internalPointer().name, child.behaviorName))
                     except:
-                        #TODO Add error logging
-                        pass
+                        print("run behavior failed")
+
+            self.setInfoText(behavior_names)
 
         self._status = bt.SUCCESS
         return self._status
