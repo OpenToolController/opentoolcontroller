@@ -13,7 +13,6 @@ pp = pprint.PrettyPrinter(width=82, compact=True)
 class BaseNode:
     def __init__(self, parent=None):
         super().__init__()
-        #self._root_node = None
         self._parent = parent
         self._children = []
 
@@ -275,7 +274,7 @@ class RootSequenceNode(SequenceNode):
         self._manual_button_new_line = False
         self._manual_button_span_col_end = False
 
-        self._info_text = ''
+        self._info_text = '' #Nodes that wait display a text to the user
         self.setRootNode(self)
 
     def setInfoText(self, text):
@@ -828,12 +827,12 @@ class SetNode(Node):
                         value = child.varIndex().internalPointer().value() 
                         tool_model.setData(child.setIndex().siblingAtColumn(col.VALUE), value)#child.varIndex().internalPointer().value())
 
-                if child_name:
-                    if len(info_names) > 0:
-                        info_names += ', '
-                    info_names += str(child_name) + ': ' + str(value)
+                #if child_name:
+                #    if len(info_names) > 0:
+                #        info_names += ', '
+                #    info_names += str(child_name) + ': ' + str(value)
 
-                self.setInfoText(info_names)
+                #self.setInfoText(info_names)
 
         self._status = bt.SUCCESS
         return self._status
@@ -877,11 +876,13 @@ class WaitNode(Node): #This one is used by the device on IO
             (tool_value, text_compare, value) = children_text[name]
             if len(text) > 0:
                 text += ", "
-            text += str(name) + ": " + str(tool_value) + str(text_compare) + str(value)
+            #text += str(name) + ": " + str(tool_value) + str(text_compare) + str(value)
+            #TODO make this fancier 
+            text += str(name) 
 
-        print(text)
-
-        super().setInfoText("Waiting for: " + text)
+        timeout_time = self._timeout_sec - (time.time() - self._start_time)
+        full_text = "Waiting for: %s , timeout: %0.1f sec" % (text, timeout_time)
+        super().setInfoText(full_text)
 
     def tick(self):
         if not self._status:
@@ -1131,11 +1132,10 @@ class Tolerancepoint(BaseNode):
             except:
                 return self._tolerance_offset_name
         def fset(self, value):
+            print("toleranceOffsetName: ", value)
             self._tolerance_offset_name = value
         return locals()
     toleranceOffsetName = property(**toleranceOffsetName())
-
-
 
 
 
@@ -1173,6 +1173,20 @@ class ToleranceNode(Node):
         super().setData(column, value)
         if   column is col.TIMEOUT_SEC: self.timeoutSec = value
 
+
+    def setInfoText(self, children_text):
+        text = ''
+
+        for name in children_text:
+            (compare1value, compare2value) = children_text[name]
+            if len(text) > 0:
+                text += ", "
+            text += "%s: (%0.1f | %0.1f)" % (name, compare1value, compare2value)
+
+        timeout_time = self._timeout_sec - (time.time() - self._start_time)
+        full_text = "Waiting for tolernace: %s , timeout: %0.1f sec" % (text, timeout_time)
+        super().setInfoText(full_text)
+
     #TODO fix tick!
     def tick(self):
         if not self._status:
@@ -1182,26 +1196,56 @@ class ToleranceNode(Node):
 
         if self._status == bt.RUNNING:
             children_results = {}
+            children_text = {}
 
             for child in self.children():
-                type_info = child.setIndex().internalPointer().typeInfo()
-                tool_model = child.toolModel()
+                if child.setType == bt.VAL:
+                    compare_1_value = child.compare1Index().internalPointer().value()
+                    compare_2_value = child.compare2Index().internalPointer().value()
+                    delta = compare_1_value - compare_2_value
 
+
+                    tol = 0
+
+                    #Scale
+                    if child.setTypeScale == bt.VAL:
+                        tol += child.toleranceScaleValue*compare_2_value
+                    elif child.setTypeScale == bt.VAR:
+                        tol += child.toleranceScaleIndex().internalPointer().value()*compare_2_value
+
+
+                    #Offset
+                    if child.setTypeOffset == bt.VAL:
+                        tol += child.toleranceOffsetValue
+                    elif child.setTypeOffset == bt.VAR:
+                        tol += child.toleranceOffsetIndex().internalPointer().value()
+
+
+                    #print("Delta:", abs(delta), " Tol:", tol)
+                
+                    if abs(delta) < tol:
+                        children_results[child.compare1Name] = True
+                    else:
+                        children_results[child.compare1Name] = False
+                        children_text[child.compare1Name] = (compare_1_value, compare_2_value)
+
+                '''
                 #Decode the two column hex value
-                wait_type = bt.set_type(child.setType)
+                wait_type_scale = bt.set_type(child.setTypeScale)
+                wait_type_offset = bt.set_type(child.setTypeOffset)
 
                 
                 tolerance_scale_value = None
-                if wait_type == bt.VAL:
-                    tolerance_scale_value = child.toleranceScaleValue()
-                elif wait_type == bt.VAR:
-                    tolerance_scale_value = child.tolernaceScaleIndex().internalPointer().value()
+                if wait_type_scale == bt.VAL:
+                    tolerance_scale_value = child.toleranceScaleValue
+                elif wait_type_scale == bt.VAR:
+                    tolerance_scale_value = child.tolernaceScaleIndex.internalPointer().value()
 
                 tolerance_offset_value = None
-                if wait_type == bt.VAL:
-                    tolerance_offset_value = child.toleranceOffsetValue()
-                elif wait_type == bt.VAR:
-                    tolerance_offset_value = child.tolernaceOffsetIndex().internalPointer().value()
+                if wait_type_offset == bt.VAL:
+                    tolerance_offset_value = child.toleranceOffsetValue
+                elif wait_type_offset == bt.VAR:
+                    tolerance_offset_value = child.tolernaceOffsetIndex.internalPointer().value()
 
 
                 if wait_type in [bt.VAL, bt.VAR]:
@@ -1211,24 +1255,28 @@ class ToleranceNode(Node):
 
                     delta = compare_1_value - compare_2_value
                     tol = tolerance_scale_value*compare_2_value + tolerance_offset_value
+
+                    print(delta, " - ", tol)
                     
                     if abs(delta) < tol:
                         children_results[child.compare1Name] = True
                     else:
                         children_results[child.compare1Name] = False
-
+                        children_text[child.compare1Name] = (compare_1_value, compare_2_value)
+                '''
 
             #keeping like this so its possible to log what one didn't hit tolerance?
             if all(child_result == True for child_result in children_results.values()):
                 self._status = bt.SUCCESS
 
 
+            self.setInfoText(children_text)
 
         #Check timeout after incase it's at 0 so it doesn't fail the first round
         if self._status == bt.RUNNING:
             if (time.time() - self._start_time)  > self._timeout_sec:
                 self._status = bt.FAILURE
-                print("timed out: ", (time.time() - self._start_time))
+                print("timed out: %0.1f" %(time.time() - self._start_time))
 
         #self._status = bt.SUCCESS
         return self._status

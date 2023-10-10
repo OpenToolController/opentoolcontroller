@@ -733,16 +733,20 @@ class BoolVarEditor(bool_var_base, bool_var_form):
         self.setupUi(self)
         self.mapper = QtWidgets.QDataWidgetMapper()
         self.ui_user_manual_set.stateChanged.connect(self.mapper.submit)
+        self.ui_launch_value.stateChanged.connect(self.mapper.submit)
+        self.ui_use_launch_value.stateChanged.connect(self.mapper.submit)
 
     def setModel(self, model):
         if hasattr(model, 'sourceModel'):
             model = model.sourceModel()
         self.mapper.setModel(model)
 
-        self.mapper.addMapping(self.ui_value          , col.VALUE)
-        self.mapper.addMapping(self.ui_off_name       , col.OFF_NAME)
-        self.mapper.addMapping(self.ui_on_name        , col.ON_NAME)
-        self.mapper.addMapping(self.ui_user_manual_set, col.USER_MANUAL_SET)
+        self.mapper.addMapping(self.ui_value           , col.VALUE)
+        self.mapper.addMapping(self.ui_off_name        , col.OFF_NAME)
+        self.mapper.addMapping(self.ui_on_name         , col.ON_NAME)
+        self.mapper.addMapping(self.ui_user_manual_set , col.USER_MANUAL_SET)
+        self.mapper.addMapping(self.ui_launch_value    , col.LAUNCH_VALUE)
+        self.mapper.addMapping(self.ui_use_launch_value, col.USE_LAUNCH_VALUE)
 
     def setSelection(self, current):
         parent = current.parent()
@@ -756,22 +760,29 @@ class IntVarEditor(int_var_base, int_var_form):
         self.setupUi(self)
         self.mapper = QtWidgets.QDataWidgetMapper()
         self.ui_user_manual_set.stateChanged.connect(self.mapper.submit)
+        self.ui_use_launch_value.stateChanged.connect(self.mapper.submit)
 
     def setModel(self, model):
         if hasattr(model, 'sourceModel'):
             model = model.sourceModel()
         self.mapper.setModel(model)
 
-        self.mapper.addMapping(self.ui_value          , col.VALUE)
-        self.mapper.addMapping(self.ui_min            , col.MIN)
-        self.mapper.addMapping(self.ui_max            , col.MAX)
-        self.mapper.addMapping(self.ui_units          , col.UNITS)
-        self.mapper.addMapping(self.ui_user_manual_set, col.USER_MANUAL_SET)
+        self.mapper.addMapping(self.ui_value           , col.VALUE)
+        self.mapper.addMapping(self.ui_min             , col.MIN)
+        self.mapper.addMapping(self.ui_max             , col.MAX)
+        self.mapper.addMapping(self.ui_units           , col.UNITS)
+        self.mapper.addMapping(self.ui_user_manual_set , col.USER_MANUAL_SET)
+        self.mapper.addMapping(self.ui_launch_value    , col.LAUNCH_VALUE)
+        self.mapper.addMapping(self.ui_use_launch_value, col.USE_LAUNCH_VALUE)
 
     def setSelection(self, current):
         parent = current.parent()
         self.mapper.setRootIndex(parent)
         self.mapper.setCurrentModelIndex(current)
+
+        node = current.internalPointer()
+        self.ui_launch_value.setMinimum(node.min)
+        self.ui_launch_value.setMaximum(node.max)
 
 
 class FloatVarEditor(float_var_base, float_var_form):
@@ -781,6 +792,7 @@ class FloatVarEditor(float_var_base, float_var_form):
         self.mapper = QtWidgets.QDataWidgetMapper()
         self.ui_display_scientific.stateChanged.connect(self.mapper.submit)
         self.ui_user_manual_set.stateChanged.connect(self.mapper.submit)
+        self.ui_use_launch_value.stateChanged.connect(self.mapper.submit)
 
     def setModel(self, model):
         if hasattr(model, 'sourceModel'):
@@ -794,6 +806,8 @@ class FloatVarEditor(float_var_base, float_var_form):
         self.mapper.addMapping(self.ui_display_digits    , col.DISPLAY_DIGITS)
         self.mapper.addMapping(self.ui_display_scientific, col.DISPLAY_SCIENTIFIC)
         self.mapper.addMapping(self.ui_user_manual_set   , col.USER_MANUAL_SET)
+        self.mapper.addMapping(self.ui_launch_value      , col.LAUNCH_VALUE)
+        self.mapper.addMapping(self.ui_use_launch_value  , col.USE_LAUNCH_VALUE)
         
 
 
@@ -801,3 +815,7 @@ class FloatVarEditor(float_var_base, float_var_form):
         parent = current.parent()
         self.mapper.setRootIndex(parent)
         self.mapper.setCurrentModelIndex(current)
+
+        node = current.internalPointer()
+        self.ui_launch_value.setMinimum(node.min)
+        self.ui_launch_value.setMaximum(node.max)

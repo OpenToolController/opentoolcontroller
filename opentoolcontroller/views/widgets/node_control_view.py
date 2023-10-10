@@ -17,6 +17,8 @@ class BehaviorButton(QtWidgets.QPushButton):
         self.customContextMenuRequested.connect(self.buttonMenu)
         self._enable_edit_behaviors = False
 
+        #Add: Log when user clicks button "username clicked: behavior.name()"
+
 
     def buttonMenu(self, pos):
         menu = QtWidgets.QMenu()
@@ -92,8 +94,27 @@ class BehaviorButtonAborting(BehaviorButton):
         if newhandler is not None:
             signal.connect(newhandler)
 
+    runningBehavior = QtCore.pyqtProperty(QtCore.QVariant, getRunningBehavior, setRunningBehavior)
+
+class BehaviorButtonDevice(BehaviorButtonAborting):
+    def __init__(self, parent=None):
+        super(BehaviorButtonDevice, self).__init__(parent)
+        self.setCheckable(True)
+
+    def getRunningBehavior(self):
+        return self._running_behavior
+
+    def setRunningBehavior(self, behavior):
+        self._running_behavior = behavior
+        self.setText(self._behavior.name())
+
+        if self._running_behavior == self._behavior:
+            self.setChecked(True)
+        else:
+            self.setChecked(False)
 
     runningBehavior = QtCore.pyqtProperty(QtCore.QVariant, getRunningBehavior, setRunningBehavior)
+
 
 
 
@@ -158,7 +179,6 @@ class NodeControlView(node_control_view_base, node_control_view_form):
         else:
             self.ui_system_is_online.hide()
             self.ui_device_manual_control.hide()
-
 
 
 
@@ -229,8 +249,6 @@ class NodeControlView(node_control_view_base, node_control_view_form):
         first_behavior = True
 
 
-
-
         #Then add in a button for each behavior
         for behavior in node.behaviors():
             if first_behavior:
@@ -253,8 +271,9 @@ class NodeControlView(node_control_view_base, node_control_view_form):
                 btn.setBehavior(behavior)
                 self._behavior_button_mapper.addMapping(btn, col.RUNNING_BEHAVIOR, bytes('runningBehavior', 'ascii'))
             else:
-                btn = BehaviorButton()
+                btn = BehaviorButtonDevice()
                 btn.setBehavior(behavior)
+                self._behavior_button_mapper.addMapping(btn, col.RUNNING_BEHAVIOR, bytes('runningBehavior', 'ascii'))
 
 
             btn.enableEditBehaviors(self._enable_edit_behaviors)

@@ -41,6 +41,7 @@ class Window(QtWidgets.QMainWindow):
         self.tool_model = ToolModel()
         self.tool_model.loadJSON(json_data)
         self.tool_model.setAlertCallback(self._alert_model.addAlert)
+        self.tool_model.setLaunchValues()
         self.tool_model.loadBehaviors()
 
         self.setWindowTitle('Open Tool Controller')

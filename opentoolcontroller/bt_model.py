@@ -157,7 +157,7 @@ class BTModel(QtCore.QAbstractItemModel):
                 self.removeRows(point_index.row(), 1, point_index.parent())
 
 
-        #After all the sets are usable then we need to sync the compare2Index and tolernaceIndex
+        #After all the sets are usable then we need to sync the compare2Index and toleranceIndex
         for point_index in self.indexesOfType(typ.TOLERANCEPOINT, leaf_index):
             point_node = point_index.internalPointer()
 
@@ -583,6 +583,22 @@ class BTModel(QtCore.QAbstractItemModel):
                 for tool_index in self.toolModel().childrenIndexes(self.toolIndex()):
                     if tool_index.internalPointer().name == value:
                         node.setVarIndex(tool_index)
+
+            #Some day convert the tolerance node to use the VAR_NODE_NAME style
+            elif index.column() == col.COMPARE_2_NAME:
+                for tool_index in self.toolModel().childrenIndexes(self.toolIndex()):
+                    if tool_index.internalPointer().name == value:
+                        node.setCompare2Index(tool_index)
+
+            elif index.column() == col.TOLERANCE_SCALE_NAME:
+                for tool_index in self.toolModel().childrenIndexes(self.toolIndex()):
+                    if tool_index.internalPointer().name == value:
+                        node.setToleranceScaleIndex(tool_index)
+
+            elif index.column() == col.TOLERANCE_OFFSET_NAME:
+                for tool_index in self.toolModel().childrenIndexes(self.toolIndex()):
+                    if tool_index.internalPointer().name == value:
+                        node.setToleranceOffsetIndex(tool_index)
             
             elif index.column() == col.BEHAVIOR_NAME: #Only for Tool/System RUN BEHAVIOR nodes TODO refine
                 device_node = node.setIndex().internalPointer()
@@ -700,7 +716,6 @@ class BTModel(QtCore.QAbstractItemModel):
         self._timer.start(self._root_node.tick_rate_ms)
         self.toolModel().setData(self.toolIndex().siblingAtColumn(col.RUNNING_BEHAVIOR_NAME), self._root_node.name)
         self.toolModel().setData(self.toolIndex().siblingAtColumn(col.RUNNING_BEHAVIOR), self)
-        #print(self.toolIndex().internalPointer().name)
         #TODO this timer might not be the most consistent
         self.tick()
 

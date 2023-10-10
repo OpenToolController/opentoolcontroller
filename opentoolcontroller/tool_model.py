@@ -21,6 +21,13 @@ class ToolModel(QtCore.QAbstractItemModel):
         self._alert_callback = callback
 
 
+    def setLaunchValues(self):
+        indexes = self.indexesOfTypes([typ.BOOL_VAR_NODE, typ.INT_VAR_NODE, typ.FLOAT_VAR_NODE])
+        for index in indexes:
+            node = index.internalPointer()
+            if node.useLaunchValue:
+                node.setData(col.VALUE, node.launchValue)
+
     #needs to happen after tool is loaded so all the tool nodes have their properties
     def loadBehaviors(self):
         indexes = self.indexesOfType(typ.DEVICE_NODE)

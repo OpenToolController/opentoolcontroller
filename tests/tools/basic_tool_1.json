@@ -14,7 +14,8 @@
                 {
                     "behaviorFiles": [
                         "/Users/wrightsh/Desktop/Open Tool Controller/tests/behaviors/devices/flow.json",
-                        "/Users/wrightsh/Desktop/Open Tool Controller/tests/behaviors/devices/stop_flow.json"
+                        "/Users/wrightsh/Desktop/Open Tool Controller/tests/behaviors/devices/stop_flow.json",
+                        "/Users/wrightsh/Desktop/Open Tool Controller/tests/behaviors/devices/idle.json"
                     ],
                     "children": [
                         {
@@ -39,12 +40,15 @@
                             "description": "",
                             "displayDigits": 2,
                             "displayScientific": false,
+                            "launchValue": 0.0,
                             "max": 500.0,
                             "min": 0.0,
                             "name": "setpoint",
                             "type_info": "Float_Var_Node",
                             "units": "",
-                            "userManualSet": true
+                            "useLaunchValue": false,
+                            "userManualSet": true,
+                            "val": 1.01
                         },
                         {
                             "children": [],
@@ -60,12 +64,15 @@
                             "description": "",
                             "displayDigits": 3,
                             "displayScientific": true,
+                            "launchValue": 0.1,
                             "max": 100.0,
                             "min": 0.0,
                             "name": "tolerance",
                             "type_info": "Float_Var_Node",
                             "units": "",
-                            "userManualSet": true
+                            "useLaunchValue": true,
+                            "userManualSet": true,
+                            "val": 0.1
                         },
                         {
                             "calibrationTableData": [
@@ -96,31 +103,40 @@
                         {
                             "children": [],
                             "description": "flag if its homed",
+                            "launchValue": false,
                             "name": "is_homed",
                             "offName": "homed",
                             "onName": "not_homed",
                             "type_info": "Bool_Var_Node",
-                            "userManualSet": true
+                            "useLaunchValue": false,
+                            "userManualSet": true,
+                            "val": true
                         },
                         {
                             "children": [],
                             "description": "",
+                            "launchValue": 6,
                             "max": 6,
                             "min": 0,
                             "name": "current_pocket",
                             "type_info": "Int_Var_Node",
                             "units": "",
-                            "userManualSet": false
+                            "useLaunchValue": true,
+                            "userManualSet": false,
+                            "val": 0
                         },
                         {
                             "children": [],
                             "description": "",
+                            "launchValue": 0,
                             "max": 6,
                             "min": 0,
                             "name": "pocket",
                             "type_info": "Int_Var_Node",
                             "units": "",
-                            "userManualSet": true
+                            "useLaunchValue": false,
+                            "userManualSet": true,
+                            "val": 0
                         }
                     ],
                     "description": "100sccm MFC",
@@ -172,7 +188,7 @@
                 }
             ],
             "description": "This is part of a tool, like a chamber or loadlock.",
-            "deviceManualControl": false,
+            "deviceManualControl": true,
             "name": "Chamber_A",
             "states": [],
             "systemIsOnline": false,
@@ -185,21 +201,27 @@
                 {
                     "children": [],
                     "description": "",
+                    "launchValue": 0,
                     "max": 1,
                     "min": 0,
                     "name": "Wafer_ID",
                     "type_info": "Int_Var_Node",
                     "units": "",
-                    "userManualSet": true
+                    "useLaunchValue": false,
+                    "userManualSet": true,
+                    "val": 0
                 },
                 {
                     "children": [],
                     "description": "",
+                    "launchValue": false,
                     "name": "Active",
                     "offName": "no",
                     "onName": "yea",
                     "type_info": "Bool_Var_Node",
-                    "userManualSet": true
+                    "useLaunchValue": false,
+                    "userManualSet": true,
+                    "val": false
                 }
             ],
             "description": "",

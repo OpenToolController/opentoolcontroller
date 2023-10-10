@@ -1,0 +1,66 @@
+{
+    "children": [
+        {
+            "children": [
+                {
+                    "compare1Name": "Flow",
+                    "compare2Name": "setpoint",
+                    "setType": 1,
+                    "setTypeOffset": 2,
+                    "setTypeScale": 0,
+                    "toleranceOffsetName": "tolerance",
+                    "toleranceOffsetValue": 0.43,
+                    "toleranceScaleName": "tolerance",
+                    "toleranceScaleValue": 0.1,
+                    "type_info": "Tolerancepoint"
+                },
+                {
+                    "compare1Name": "setpoint",
+                    "compare2Name": "Flow",
+                    "setType": 0,
+                    "setTypeOffset": 0,
+                    "setTypeScale": 0,
+                    "toleranceOffsetName": "Flow",
+                    "toleranceOffsetValue": 1.0,
+                    "toleranceScaleName": "Flow",
+                    "toleranceScaleValue": 0.1,
+                    "type_info": "Tolerancepoint"
+                },
+                {
+                    "compare1Name": "tolerance",
+                    "compare2Name": "Flow",
+                    "setType": 0,
+                    "setTypeOffset": 0,
+                    "setTypeScale": 0,
+                    "toleranceOffsetName": "Flow",
+                    "toleranceOffsetValue": 1.0,
+                    "toleranceScaleName": "Flow",
+                    "toleranceScaleValue": 0.1,
+                    "type_info": "Tolerancepoint"
+                }
+            ],
+            "pos": [
+                -1110.0,
+                29.0
+            ],
+            "timeoutSec": 5.0,
+            "type_info": "Tolerance"
+        },
+        {
+            "pos": [
+                -88.73453367931404,
+                122.6748318930629
+            ],
+            "type_info": "Success"
+        }
+    ],
+    "manualButtonNewLine": false,
+    "manualButtonSpanColEnd": false,
+    "name": "Idle",
+    "pos": [
+        -647.2659949318581,
+        -294.67910626436634
+    ],
+    "tick_rate_ms": 500,
+    "type_info": "Root_Sequence"
+}

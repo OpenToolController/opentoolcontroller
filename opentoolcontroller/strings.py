@@ -151,6 +151,9 @@ class col():
     RUNNING_BEHAVIOR_NAME = 128
     RUNNING_BEHAVIOR = 129
 
+    LAUNCH_VALUE = 130
+    USE_LAUNCH_VALUE = 131
+
 class typ():
     TOOL_NODE = 'Tool_Node'
     SYSTEM_NODE = 'System_Node'

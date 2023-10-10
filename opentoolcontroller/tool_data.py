@@ -199,24 +199,22 @@ class BehaviorNode(Node):
 
     def data(self, c):
         r = super().data(c)
-        if   c is col.STATE     : r = self._state
-        elif c is col.BEHAVIORS : r = self._behaviors
-        elif c is col.STATES    : r = self._states
+        if   c is col.STATE                 : r = self._state
+        elif c is col.BEHAVIORS             : r = self._behaviors
+        elif c is col.STATES                : r = self._states
         elif c is col.RUNNING_BEHAVIOR_NAME : r = self._running_behavior_name
-        elif c is col.RUNNING_BEHAVIOR : r = self._running_behavior
-        elif c is col.BEHAVIOR_INFO_TEXT : r = self._behavior_info_text
+        elif c is col.RUNNING_BEHAVIOR      : r = self._running_behavior
+        elif c is col.BEHAVIOR_INFO_TEXT    : r = self._behavior_info_text
         return r
 
     def setData(self, c, value):
         super().setData(c, value)
-        if   c is col.STATE     : self._state = str(value)
-        elif c is col.BEHAVIORS : pass #needs to be handled by the model to sync
-        elif c is col.STATES    : self._states = value
+        if   c is col.STATE                 : self._state = str(value)
+        elif c is col.BEHAVIORS             : pass #needs to be handled by the model to sync
+        elif c is col.STATES                : self._states = value
         elif c is col.RUNNING_BEHAVIOR_NAME : self._running_behavior_name = value
-        elif c is col.RUNNING_BEHAVIOR :
-            print("HMM: ", value)
-            self._running_behavior = value
-        elif c is col.BEHAVIOR_INFO_TEXT : self._behavior_info_text = value
+        elif c is col.RUNNING_BEHAVIOR      : self._running_behavior = value
+        elif c is col.BEHAVIOR_INFO_TEXT    : self._behavior_info_text = value
 
     def state(self):
         return self._state
@@ -925,28 +923,42 @@ class BoolVarNode(Node):
         self._off_name = ''
         self._on_name = ''
         self._user_manual_set = True
+        self._launch_value = False
+        self._use_launch_value = False
 
     def typeInfo(self):
         return typ.BOOL_VAR_NODE
 
     def data(self, c):
         r = super().data(c)
-        if   c is col.VALUE           : r = self._val
+        if   c is col.VALUE           : r = self.val
         elif c is col.OFF_NAME        : r = self.offName
         elif c is col.ON_NAME         : r = self.onName
         elif c is col.USER_MANUAL_SET : r = self.userManualSet
+        elif c is col.LAUNCH_VALUE    : r = self.launchValue
+        elif c is col.USE_LAUNCH_VALUE: r = self.useLaunchValue
 
         return r
 
     def setData(self, c, value):
         super().setData(c, value)
-        if   c is col.VALUE           : self._val = True if value == True else False
+        if   c is col.VALUE           : self.val = True if value == True else False
         elif c is col.OFF_NAME        : self.offName = value
         elif c is col.ON_NAME         : self.onName = value
         elif c is col.USER_MANUAL_SET : self.userManualSet = value
+        elif c is col.LAUNCH_VALUE    : self.launchValue = value
+        elif c is col.USE_LAUNCH_VALUE: self.useLaunchValue = value
 
+    #Need this one to be interfaced the same as Hal Nodes
     def value(self):
         return self._val
+
+    #This one is to save the state
+    def val():
+        def fget(self): return self._val
+        def fset(self, value): self._val = bool(value)
+        return locals()
+    val = property(**val())
 
     def offName():
         def fget(self): return self._off_name
@@ -971,6 +983,19 @@ class BoolVarNode(Node):
         return locals()
     userManualSet = property(**userManualSet())
 
+    def launchValue():
+        def fget(self): return self._launch_value
+        def fset(self, value): self._launch_value = bool(value)
+        return locals()
+    launchValue = property(**launchValue())
+
+    def useLaunchValue():
+        def fget(self): return self._use_launch_value
+        def fset(self, value): self._use_launch_value = bool(value)
+        return locals()
+    useLaunchValue = property(**useLaunchValue())
+
+
 class IntVarNode(Node):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -980,29 +1005,41 @@ class IntVarNode(Node):
         self._max = 0
         self._units = ''
         self._user_manual_set = True
+        self._launch_value = 0
+        self._use_launch_value = False
 
     def typeInfo(self):
         return typ.INT_VAR_NODE
 
     def data(self, c):
         r = super().data(c)
-        if   c is col.VALUE           : r = self._val
+        if   c is col.VALUE           : r = self.val
         elif c is col.MIN             : r = self.min
         elif c is col.MAX             : r = self.max
         elif c is col.UNITS           : r = self.units
         elif c is col.USER_MANUAL_SET : r = self.userManualSet
+        elif c is col.LAUNCH_VALUE    : r = self.launchValue
+        elif c is col.USE_LAUNCH_VALUE: r = self.useLaunchValue
         return r
 
     def setData(self, c, value):
         super().setData(c, value)
-        if c is col.VALUE             : self._val = int(clamp(int(value), self.min, self.max))
+        if c is col.VALUE             : self.val = int(clamp(int(value), self.min, self.max))
         elif c is col.MIN             : self.min = value
         elif c is col.MAX             : self.max = value
         elif c is col.UNITS           : self.units = value
         elif c is col.USER_MANUAL_SET : self.userManualSet = value
+        elif c is col.LAUNCH_VALUE    : self.launchValue = value
+        elif c is col.USE_LAUNCH_VALUE: self.useLaunchValue = value
 
     def value(self):
         return self._val
+
+    def val():
+        def fget(self): return self._val
+        def fset(self, value): self._val = int(value)
+        return locals()
+    val = property(**val())
 
     def min():
         def fget(self): return self._min
@@ -1033,6 +1070,18 @@ class IntVarNode(Node):
         return locals()
     userManualSet = property(**userManualSet())
 
+    def launchValue():
+        def fget(self): return self._launch_value
+        def fset(self, value): self._launch_value = int(value)
+        return locals()
+    launchValue = property(**launchValue())
+
+    def useLaunchValue():
+        def fget(self): return self._use_launch_value
+        def fset(self, value): self._use_launch_value = bool(value)
+        return locals()
+    useLaunchValue = property(**useLaunchValue())
+
 class FloatVarNode(Node):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -1044,33 +1093,45 @@ class FloatVarNode(Node):
         self._display_digits = defaults.A_DISPLAY_DIGITS
         self._display_scientific = False
         self._user_manual_set = True
+        self._launch_value = 0.0
+        self._use_launch_value = False
 
     def typeInfo(self):
         return typ.FLOAT_VAR_NODE
 
     def data(self, c):
         r = super().data(c)
-        if   c is col.VALUE              : r = self._val
+        if   c is col.VALUE              : r = self.val
         elif c is col.MIN                : r = self.min
         elif c is col.MAX                : r = self.max
         elif c is col.UNITS              : r = self.units
         elif c is col.DISPLAY_DIGITS     : r = self.displayDigits
         elif c is col.DISPLAY_SCIENTIFIC : r = self.displayScientific
         elif c is col.USER_MANUAL_SET    : r = self.userManualSet
+        elif c is col.LAUNCH_VALUE    : r = self.launchValue
+        elif c is col.USE_LAUNCH_VALUE: r = self.useLaunchValue
         return r
 
     def setData(self, c, value):
         super().setData(c, value)
-        if c is col.VALUE                : self._val = clamp(float(value), self.min, self.max)
+        if c is col.VALUE                : self.val = clamp(float(value), self.min, self.max)
         elif c is col.MIN                : self.min = value
         elif c is col.MAX                : self.max = value
         elif c is col.UNITS              : self.units = value
         elif c is col.DISPLAY_DIGITS     : self.displayDigits = value
         elif c is col.DISPLAY_SCIENTIFIC : self.displayScientific = value
         elif c is col.USER_MANUAL_SET    : self.userManualSet = value
+        elif c is col.LAUNCH_VALUE       : self.launchValue = value
+        elif c is col.USE_LAUNCH_VALUE   : self.useLaunchValue = value
 
     def value(self):
         return self._val
+
+    def val():
+        def fget(self): return self._val
+        def fset(self, value): self._val = float(value)
+        return locals()
+    val = property(**val())
 
     def min():
         def fget(self): return self._min
@@ -1118,3 +1179,15 @@ class FloatVarNode(Node):
 
         return locals()
     userManualSet = property(**userManualSet())
+
+    def launchValue():
+        def fget(self): return self._launch_value
+        def fset(self, value): self._launch_value = float(value)
+        return locals()
+    launchValue = property(**launchValue())
+
+    def useLaunchValue():
+        def fget(self): return self._use_launch_value
+        def fset(self, value): self._use_launch_value = bool(value)
+        return locals()
+    useLaunchValue = property(**useLaunchValue())
