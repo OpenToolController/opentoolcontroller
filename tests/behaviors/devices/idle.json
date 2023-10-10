@@ -1,55 +1,41 @@
 {
     "children": [
         {
-            "children": [
-                {
-                    "compare1Name": "Flow",
-                    "compare2Name": "setpoint",
-                    "setType": 1,
-                    "setTypeOffset": 2,
-                    "setTypeScale": 0,
-                    "toleranceOffsetName": "tolerance",
-                    "toleranceOffsetValue": 0.43,
-                    "toleranceScaleName": "tolerance",
-                    "toleranceScaleValue": 0.1,
-                    "type_info": "Tolerancepoint"
-                },
-                {
-                    "compare1Name": "setpoint",
-                    "compare2Name": "Flow",
-                    "setType": 0,
-                    "setTypeOffset": 0,
-                    "setTypeScale": 0,
-                    "toleranceOffsetName": "Flow",
-                    "toleranceOffsetValue": 1.0,
-                    "toleranceScaleName": "Flow",
-                    "toleranceScaleValue": 0.1,
-                    "type_info": "Tolerancepoint"
-                },
-                {
-                    "compare1Name": "tolerance",
-                    "compare2Name": "Flow",
-                    "setType": 0,
-                    "setTypeOffset": 0,
-                    "setTypeScale": 0,
-                    "toleranceOffsetName": "Flow",
-                    "toleranceOffsetValue": 1.0,
-                    "toleranceScaleName": "Flow",
-                    "toleranceScaleValue": 0.1,
-                    "type_info": "Tolerancepoint"
-                }
-            ],
+            "device_state": "Stabilizing",
             "pos": [
-                -1110.0,
-                29.0
+                -703.0,
+                -17.0
             ],
-            "timeoutSec": 5.0,
-            "type_info": "Tolerance"
+            "type_info": "Set_Device_State"
         },
         {
             "pos": [
-                -88.73453367931404,
-                122.6748318930629
+                -557.0,
+                22.0
+            ],
+            "type_info": "Wait_Time",
+            "wait_time": 1.0
+        },
+        {
+            "device_state": "Flowing",
+            "pos": [
+                -313.0,
+                15.0
+            ],
+            "type_info": "Set_Device_State"
+        },
+        {
+            "pos": [
+                -10.0,
+                93.99999999999994
+            ],
+            "type_info": "Wait_Time",
+            "wait_time": 2.0
+        },
+        {
+            "pos": [
+                205.26546632068596,
+                117.6748318930629
             ],
             "type_info": "Success"
         }

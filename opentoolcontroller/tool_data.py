@@ -1108,8 +1108,8 @@ class FloatVarNode(Node):
         elif c is col.DISPLAY_DIGITS     : r = self.displayDigits
         elif c is col.DISPLAY_SCIENTIFIC : r = self.displayScientific
         elif c is col.USER_MANUAL_SET    : r = self.userManualSet
-        elif c is col.LAUNCH_VALUE    : r = self.launchValue
-        elif c is col.USE_LAUNCH_VALUE: r = self.useLaunchValue
+        elif c is col.LAUNCH_VALUE       : r = self.launchValue
+        elif c is col.USE_LAUNCH_VALUE   : r = self.useLaunchValue
         return r
 
     def setData(self, c, value):

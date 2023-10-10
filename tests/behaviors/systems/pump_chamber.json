@@ -1,38 +1,52 @@
 {
     "children": [
         {
-            "pos": [
-                -646.0,
-                -58.0
-            ],
-            "type_info": "Wait_Time",
-            "wait_time": 2.0
-        },
-        {
             "children": [
                 {
                     "behaviorName": "Tool Test",
                     "setName": "Pump",
-                    "setType": 1,
+                    "setType": 0,
                     "type_info": "Run_Behavior_Setpoint"
                 },
                 {
-                    "behaviorName": "Flow",
+                    "behaviorName": "Idle",
                     "setName": "SF6_MFC",
                     "setType": 1,
                     "type_info": "Run_Behavior_Setpoint"
                 }
             ],
             "pos": [
-                -367.0,
+                -562.0,
                 -79.0
             ],
             "type_info": "Run_Behavior"
         },
         {
+            "children": [
+                {
+                    "setName": "SF6_MFC",
+                    "setType": 17,
+                    "state": "Flowingk",
+                    "type_info": "Wait_State_Setpoint"
+                },
+                {
+                    "setName": "Pump",
+                    "setType": 16,
+                    "state": "",
+                    "type_info": "Wait_State_Setpoint"
+                }
+            ],
             "pos": [
-                -35.0,
-                -25.0
+                -169.0,
+                -79.0
+            ],
+            "timeoutSec": 5.0,
+            "type_info": "Wait_State"
+        },
+        {
+            "pos": [
+                450.0,
+                -27.0
             ],
             "type_info": "Success"
         }
