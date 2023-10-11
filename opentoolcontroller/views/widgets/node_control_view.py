@@ -13,12 +13,21 @@ class BehaviorButton(QtWidgets.QPushButton):
     def __init__(self, parent=None):
         super(BehaviorButton, self).__init__(parent)
         self._behavior = None
+        self._action_log_callback = None
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.buttonMenu)
         self._enable_edit_behaviors = False
+        self._behavior_name = ""
+        self._node_name = ""
 
-        #Add: Log when user clicks button "username clicked: behavior.name()"
-
+    def setActionLog(self, callback, node_name):
+        self._action_log_callback = callback
+        self._node_name = str(node_name)
+        self.pressed.connect(self.logAction)
+        
+    def logAction(self):
+        if self._action_log_callback is not None:
+            self._action_log_callback(action_text="Clicked: "+self._behavior_name + " on " + self._node_name )
 
     def buttonMenu(self, pos):
         menu = QtWidgets.QMenu()
@@ -49,6 +58,7 @@ class BehaviorButton(QtWidgets.QPushButton):
 
     def setBehavior(self, behavior):
         self._behavior = behavior
+        self._behavior_name = behavior.name()
         self.setText(behavior.name())
         self.clicked.connect(self._behavior.runAbortOthers)
 
@@ -269,10 +279,12 @@ class NodeControlView(node_control_view_base, node_control_view_form):
             if node.typeInfo() in [typ.TOOL_NODE, typ.SYSTEM_NODE]:
                 btn = BehaviorButtonAborting()
                 btn.setBehavior(behavior)
+                btn.setActionLog(index.model().actionLogCallback(), node.name)
                 self._behavior_button_mapper.addMapping(btn, col.RUNNING_BEHAVIOR, bytes('runningBehavior', 'ascii'))
             else:
                 btn = BehaviorButtonDevice()
                 btn.setBehavior(behavior)
+                btn.setActionLog(index.model().actionLogCallback(), node.name)
                 self._behavior_button_mapper.addMapping(btn, col.RUNNING_BEHAVIOR, bytes('runningBehavior', 'ascii'))
 
 

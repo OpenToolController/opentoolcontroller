@@ -7,7 +7,7 @@ import xml.etree.ElementTree as ET
 from opentoolcontroller.tool_model import ToolModel
 from opentoolcontroller.tool_editor import ToolEditor
 from opentoolcontroller.tool_control_view import ToolControlView
-from opentoolcontroller.alert_view import AlertView, AlertTableModel
+from opentoolcontroller.alert_view import AlertView, AlertTableModel, ActionLogView, ActionLogTableModel
 from opentoolcontroller.login import LoginView, LoginModel
 
 from opentoolcontroller.bt_model import BTModel
@@ -35,12 +35,17 @@ class Window(QtWidgets.QMainWindow):
         self._alert_view.setWindowTitle('Alerts')
         self._login_model.addLoginChangedCallback(self._alert_view.enableClearAlerts, self._login_model.CLEAR_ALERTS)
 
+        self._action_log_model =  ActionLogTableModel()
+        self._action_log_model.setCurrentUser(self._login_model.currentUser)
+        self._action_log_view = ActionLogView(self._action_log_model)
+        self._action_log_view.setWindowTitle('Action Log')
 
 
         #self.reader = HalReader()
         self.tool_model = ToolModel()
         self.tool_model.loadJSON(json_data)
         self.tool_model.setAlertCallback(self._alert_model.addAlert)
+        self.tool_model.setActionLogCallback(self._action_log_model.addAction)
         self.tool_model.setLaunchValues()
         self.tool_model.loadBehaviors()
 
@@ -76,19 +81,26 @@ class Window(QtWidgets.QMainWindow):
         dock4.setWidget(self._login_view)
         dock4.setContextMenuPolicy(QtCore.Qt.PreventContextMenu)
         
+        dock5 = QtWidgets.QDockWidget('Action Log', self, objectName='action_log')
+        dock5.setWidget(self._action_log_view)
+        dock5.setContextMenuPolicy(QtCore.Qt.PreventContextMenu)
+
 
         dock1.setFeatures(QtWidgets.QDockWidget.DockWidgetFloatable | QtWidgets.QDockWidget.DockWidgetMovable)
         dock2.setFeatures(QtWidgets.QDockWidget.DockWidgetFloatable | QtWidgets.QDockWidget.DockWidgetMovable)
         dock3.setFeatures(QtWidgets.QDockWidget.DockWidgetFloatable | QtWidgets.QDockWidget.DockWidgetMovable)
         dock4.setFeatures(QtWidgets.QDockWidget.DockWidgetFloatable | QtWidgets.QDockWidget.DockWidgetMovable)
+        dock5.setFeatures(QtWidgets.QDockWidget.DockWidgetFloatable | QtWidgets.QDockWidget.DockWidgetMovable)
 
         self.addDockWidget(QtCore.Qt.TopDockWidgetArea, dock1)
         self.addDockWidget(QtCore.Qt.TopDockWidgetArea, dock2)
         self.addDockWidget(QtCore.Qt.TopDockWidgetArea, dock3)
         self.addDockWidget(QtCore.Qt.TopDockWidgetArea, dock4)
+        self.addDockWidget(QtCore.Qt.TopDockWidgetArea, dock5)
         self.tabifyDockWidget(dock1, dock2)
         self.tabifyDockWidget(dock2, dock3)
         self.tabifyDockWidget(dock3, dock4)
+        self.tabifyDockWidget(dock4, dock5)
         self.setDockNestingEnabled(True) #needed for left/right arranging
 
 

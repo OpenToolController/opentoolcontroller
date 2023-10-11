@@ -12,6 +12,7 @@ class ToolModel(QtCore.QAbstractItemModel):
         self._tool_node = ToolNode()
         self._tool_index = self.createIndex(0, 0, self._tool_node) #There's a empty index w/out a valid parent above this
         self._alert_callback = None
+        self._action_log_callback = None
 
 
     def alertCallback(self):
@@ -20,6 +21,11 @@ class ToolModel(QtCore.QAbstractItemModel):
     def setAlertCallback(self, callback):
         self._alert_callback = callback
 
+    def actionLogCallback(self):
+        return self._action_log_callback
+
+    def setActionLogCallback(self, callback):
+        self._action_log_callback = callback
 
     def setLaunchValues(self):
         indexes = self.indexesOfTypes([typ.BOOL_VAR_NODE, typ.INT_VAR_NODE, typ.FLOAT_VAR_NODE])
