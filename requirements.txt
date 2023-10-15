@@ -1,0 +1,6 @@
+numpy==1.24.1
+-e git+ssh://git@github.com/OpenToolController/opentoolcontroller.git@823a1db3cbefc342c10767639e0410b61a8fcbb4#egg=OpenToolController
+PyQt5==5.15.8
+PyQt5-Qt5==5.15.2
+PyQt5-sip==12.11.1
+scipy==1.10.0
