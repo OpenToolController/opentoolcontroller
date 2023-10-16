@@ -1,12 +1,14 @@
 # OpenTool Controller
-This software is intended to control equipment often used in the semiconductor industry
-... and is also a very early version and far from complete
+This software is in early development, but is intended for controlling equipment often used in the semiconductor industry.  It should be installed on a system that is setup to run LinuxCNC, and makes use of the hal modeule to control IO.
 
 ##Development Install
-- `python3 -m venv venv` install a virtual environment
-- `source venv/bin/activate`
+- `git clone https://github.com/OpenToolController/opentoolcontroller.git` Download the project 
+- `cd opentoolcontroller`
+- `python3 -m venv venv` make a new python virtual environment
+- `source venv/bin/activate` actiate the virtural environment
 - `pip install -r requirements.txt` install all the needed python packages
-- `pip install -e .`  - install the opentoolcontroller code as a package
+- `pip install -e .`  install the opentoolcontroller code as a package
+- `python opentoolcontroller/main.py`  launch Open Tool Controller
 
 
 ##Notes

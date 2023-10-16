@@ -17,7 +17,6 @@ import ctypes
 class HalReader():
     def __init__(self):
         super().__init__()
-
         self._running = False
         self.sampler_queue = Queue()
 
@@ -28,12 +27,23 @@ class HalReader():
         self.connected_sampler_pins = []
         self.connected_streamer_pins = []
         self._previous_stream = []
+        self._hal_exists = False
 
 
-        self.setupHal()
-        self.setupHalTesting()
-        #self.setupHalEthercat()
-        self.findPins()
+        try:
+            self.setupHal()
+            self.setupHalTesting()
+            #self.setupHalEthercat()
+            self.findPins()
+            self._hal_exists = True
+
+
+        except FileNotFoundError:
+            self._hal_exists = False
+
+
+    def halExists(self):
+        return self._hal_exists
 
     def setModel(self, value):
         self._tool_model = value
@@ -48,54 +58,57 @@ class HalReader():
         return
 
     def start(self):
-        self.setupHal()
-        self.setupHalTesting()
-        #self.setupHalEthercat()
-        self.findPins()
+        if self._hal_exists:
+            self.setupHal()
+            self.setupHalTesting()
+            #self.setupHalEthercat()
+            self.findPins()
 
-        #Sampler is on all the used hal pins
-        self.connected_sampler_pins = self.connectedPins(HalNode.hal_pins, self.samplerIndexes())
-        if len(self.connected_sampler_pins) > 0:
-            self.sampler_cfg = self.cfgFromPins(self.connected_sampler_pins)
-            cfg = 'cfg=' + str(self.sampler_cfg)
+            #Sampler is on all the used hal pins
+            self.connected_sampler_pins = self.connectedPins(HalNode.hal_pins, self.samplerIndexes())
+            if len(self.connected_sampler_pins) > 0:
+                self.sampler_cfg = self.cfgFromPins(self.connected_sampler_pins)
+                cfg = 'cfg=' + str(self.sampler_cfg)
 
-            subprocess.call(['halcmd', 'loadrt', 'sampler', 'depth=100', cfg])
-            print("\nSampler CFG: ", self.sampler_cfg)
-            self.connectSamplerSignals(self.connected_sampler_pins)
+                subprocess.call(['halcmd', 'loadrt', 'sampler', 'depth=100', cfg])
+                print("\nSampler CFG: ", self.sampler_cfg)
+                self.connectSamplerSignals(self.connected_sampler_pins)
 
-        #Streamer is only on output hal pins that are used
-        self.connected_streamer_pins = self.connectedPins(HalNode.hal_pins, self.streamerIndexes())
-        if len(self.connected_streamer_pins) > 0:
-            self.streamer_cfg = self.cfgFromPins(self.connected_streamer_pins)
-            cfg = 'cfg=' + str(self.streamer_cfg)
-
-
-            subprocess.call(['halcmd', 'loadrt', 'streamer', 'depth=100', cfg])
-            print("\nStreamer CFG: ", self.streamer_cfg)
-            self.connectStreamerSignals(self.connected_streamer_pins)
-
-            self._previous_stream = self.baseStream(self.streamer_cfg)
+            #Streamer is only on output hal pins that are used
+            self.connected_streamer_pins = self.connectedPins(HalNode.hal_pins, self.streamerIndexes())
+            if len(self.connected_streamer_pins) > 0:
+                self.streamer_cfg = self.cfgFromPins(self.connected_streamer_pins)
+                cfg = 'cfg=' + str(self.streamer_cfg)
 
 
-        subprocess.call(['halcmd', 'start'])
-        #subprocess.call(['halcmd', 'loadusr', 'halmeter'])
+                subprocess.call(['halcmd', 'loadrt', 'streamer', 'depth=100', cfg])
+                print("\nStreamer CFG: ", self.streamer_cfg)
+                self.connectStreamerSignals(self.connected_streamer_pins)
 
-        self.timer.start(100)
-        self._running = True
+                self._previous_stream = self.baseStream(self.streamer_cfg)
+
+
+            subprocess.call(['halcmd', 'start'])
+            #subprocess.call(['halcmd', 'loadusr', 'halmeter'])
+
+            self.timer.start(100)
+            self._running = True
 
 
     def stop(self):
-        self.timer.stop()
-        subprocess.check_output(['halcmd', 'stop']) #wait until cmd finishes
-        subprocess.check_output(['halcmd', 'unload', 'all']) #wait until cmd finishes
-        self._running = False
+        if self._hal_exists:
+            self.timer.stop()
+            subprocess.check_output(['halcmd', 'stop']) #wait until cmd finishes
+            subprocess.check_output(['halcmd', 'unload', 'all']) #wait until cmd finishes
+            self._running = False
 
 
     def setupHalEthercat(self):
-        subprocess.call(['halcmd', 'loadusr', '-W', 'lcec_conf', 'ethercat_config.xml'])
-        subprocess.call(['halcmd', 'loadrt', 'lcec'])
-        subprocess.call(['halcmd', 'addf', 'lcec.read-all', 'gui'])
-        subprocess.call(['halcmd', 'addf', 'lcec.write-all', 'gui'])
+        if self._hal_exists:
+            subprocess.call(['halcmd', 'loadusr', '-W', 'lcec_conf', 'ethercat_config.xml'])
+            subprocess.call(['halcmd', 'loadrt', 'lcec'])
+            subprocess.call(['halcmd', 'addf', 'lcec.read-all', 'gui'])
+            subprocess.call(['halcmd', 'addf', 'lcec.write-all', 'gui'])
 
 
     def setupHal(self):

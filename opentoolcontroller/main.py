@@ -41,7 +41,7 @@ class Window(QtWidgets.QMainWindow):
         self._action_log_view.setWindowTitle('Action Log')
 
 
-        #self.reader = HalReader()
+        self.reader = HalReader()
         self.tool_model = ToolModel()
         self.tool_model.loadJSON(json_data)
         self.tool_model.setAlertCallback(self._alert_model.addAlert)
@@ -123,8 +123,12 @@ class Window(QtWidgets.QMainWindow):
 
         self.file_menu = self.menuBar().addMenu('&File')
         self.file_menu.addAction(extractAction)
-        self.file_menu.addAction(self.toggleHalAction)
         self.file_menu.addAction(self.saveToolAction)
+        self.file_menu.addAction(self.toggleHalAction)
+
+
+        if not self.reader.halExists():
+            self.toggleHalAction.setDisabled(True)
 
 
         #Add enable direct io control to the menu?
