@@ -13,7 +13,15 @@ class ToolModel(QtCore.QAbstractItemModel):
         self._tool_index = self.createIndex(0, 0, self._tool_node) #There's a empty index w/out a valid parent above this
         self._alert_callback = None
         self._action_log_callback = None
+        self._working_directory = None
 
+
+    def setWorkingDirectory(self, tool_dir):
+        self._working_directory = tool_dir
+        BTModel.working_directory = tool_dir
+
+    def workingDirectory(self):
+        return self._working_directory
 
     def alertCallback(self):
         return self._alert_callback
@@ -41,15 +49,36 @@ class ToolModel(QtCore.QAbstractItemModel):
         indexes += [self._tool_index]
 
         for index in indexes:
-            node = index.internalPointer()
-            node.loadBehaviors()
+            self.loadBehaviorsOfIndex(index)
 
-            bt_models = node.behaviors()
+    def fullPath(self, relative_path):
+        return self._working_directory +'/'+ relative_path
 
-            for bt_model in bt_models:
-                bt_model.setToolModel(self)
-                bt_model.setToolIndex(index)
-                bt_model.syncToTool()
+    def loadBehaviorsOfIndex(self, index):
+        node = index.internalPointer()
+
+        behaviors = []
+        for relative_path in node.behaviorFiles:
+            full_path = self.fullPath(relative_path)
+            if isinstance(full_path, str) and os.path.isfile(full_path):
+                behaviors.append(self.loadBehaviorOfIndexFromFile(index, relative_path))
+
+        node.setBehaviors(behaviors)
+
+
+    def loadBehaviorOfIndexFromFile(self, index, relative_path):
+        bt_model = BTModel()
+        full_path = self.fullPath(relative_path)
+
+        with open(full_path) as f:
+            json_data = json.load(f)
+            bt_model.loadJSON(json_data)
+            bt_model.setFile(relative_path)
+            bt_model.setToolModel(self)
+            bt_model.setToolIndex(index)
+            bt_model.syncToTool()
+            
+        return bt_model
 
 
 
@@ -239,12 +268,13 @@ class ToolModel(QtCore.QAbstractItemModel):
                 for i, item in enumerate(value): 
                     #If a string is inserted into the behavior list we convert that into a new bt model
                     if isinstance(item, str):
-                        new_bt_model = BTModel()
-                        new_bt_model.setFile(item)
-                        new_bt_model.setToolModel(self)
-                        new_bt_model.setToolIndex(index)
-                        new_bt_model.syncToTool()
-                        value[i] = new_bt_model
+                        relative_path = item
+                        full_path = self.fullPath(relative_path)
+                        #Add something if it fails to load
+                        if isinstance(full_path, str) and os.path.isfile(full_path):
+                            new_bt_model = self.loadBehaviorOfIndexFromFile(index, relative_path)
+                            value[i] = new_bt_model
+
                 node.setBehaviors(value)
                 self.dataChanged.emit(index, index)
 

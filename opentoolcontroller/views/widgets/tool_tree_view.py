@@ -25,17 +25,15 @@ class ToolTreeView(QtWidgets.QTreeView):
             #Setup the menu
             menu = QtWidgets.QMenu(self)
             add_menu = menu.addMenu('Add')
-
-            if current_index.internalPointer().typeInfo() is not typ.DEVICE_ICON_NODE:
+            if current_index.internalPointer().typeInfo() not in [typ.TOOL_NODE, typ.DEVICE_ICON_NODE]:
                 menu.addAction("Delete")
             menu.addAction("Export")
 
-            if current_index.internalPointer().typeInfo() == typ.SYSTEM_NODE:
-                add_menu.addAction('System')
 
             possible_children = self.model().possibleChildren(current_index)
             for possible_child in possible_children:
-                if   possible_child == typ.DEVICE_NODE    : add_menu.addAction('Device')
+                if   possible_child == typ.SYSTEM_NODE    : add_menu.addAction('System')
+                elif possible_child == typ.DEVICE_NODE    : add_menu.addAction('Device')
                 elif possible_child == typ.D_IN_NODE      : add_menu.addAction('Digital Input')
                 elif possible_child == typ.A_IN_NODE      : add_menu.addAction('Analog Input')
                 elif possible_child == typ.D_OUT_NODE     : add_menu.addAction('Digital Output')
@@ -48,10 +46,8 @@ class ToolTreeView(QtWidgets.QTreeView):
             action = menu.exec_(self.mapToGlobal(event.pos()))
 
             if action is not None:
-                if   action.text() == "System"          : self.model().insertChild(current_index.parent(), typ.SYSTEM_NODE, current_index.row()+1)
-                elif action.text() == "Device"          :
-                    new_index = self.model().insertChild(current_index, typ.DEVICE_NODE)
-                    self.model().insertChild(new_index, typ.DEVICE_ICON_NODE)
+                if   action.text() == "System"          : self.model().insertChild(current_index, typ.SYSTEM_NODE)
+                elif action.text() == "Device"          : self.model().insertChild(current_index, typ.DEVICE_NODE)
                 elif action.text() == "Digital Input"   : self.model().insertChild(current_index, typ.D_IN_NODE)
                 elif action.text() == "Analog Input"    : self.model().insertChild(current_index, typ.A_IN_NODE)
                 elif action.text() == "Digital Output"  : self.model().insertChild(current_index, typ.D_OUT_NODE)
@@ -59,6 +55,7 @@ class ToolTreeView(QtWidgets.QTreeView):
                 elif action.text() == "Bool Variable"   : self.model().insertChild(current_index, typ.BOOL_VAR_NODE)
                 elif action.text() == "Int Variable"    : self.model().insertChild(current_index, typ.INT_VAR_NODE)
                 elif action.text() == "Float Variable"  : self.model().insertChild(current_index, typ.FLOAT_VAR_NODE)
+
 
                 elif action.text() == "Delete":
                     result = QtWidgets.QMessageBox.question(self,"Delete...?", "Are you sure you want to delete " + str(node.name),

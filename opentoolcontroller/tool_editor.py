@@ -34,6 +34,7 @@ class ToolEditor(tool_editor_base, tool_editor_form):
         super(tool_editor_base, self).__init__(parent)
         self.setupUi(self)
 
+        self._working_directory = None
         #The node editor is common for every node in a tool
         self._node_editor = NodeEditor(self)
         self._behavior_state_editor = BehaviorStateEditor(self)
@@ -68,6 +69,14 @@ class ToolEditor(tool_editor_base, tool_editor_form):
         self.restoreState(state)
         self.ui_splitter.restoreState(splitter_state)
         self.enableEditTool(False)
+
+
+    def setWorkingDirectory(self, tool_dir):
+        self._working_directory = tool_dir
+        self._behavior_state_editor.setWorkingDirectory(self._working_directory)
+
+    def workingDirectory(self):
+        return self._working_directory
 
 
     def hideEditors(self):
@@ -215,6 +224,7 @@ class BehaviorStateEditor(QtWidgets.QWidget):
         self._mapper1 = QtWidgets.QDataWidgetMapper()
         self._mapper2 = QtWidgets.QDataWidgetMapper()
         self._behaviors = None #list of behavior models
+        self._working_directory = None #default location for behavior files in working dir
 
         self._edit_btns = [] #just used to enable/disable these easier
         self._enable_edit_behaviors = False
@@ -269,6 +279,11 @@ class BehaviorStateEditor(QtWidgets.QWidget):
 
 
 
+    def setWorkingDirectory(self, tool_dir):
+        self._working_directory = tool_dir
+
+    def workingDirectory(self):
+        return self._working_directory
 
     def setModel(self, model):
         if hasattr(model, 'sourceModel'):
@@ -289,21 +304,16 @@ class BehaviorStateEditor(QtWidgets.QWidget):
         self._mapper2.setCurrentModelIndex(current)
 
     def insertBehavior(self, row):
+        starting_dir = self._working_directory + '/behaviors'
+
         options = QtWidgets.QFileDialog.Options()
         options |= QtWidgets.QFileDialog.DontUseNativeDialog
-        file_name = QtWidgets.QFileDialog.getOpenFileName(self,"QFileDialog.getOpenFileName()", 
-                                                          "opentoolcontroller/","JSON (*.json);;All Files (*)", options=options)
-        file_name = file_name[0]
-
-        if isinstance(file_name, str) and os.path.isfile(file_name):
-            #the model takes care of loading the file into a BT Model
-            self.behaviors.insert(row, file_name)
-            self._mapper1.submit()
-
-
-        return locals()
-
+        file_name = QtWidgets.QFileDialog.getOpenFileName(self,"QFileDialog.getOpenFileName()", starting_dir, 
+                                                           "JSON (*.json);;All Files (*)", options=options)
+        relative_path = os.path.relpath(file_name[0], self._working_directory)
+        self.behaviors.insert(row, relative_path)
         self._mapper1.submit()
+
 
 
     def editBehavior(self, row):

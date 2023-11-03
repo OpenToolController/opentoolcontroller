@@ -190,7 +190,7 @@ class BehaviorNode(Node):
     def __init__(self, parent=None):
         super().__init__(parent)
         self._state = 'unknown'
-        self._behaviors = []
+        self._behaviors = None
         self._behavior_files = []
         self._states = []
         self._running_behavior = None
@@ -264,15 +264,11 @@ class BehaviorNode(Node):
     def runningBehavior(self):
         return self._running_behavior
 
-    def loadBehaviors(self):
-        self._behaviors = []
-        for file in self._behavior_files:
-            bt_model = BTModel()
-            bt_model.setFile(file)
-            self._behaviors.append(bt_model)
-
     def behaviorFiles():
         def fget(self):
+            if self._behaviors is None: #If we haven't loaded them yet we need this initial file list
+                return self._behavior_files
+
             files = []
             for behavior in self._behaviors:
                 files.append(behavior.file())

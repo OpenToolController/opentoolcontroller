@@ -7,9 +7,6 @@ import json
 from string import Formatter
 import time
 
-import pprint
-pp = pprint.PrettyPrinter(width=82, compact=True)
-
 class BaseNode:
     def __init__(self, parent=None):
         super().__init__()
@@ -291,7 +288,6 @@ class RootSequenceNode(SequenceNode):
         return self._file
 
     def setFile(self, value):
-        print("RootSquence file: ", value)
         self._file = value
 
     def treeType(self):

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -.- coding: utf-8 -.-
-import sys, json
+import sys, json, os
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 import xml.etree.ElementTree as ET
@@ -20,11 +20,19 @@ import gc, pprint
 # clear; pytest 'tests/test_device_control_view.py' -k 'test_two' -s
 
 class Window(QtWidgets.QMainWindow):
-    def __init__(self, parent=None):
+    def __init__(self, tool_dir, parent=None):
         super().__init__()
-        file = 'tests/tools/basic_tool_1.json'
-        with open(file) as f:
-            json_data = json.load(f)
+
+        json_data = None
+        self._tool_dir = tool_dir
+        if tool_dir:
+            try:
+                tool_config_file = tool_dir + '/tool_config.json'
+                with open(tool_config_file) as f:
+                    json_data = json.load(f)
+            except:
+                pass
+
 
         self._login_model = LoginModel()
         self._login_view = LoginView(self._login_model)
@@ -43,7 +51,12 @@ class Window(QtWidgets.QMainWindow):
 
         self.reader = HalReader()
         self.tool_model = ToolModel()
-        self.tool_model.loadJSON(json_data)
+        self.tool_model.setWorkingDirectory(self._tool_dir)
+
+
+        '''Work on enforcing this next! '''
+        if json_data is not None:
+            self.tool_model.loadJSON(json_data)
         self.tool_model.setAlertCallback(self._alert_model.addAlert)
         self.tool_model.setActionLogCallback(self._action_log_model.addAction)
         self.tool_model.setLaunchValues()
@@ -61,6 +74,7 @@ class Window(QtWidgets.QMainWindow):
         self._tool_editor = ToolEditor()
         self._tool_editor.setModel(self.tool_model)
         self._tool_editor.setWindowTitle('Tool Editor')
+        self._tool_editor.setWorkingDirectory(self._tool_dir)
         self._login_model.addLoginChangedCallback(self._tool_editor.enableEditTool, self._login_model.EDIT_TOOL)
         self._login_model.addLoginChangedCallback(self._tool_editor.enableEditBehaviors, self._login_model.EDIT_BEHAVIOR)
 
@@ -121,9 +135,15 @@ class Window(QtWidgets.QMainWindow):
         self.saveToolAction.triggered.connect(self.saveTool)
         self.saveToolAction.setShortcut('ctrl+s')
 
+        self.saveToolAsAction = QtWidgets.QAction("Save As", self)
+        self.saveToolAsAction.triggered.connect(self.saveToolAs)
+
+
         self.file_menu = self.menuBar().addMenu('&File')
         self.file_menu.addAction(extractAction)
-        self.file_menu.addAction(self.saveToolAction)
+        if self._tool_dir:
+            self.file_menu.addAction(self.saveToolAction)
+        self.file_menu.addAction(self.saveToolAsAction)
         self.file_menu.addAction(self.toggleHalAction)
 
 
@@ -144,13 +164,25 @@ class Window(QtWidgets.QMainWindow):
 
     def saveTool(self):
         data = self.tool_model.asJSON()
-        #filename = self._bt_editor.model().file()
-        filename = 'tests/tools/basic_tool_1.json'
+        filename = self._tool_dir + '/tool_config.json'
         with open(filename, 'w') as f:
             f.write(data)
 
-        #self.setTitle(file_changed=False)
+    def saveToolAs(self):
+        data = self.tool_model.asJSON()
 
+        options = QtWidgets.QFileDialog.Options()
+        save_as_dialog = QtWidgets.QFileDialog(options=options)
+        save_as_dialog.setFileMode(QtWidgets.QFileDialog.AnyFile)
+        save_as_dialog.setWindowTitle('Save Tool Config As')
+        save_as_dialog.setAcceptMode(QtWidgets.QFileDialog.AcceptSave)
+        save_as_dialog.setNameFilter('JSON files (*.json)')
+        save_as_dialog.setDefaultSuffix('json')
+
+        if save_as_dialog.exec_() == QtWidgets.QFileDialog.Accepted:
+            f = open(save_as_dialog.selectedFiles()[0],'w')
+            f.write(data)
+            f.close()
 
     def collectGarbage(self):
         pp = pprint.PrettyPrinter(indent=4)
@@ -207,8 +239,16 @@ class Window(QtWidgets.QMainWindow):
 
 
 if __name__ == '__main__':
+    tool_dir = None
+    try:
+        tool_dir = sys.argv[1]
+        tool_dir = tool_dir.rstrip("/")
+    except:
+        print("Please pass the tool directory")
+
     app = QtWidgets.QApplication(sys.argv)
     #app.setStyle("fusion") #Changing the style
-    w = Window()
+    w = Window(tool_dir)
     w.show()
     sys.exit(app.exec_())
+

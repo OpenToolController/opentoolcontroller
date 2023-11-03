@@ -149,7 +149,7 @@ class BTEditorWindow(QtWidgets.QMainWindow):
 
     def saveBehavior(self):
         data = self._bt_editor.model().asJSON()
-        filename = self._bt_editor.model().file()
+        filename = self._bt_editor.model().fileFullPath()
         with open(filename, 'w') as f:
             f.write(data)
 

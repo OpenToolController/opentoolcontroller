@@ -10,6 +10,8 @@ import pprint
 pp = pprint.PrettyPrinter(width=82, compact=True)
 
 class BTModel(QtCore.QAbstractItemModel):
+    working_directory = ''
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self._root_node = RootSequenceNode()
@@ -292,23 +294,14 @@ class BTModel(QtCore.QAbstractItemModel):
     def name(self):
         return str(self._root_node.name)
 
+    def fileFullPath(self):
+        return self.working_directory + "/" + self._root_node.file()
 
     def file(self):
         return str(self._root_node.file())
 
     def setFile(self, file_name):
         self._root_node.setFile(file_name)
-
-        if isinstance(file_name, str) and os.path.isfile(file_name):
-            with open(file_name) as f:
-                json_data = json.load(f)
-                self.loadJSON(json_data)
-
-
-
-
-
-
 
 
     #Behavior tree stuff
