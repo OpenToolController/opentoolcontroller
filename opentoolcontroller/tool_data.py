@@ -300,10 +300,10 @@ class ToolNode(BehaviorNode):
 class SystemNode(BehaviorNode):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self._background_svg = defaults.SYSTEM_BACKGROUND
         self._movable_icons = False
         self._system_is_online = False
         self._device_manual_control = False
+        self._background_svg_relative_path = defaults.SYSTEM_BACKGROUND
 
     def typeInfo(self):
         return typ.SYSTEM_NODE
@@ -326,16 +326,27 @@ class SystemNode(BehaviorNode):
     def movableIcons(self):
         return self._movable_icons
 
+
+        
+    def backgroundSVGFullPath(self):
+        full_path = defaults.TOOL_DIR + '/' + self._background_svg_relative_path
+
+        try:
+            if os.path.isfile(full_path):
+                return full_path
+        except:
+            pass
+
+        return defaults.SYSTEM_BACKGROUND 
+
+
+
+
     def backgroundSVG():
-        def fget(self): return self._background_svg
-        def fset(self, value):
-            if isinstance(value, str) and os.path.isfile(value):
-                self._background_svg = value
-            else:
-                self._background_svg =  defaults.SYSTEM_BACKGROUND
+        def fget(self): return self._background_svg_relative_path
+        def fset(self, value): self._background_svg_relative_path = value
         return locals()
     backgroundSVG = property(**backgroundSVG())
-
 
     def systemIsOnline():
         def fget(self): return self._system_is_online
@@ -396,7 +407,7 @@ class DeviceIconNode(Node):
         self._max_font_size = 72
         self._font_color = QtGui.QColor(0xFFFFFF) 
 
-        self.svg = defaults.DEVICE_ICON        #'opentoolcontroller/resources/icons/general/unknown.svg'
+        self._svg_relative_path = defaults.DEVICE_ICON        #'opentoolcontroller/resources/icons/general/unknown.svg'
 
     def typeInfo(self):
         return typ.DEVICE_ICON_NODE
@@ -468,28 +479,41 @@ class DeviceIconNode(Node):
         return self._text
 
 
+        
+    def svgFullPath(self):
+        full_path = defaults.TOOL_DIR + '/' + self._svg_relative_path
+
+        try:
+            if os.path.isfile(full_path):
+                return full_path
+        except:
+            pass
+
+        return defaults.DEVICE_ICON 
+
+
+
    #All of these properties get saved
+
+
+
     def svg():
         def fget(self):
-            return self._svg
+            return self._svg_relative_path
 
         def fset(self, value):
+            self._svg_relative_path = value
+
             try:
-                self._svg = value
                 self._layers = []
-                xml = ET.parse(self._svg)
-                svg = xml.getroot()
+                xml = ET.parse(self.svgFullPath())
 
+                svg = xml.getroot()
                 for child in svg:
                     self._layers.append(child.attrib['id'])
-
             except:
-                self._svg = 'opentoolcontroller/resources/icons/general/unknown.svg'
-                xml = ET.parse(self._svg)
-                svg = xml.getroot()
+                self._layers = []
 
-                for child in svg:
-                    self._layers.append(child.attrib['id'])
 
         return locals()
     svg = property(**svg())

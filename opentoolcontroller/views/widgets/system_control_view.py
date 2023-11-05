@@ -52,7 +52,7 @@ class SystemControlView(QtWidgets.QAbstractItemView):
                 if index.column() == col.SVG:
                     icon_node = index.internalPointer()
                     wid = self._device_icons[index.parent().row()]
-                    wid.renderer().load(icon_node.svg)
+                    wid.renderer().load(icon_node.svgFullPath())
                     wid.setElementId(icon_node.layer())
 
                 elif index.column() == col.LAYER:
@@ -175,7 +175,7 @@ class SystemControlView(QtWidgets.QAbstractItemView):
             return
 
         system_node = system_index.internalPointer()
-        svg_image = system_node.backgroundSVG
+        svg_image = system_node.backgroundSVGFullPath()
         movable = system_node.movableIcons()
 
         #Border line around background image
@@ -195,7 +195,7 @@ class SystemControlView(QtWidgets.QAbstractItemView):
             icon_node = icon_index.internalPointer()
 
             renderer = QtSvg.QSvgRenderer(self)
-            renderer.load(icon_node.svg)
+            renderer.load(icon_node.svgFullPath())
 
             wid = DeviceIconWidget(renderer)
             wid.setCallback(self.setSelection)

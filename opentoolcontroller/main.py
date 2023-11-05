@@ -13,6 +13,7 @@ from opentoolcontroller.login import LoginView, LoginModel
 from opentoolcontroller.bt_model import BTModel
 
 from opentoolcontroller.hardware import HalReader
+from opentoolcontroller.strings import defaults
 
 import gc, pprint
 
@@ -24,8 +25,12 @@ class Window(QtWidgets.QMainWindow):
         super().__init__()
 
         json_data = None
-        self._tool_dir = tool_dir
+        self._allow_save = False
+
         if tool_dir:
+            defaults.TOOL_DIR = tool_dir
+            self._allow_save = True
+
             try:
                 tool_config_file = tool_dir + '/tool_config.json'
                 with open(tool_config_file) as f:
@@ -33,6 +38,7 @@ class Window(QtWidgets.QMainWindow):
             except:
                 pass
 
+        '''Add something to select where to save if we start a new one '''
 
         self._login_model = LoginModel()
         self._login_view = LoginView(self._login_model)
@@ -51,7 +57,6 @@ class Window(QtWidgets.QMainWindow):
 
         self.reader = HalReader()
         self.tool_model = ToolModel()
-        self.tool_model.setWorkingDirectory(self._tool_dir)
 
 
         '''Work on enforcing this next! '''
@@ -74,7 +79,6 @@ class Window(QtWidgets.QMainWindow):
         self._tool_editor = ToolEditor()
         self._tool_editor.setModel(self.tool_model)
         self._tool_editor.setWindowTitle('Tool Editor')
-        self._tool_editor.setWorkingDirectory(self._tool_dir)
         self._login_model.addLoginChangedCallback(self._tool_editor.enableEditTool, self._login_model.EDIT_TOOL)
         self._login_model.addLoginChangedCallback(self._tool_editor.enableEditBehaviors, self._login_model.EDIT_BEHAVIOR)
 
@@ -141,7 +145,7 @@ class Window(QtWidgets.QMainWindow):
 
         self.file_menu = self.menuBar().addMenu('&File')
         self.file_menu.addAction(extractAction)
-        if self._tool_dir:
+        if self._allow_save:
             self.file_menu.addAction(self.saveToolAction)
         self.file_menu.addAction(self.saveToolAsAction)
         self.file_menu.addAction(self.toggleHalAction)
@@ -164,7 +168,7 @@ class Window(QtWidgets.QMainWindow):
 
     def saveTool(self):
         data = self.tool_model.asJSON()
-        filename = self._tool_dir + '/tool_config.json'
+        filename = defaults.TOOL_DIR + '/tool_config.json'
         with open(filename, 'w') as f:
             f.write(data)
 

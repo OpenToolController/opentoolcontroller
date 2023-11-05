@@ -206,6 +206,7 @@ class typ():
 
 
 class defaults():
+    TOOL_DIR             = ''
     SYSTEM_BACKGROUND    =  'opentoolcontroller/resources/icons/general/generic_system_background.svg'
     DEVICE_ICON          = 'opentoolcontroller/resources/icons/general/unknown.svg'
     A_DISPLAY_DIGITS     = 2

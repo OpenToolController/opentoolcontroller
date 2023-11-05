@@ -6,7 +6,7 @@ from opentoolcontroller.views.widgets.tool_tree_view import ToolTreeView
 from opentoolcontroller.tool_model import LeafFilterProxyModel
 from opentoolcontroller.views.widgets.behavior_editor_view import BTEditorWindow, BTEditor
 
-from opentoolcontroller.strings import col, typ
+from opentoolcontroller.strings import col, typ, defaults
 
 import random
 import pprint
@@ -34,7 +34,6 @@ class ToolEditor(tool_editor_base, tool_editor_form):
         super(tool_editor_base, self).__init__(parent)
         self.setupUi(self)
 
-        self._working_directory = None
         #The node editor is common for every node in a tool
         self._node_editor = NodeEditor(self)
         self._behavior_state_editor = BehaviorStateEditor(self)
@@ -70,13 +69,6 @@ class ToolEditor(tool_editor_base, tool_editor_form):
         self.ui_splitter.restoreState(splitter_state)
         self.enableEditTool(False)
 
-
-    def setWorkingDirectory(self, tool_dir):
-        self._working_directory = tool_dir
-        self._behavior_state_editor.setWorkingDirectory(self._working_directory)
-
-    def workingDirectory(self):
-        return self._working_directory
 
 
     def hideEditors(self):
@@ -186,8 +178,12 @@ class SystemEditor(system_base, system_form):
         #Background SVG file selection
         self.file_signal.connect(self.mapper.submit)
         self.ui_select_image.clicked.connect(self.selectSVG)
-        self.ui_background_svg.textChanged.connect(lambda update_system_svg: self.ui_svg_widget.load(self.ui_background_svg.text()))
+        self.ui_background_svg.textChanged.connect(lambda update_system_svg: self.ui_svg_widget.load(self.fullPath(self.ui_background_svg.text())))
         self.ui_movable_icons.stateChanged.connect(self.mapper.submit)
+    
+
+    def fullPath(self, relative_path):
+        return defaults.TOOL_DIR +'/'+ relative_path
 
     def setModel(self, model):
         if hasattr(model, 'sourceModel'):
@@ -205,14 +201,17 @@ class SystemEditor(system_base, system_form):
 
 
     def selectSVG(self,sender):
+        starting_dir = defaults.TOOL_DIR + '/graphics/system_backgrounds'
         options = QtWidgets.QFileDialog.Options()
         options |= QtWidgets.QFileDialog.DontUseNativeDialog
 
-        file_name = QtWidgets.QFileDialog.getOpenFileName(self,"QFileDialog.getOpenFileName()", "opentoolcontroller/resources/icons","SVG (*.svg);;All Files (*)", options=options)
-        file_name = file_name[0]
+        file = QtWidgets.QFileDialog.getOpenFileName(self,"QFileDialog.getOpenFileName()", starting_dir, 
+                                                            "SVG (*.svg);;All Files (*)", options=options)
+        file = file[0]
 
-        if isinstance(file_name, str) and os.path.isfile(file_name):
-            self.ui_background_svg.setText(file_name)
+        if file and os.path.isfile(file):
+            relative_path = os.path.relpath(file, defaults.TOOL_DIR)
+            self.ui_background_svg.setText(relative_path)
             self.file_signal.emit()
         else:
             pass
@@ -224,7 +223,6 @@ class BehaviorStateEditor(QtWidgets.QWidget):
         self._mapper1 = QtWidgets.QDataWidgetMapper()
         self._mapper2 = QtWidgets.QDataWidgetMapper()
         self._behaviors = None #list of behavior models
-        self._working_directory = None #default location for behavior files in working dir
 
         self._edit_btns = [] #just used to enable/disable these easier
         self._enable_edit_behaviors = False
@@ -279,12 +277,6 @@ class BehaviorStateEditor(QtWidgets.QWidget):
 
 
 
-    def setWorkingDirectory(self, tool_dir):
-        self._working_directory = tool_dir
-
-    def workingDirectory(self):
-        return self._working_directory
-
     def setModel(self, model):
         if hasattr(model, 'sourceModel'):
             model = model.sourceModel()
@@ -304,17 +296,16 @@ class BehaviorStateEditor(QtWidgets.QWidget):
         self._mapper2.setCurrentModelIndex(current)
 
     def insertBehavior(self, row):
-        starting_dir = self._working_directory + '/behaviors'
+        starting_dir = defaults.TOOL_DIR + '/behaviors'
 
         options = QtWidgets.QFileDialog.Options()
         options |= QtWidgets.QFileDialog.DontUseNativeDialog
         file_name = QtWidgets.QFileDialog.getOpenFileName(self,"QFileDialog.getOpenFileName()", starting_dir, 
                                                            "JSON (*.json);;All Files (*)", options=options)
-        relative_path = os.path.relpath(file_name[0], self._working_directory)
-        self.behaviors.insert(row, relative_path)
-        self._mapper1.submit()
-
-
+        if file_name[0]:
+            relative_path = os.path.relpath(file_name[0], defaults.TOOL_DIR)
+            self.behaviors.insert(row, relative_path)
+            self._mapper1.submit()
 
     def editBehavior(self, row):
         behavior = self.behaviors[row]
@@ -493,7 +484,7 @@ class DeviceIconEditor(device_icon_base, device_icon_form):
 
         self.file_signal.connect(self.mapper.submit)
         self.ui_select_image.clicked.connect(self.selectSVG)
-        self.ui_svg.textChanged.connect(lambda update_system_svg: self.ui_svg_widget.load(self.ui_svg.text()))
+        self.ui_svg.textChanged.connect(lambda update_system_svg: self.ui_svg_widget.load(self.fullPath(self.ui_svg.text())))
         #self.ui_svg_widget.load(self.ui_svg.text())
 
         self.ui_default_layer.currentIndexChanged.connect(self.defaultLayerChanged)
@@ -502,6 +493,9 @@ class DeviceIconEditor(device_icon_base, device_icon_form):
         self._font_color = QtGui.QColor(0xFFFFFF) 
 
 
+
+    def fullPath(self, relative_path):
+        return defaults.TOOL_DIR +'/'+ relative_path
 
     def updateColorBox(self):
         pal = QtGui.QPalette()
@@ -586,19 +580,21 @@ class DeviceIconEditor(device_icon_base, device_icon_form):
 
 
     def selectSVG(self,sender):
+        starting_dir = defaults.TOOL_DIR + '/graphics/device_icons'
         options = QtWidgets.QFileDialog.Options()
         options |= QtWidgets.QFileDialog.DontUseNativeDialog
 
-        file_name = QtWidgets.QFileDialog.getOpenFileName(self,"QFileDialog.getOpenFileName()", "opentoolcontroller/resources/icons","SVG (*.svg);;All Files (*)", options=options)
-        file_name = file_name[0]
+        file = QtWidgets.QFileDialog.getOpenFileName(self,"QFileDialog.getOpenFileName()", starting_dir, 
+                                                          "SVG (*.svg);;All Files (*)", options=options)
 
-        if os.path.isfile(file_name):
-            self.ui_svg.setText(file_name)
+        file = file[0]
+        if file and os.path.isfile(file):
+            relative_path = os.path.relpath(file, defaults.TOOL_DIR)
+            self.ui_svg.setText(relative_path)
             self.file_signal.emit()
-
             self.loadDefaultLayerBox()
-        else:
-            pass
+
+
     
     fontColorZ = QtCore.pyqtProperty(QtCore.QVariant, getFontColor, setFontColor)
 

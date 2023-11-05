@@ -3,6 +3,7 @@ from PyQt5 import QtCore, QtGui
 from opentoolcontroller.strings import bt, col, typ
 from opentoolcontroller.bt_data import *
 from opentoolcontroller.message_box import MessageBox
+from opentoolcontroller.strings import defaults
 
 import json
 import os.path
@@ -10,7 +11,6 @@ import pprint
 pp = pprint.PrettyPrinter(width=82, compact=True)
 
 class BTModel(QtCore.QAbstractItemModel):
-    working_directory = ''
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -295,7 +295,7 @@ class BTModel(QtCore.QAbstractItemModel):
         return str(self._root_node.name)
 
     def fileFullPath(self):
-        return self.working_directory + "/" + self._root_node.file()
+        return defaults.TOOL_DIR + "/" + self._root_node.file()
 
     def file(self):
         return str(self._root_node.file())

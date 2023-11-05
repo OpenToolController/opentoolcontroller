@@ -3,7 +3,7 @@ from PyQt5 import QtCore, QtGui
 from opentoolcontroller.strings import col, typ
 from opentoolcontroller.tool_data import *
 from opentoolcontroller.message_box import MessageBox
-
+from opentoolcontroller.strings import defaults
 
 #The tool model represents an entire tool in a tree structure.
 class ToolModel(QtCore.QAbstractItemModel):
@@ -13,15 +13,7 @@ class ToolModel(QtCore.QAbstractItemModel):
         self._tool_index = self.createIndex(0, 0, self._tool_node) #There's a empty index w/out a valid parent above this
         self._alert_callback = None
         self._action_log_callback = None
-        self._working_directory = None
 
-
-    def setWorkingDirectory(self, tool_dir):
-        self._working_directory = tool_dir
-        BTModel.working_directory = tool_dir
-
-    def workingDirectory(self):
-        return self._working_directory
 
     def alertCallback(self):
         return self._alert_callback
@@ -52,7 +44,7 @@ class ToolModel(QtCore.QAbstractItemModel):
             self.loadBehaviorsOfIndex(index)
 
     def fullPath(self, relative_path):
-        return self._working_directory +'/'+ relative_path
+        return defaults.TOOL_DIR +'/'+ relative_path
 
     def loadBehaviorsOfIndex(self, index):
         node = index.internalPointer()

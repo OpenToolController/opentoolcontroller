@@ -1276,7 +1276,7 @@ class SetIconNode(Node):
         return self._icon_index
 
     def svg(self):
-        return self._icon_index.internalPointer().svg
+        return self._icon_index.internalPointer().svgFullPath()
 
     def layers(self):
         return self._icon_index.internalPointer().layers()
