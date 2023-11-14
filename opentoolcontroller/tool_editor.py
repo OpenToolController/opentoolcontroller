@@ -683,6 +683,8 @@ class AnalogInputEditor(a_in_base, a_in_form):
         self.mapper.addMapping(self.ui_display_scientific, col.DISPLAY_SCIENTIFIC)
         self.mapper.addMapping(self.ui_calibration_table , col.CALIBRATION_TABLE_MODEL,  b"calibrationTableView")
 
+        self.ui_display_scientific.stateChanged.connect(self.mapper.submit)
+
     def setSelection(self, current):
         parent = current.parent()
         self.mapper.setRootIndex(parent)
@@ -718,6 +720,8 @@ class AnalogOutputEditor(a_out_base, a_out_form):
         self.mapper.addMapping(self.ui_display_scientific, col.DISPLAY_SCIENTIFIC)
         self.mapper.addMapping(self.ui_calibration_table , col.CALIBRATION_TABLE_MODEL,  b"calibrationTableView")
 
+        self.ui_display_scientific.stateChanged.connect(self.mapper.submit)
+
     def setSelection(self, current):
         parent = current.parent()
         self.mapper.setRootIndex(parent)
@@ -738,9 +742,6 @@ class BoolVarEditor(bool_var_base, bool_var_form):
         super(bool_var_base, self).__init__(parent)
         self.setupUi(self)
         self.mapper = QtWidgets.QDataWidgetMapper()
-        self.ui_user_manual_set.stateChanged.connect(self.mapper.submit)
-        self.ui_launch_value.stateChanged.connect(self.mapper.submit)
-        self.ui_use_launch_value.stateChanged.connect(self.mapper.submit)
 
     def setModel(self, model):
         if hasattr(model, 'sourceModel'):
@@ -754,6 +755,10 @@ class BoolVarEditor(bool_var_base, bool_var_form):
         self.mapper.addMapping(self.ui_launch_value    , col.LAUNCH_VALUE)
         self.mapper.addMapping(self.ui_use_launch_value, col.USE_LAUNCH_VALUE)
 
+        self.ui_user_manual_set.stateChanged.connect(self.mapper.submit)
+        self.ui_launch_value.stateChanged.connect(self.mapper.submit)
+        self.ui_use_launch_value.stateChanged.connect(self.mapper.submit)
+
     def setSelection(self, current):
         parent = current.parent()
         self.mapper.setRootIndex(parent)
@@ -765,8 +770,6 @@ class IntVarEditor(int_var_base, int_var_form):
         super(int_var_base, self).__init__(parent)
         self.setupUi(self)
         self.mapper = QtWidgets.QDataWidgetMapper()
-        self.ui_user_manual_set.stateChanged.connect(self.mapper.submit)
-        self.ui_use_launch_value.stateChanged.connect(self.mapper.submit)
 
     def setModel(self, model):
         if hasattr(model, 'sourceModel'):
@@ -780,6 +783,9 @@ class IntVarEditor(int_var_base, int_var_form):
         self.mapper.addMapping(self.ui_user_manual_set , col.USER_MANUAL_SET)
         self.mapper.addMapping(self.ui_launch_value    , col.LAUNCH_VALUE)
         self.mapper.addMapping(self.ui_use_launch_value, col.USE_LAUNCH_VALUE)
+
+        self.ui_user_manual_set.stateChanged.connect(self.mapper.submit)
+        self.ui_use_launch_value.stateChanged.connect(self.mapper.submit)
 
     def setSelection(self, current):
         parent = current.parent()
@@ -796,9 +802,6 @@ class FloatVarEditor(float_var_base, float_var_form):
         super(float_var_base, self).__init__(parent)
         self.setupUi(self)
         self.mapper = QtWidgets.QDataWidgetMapper()
-        self.ui_display_scientific.stateChanged.connect(self.mapper.submit)
-        self.ui_user_manual_set.stateChanged.connect(self.mapper.submit)
-        self.ui_use_launch_value.stateChanged.connect(self.mapper.submit)
 
     def setModel(self, model):
         if hasattr(model, 'sourceModel'):
@@ -815,6 +818,9 @@ class FloatVarEditor(float_var_base, float_var_form):
         self.mapper.addMapping(self.ui_launch_value      , col.LAUNCH_VALUE)
         self.mapper.addMapping(self.ui_use_launch_value  , col.USE_LAUNCH_VALUE)
         
+        self.ui_display_scientific.stateChanged.connect(self.mapper.submit)
+        self.ui_user_manual_set.stateChanged.connect(self.mapper.submit)
+        self.ui_use_launch_value.stateChanged.connect(self.mapper.submit)
 
 
     def setSelection(self, current):

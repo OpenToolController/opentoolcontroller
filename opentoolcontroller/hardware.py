@@ -14,6 +14,14 @@ import ctypes
 #use ctypes.c_ulong, c_long and c_float
 
 
+'''
+TODO: some of this should get moved into a config file!
+
+
+
+'''
+
+
 class HalReader():
     def __init__(self):
         super().__init__()

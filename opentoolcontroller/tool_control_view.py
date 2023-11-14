@@ -24,6 +24,7 @@ class ToolControlView(tool_control_view_base, tool_control_view_form):
 
         self.ui_tree.setModel(self._proxy_model)
         self.ui_tree.selectionModel().currentChanged.connect(self.setGraphicSelection)
+        self.ui_tree.setEnableContextMenu(False)
         self.ui_system_control_view.setModel(self._model) #TODO Used to be _proxy_mode
         self.ui_system_control_view.selectionModel().currentChanged.connect(self.setTreeSelection)
 
@@ -34,6 +35,8 @@ class ToolControlView(tool_control_view_base, tool_control_view_form):
         self.ui_splitter_vertical.setSizes([self.height()*0.4, self.height()*0.6])
         self.ui_tree.setColumnWidth(0,200)
         self.ui_tree.expandToDepth(1)
+        self.ui_tree.setColumnHidden(1, True)
+        #self.ui_tree.setItemsExpandable(False)
         self.vlayout = QtWidgets.QVBoxLayout()
 
 

@@ -156,6 +156,7 @@ class NodeControlView(node_control_view_base, node_control_view_form):
     def setSelection(self, index):
         self._current_index = index
         self._sub_mappers = []
+        typeInfo = None
 
         if hasattr(index.model(), 'mapToSource'):
             index = index.model().mapToSource(index)

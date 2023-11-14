@@ -18,8 +18,6 @@ from opentoolcontroller.calibration_table_model import CalibrationTableModel
 
 def clamp(n, smallest, largest): return max(smallest, min(n, largest))
 
-def str2bool(v):
-  return v.lower() in ("yes", "true", "t", "1")
 
 #Sending a list ['one','two','etc'] so we don't use *enumerated
 def enum(enumerated):
@@ -31,7 +29,6 @@ def enum(enumerated):
 class Node:
     def __init__(self, parent=None):
         super().__init__()
-
         self._parent = parent
         self._children = []
         self._name = "unknown"
@@ -169,22 +166,6 @@ class Node:
         return locals()
     description = property(**description())
 
-'''
-Things you might want to do with a behavior:
-  - Run it
-  - See what it's reporting out
-  - Abort it (forced and controled)
-  - send it an endpoint signal? (for behaviors with files with steps)
-
-  parts that routh through the model for display
-    - list of behaviors to make buttons
-    - currently running behaviors name
-    - currently running behavior
-    - currently running behaviors info text (or nodes status???)
-
-.... so we're gonna generate text from the behavior nodes then display it
-
-'''
 
 class BehaviorNode(Node):
     def __init__(self, parent=None):
@@ -210,7 +191,7 @@ class BehaviorNode(Node):
     def setData(self, c, value):
         super().setData(c, value)
         if   c is col.STATE                 : self._state = str(value)
-        elif c is col.BEHAVIORS             : pass #needs to be handled by the model to sync
+        elif c is col.BEHAVIORS             : pass #handled by the model to sync
         elif c is col.STATES                : self._states = value
         elif c is col.RUNNING_BEHAVIOR_NAME : self._running_behavior_name = value
         elif c is col.RUNNING_BEHAVIOR      : self._running_behavior = value
@@ -219,43 +200,9 @@ class BehaviorNode(Node):
     def state(self):
         return self._state
 
-    #TODO the system needs the same interfaces as the user for aborting and keeping track of what behavior is running 
-    # maybe make a flat display of running behaviors? and allow visibilty of tool /system / device levels?
-    # or make that display part of the tree?
-    # Should be able to abort behaviros, orat least tool and system ones?
-    # Abort button? should that just be a tool behavior?
-    # Idle tool? (or similar) that's just a tool behavior?
-    # When we can run device behaviors by hand then must disable system / tool behaviors
-    # # Get a list of running behaviors with abort option of the category you can start?
-
-    # - probably make a runningBehavior() function? hmm
-
-    '''
-    should device behaviors be abortable? ~~ probably, but only when you can manually operate devices
-    system can be either in manual or auto (maintenance / online)?
-    online systems can by used by tool behaviors, need system behaviors to be able to check that state
-    
-    SystemOperationMode
-        what if this is a switch on the system graphic?
-        - Online for process
-            This is full auto, user can't run system or device behaviors, the tool Behaviors can start system behaviors
-        - Manual
-            User is allowed to start system behaviors
-        - Manual
-            User is allowed to start device behaviors
-            User is allowed to start system and device behaviors
-
-
-    actually 3 states
-        - online for process
-        - offline for maintenance
-        - manual
-
-
-
-    '''
-
     def behaviors(self):
+        if self._behaviors is None:
+            return []
         return self._behaviors
 
     def setBehaviors(self, value):
@@ -286,7 +233,6 @@ class BehaviorNode(Node):
         def fset(self,value): self._states = value
         return locals()
     states = property(**states())
-
 
 
 class ToolNode(BehaviorNode):
@@ -326,8 +272,6 @@ class SystemNode(BehaviorNode):
     def movableIcons(self):
         return self._movable_icons
 
-
-        
     def backgroundSVGFullPath(self):
         full_path = defaults.TOOL_DIR + '/' + self._background_svg_relative_path
 
@@ -338,9 +282,6 @@ class SystemNode(BehaviorNode):
             pass
 
         return defaults.SYSTEM_BACKGROUND 
-
-
-
 
     def backgroundSVG():
         def fget(self): return self._background_svg_relative_path
@@ -361,10 +302,6 @@ class SystemNode(BehaviorNode):
     deviceManualControl = property(**deviceManualControl())
 
 
-
-
-
-# This has to be fixed after the IO nodes are fixed
 class DeviceNode(BehaviorNode):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -380,13 +317,9 @@ class DeviceNode(BehaviorNode):
         super().setData(c, value)
 
 
-
-
-#TODO: Add background and font color and left/right align
 class DeviceIconNode(Node):
     def __init__(self, parent=None):
         super().__init__(parent)
-
         self._name     = 'Icon'
         self._x        = 50.0
         self._y        = 50.0
@@ -407,7 +340,7 @@ class DeviceIconNode(Node):
         self._max_font_size = 72
         self._font_color = QtGui.QColor(0xFFFFFF) 
 
-        self._svg_relative_path = defaults.DEVICE_ICON        #'opentoolcontroller/resources/icons/general/unknown.svg'
+        self._svg_relative_path = defaults.DEVICE_ICON
 
     def typeInfo(self):
         return typ.DEVICE_ICON_NODE
@@ -447,13 +380,12 @@ class DeviceIconNode(Node):
         elif c is col.FONT_SIZE     : r = self.fontSize
         elif c is col.FONT_COLOR    : r = self._font_color
 
-        elif c is col.POS      : r = QtCore.QPointF(self.x, self.y)
+        elif c is col.POS           : r = QtCore.QPointF(self.x, self.y)
 
         return r
 
     def setData(self, c, value):
         super().setData(c, value)
-
 
         if   c is col.SVG           : self.svg            = value
         elif c is col.LAYER         : self.setLayer(value)
@@ -478,7 +410,6 @@ class DeviceIconNode(Node):
     def text(self):
         return self._text
 
-
         
     def svgFullPath(self):
         full_path = defaults.TOOL_DIR + '/' + self._svg_relative_path
@@ -488,14 +419,7 @@ class DeviceIconNode(Node):
                 return full_path
         except:
             pass
-
         return defaults.DEVICE_ICON 
-
-
-
-   #All of these properties get saved
-
-
 
     def svg():
         def fget(self):
@@ -513,7 +437,6 @@ class DeviceIconNode(Node):
                     self._layers.append(child.attrib['id'])
             except:
                 self._layers = []
-
 
         return locals()
     svg = property(**svg())
@@ -583,39 +506,7 @@ class DeviceIconNode(Node):
     defaultLayer = property(**defaultLayer())
 
 
-
-
-
-'''
-All Hal nodes have a Queue
-  - Devices have a BT
-  - The device BT puts values into a queue for the HalNode
-  - System Auto: It's BT sends commnads to the device BT via Bool/Float var nodes
-  - System Manual: Device manual view gets buttons/variables for the Bool/Float var nodes
-
-
-Do we need this queue thing or can we just have the BT control loop also edit the Streamer ???
-
- - each device has a behavior tree
- - need a controller that run through each and builds a set of changes for the streamer
-
-
- a thread just processing behavior trees?
- .... for device in system
- ........ do stuff and set the values in the halQueue
-
-
- Then in the hardware thread
- .... for pin in pins
- ........ build new stream via queue
- .... if stream != prev_stream --> set streamer
-'''
-
 class HalNode(Node):
-    '''Common to all IO nodes
-        All IO Nodes have:
-            - name           : The nodes name is used for the hal pin name, for >1 bit name_0, name_1, etc.  This is unique within a device
-    '''
     hal_pins = []  # Format (pin_name, direction, type)
 
     def __init__(self, parent=None):
@@ -624,8 +515,8 @@ class HalNode(Node):
         self._name = 'HAL_Node'
         self._hal_pin = ''
         self._hal_pin_type = None
-        self._hal_queue = queue.Queue()
-
+        self._queue_max_size = 10
+        self._hal_queue = queue.Queue(maxsize=self._queue_max_size)
 
     def typeInfo(self):
         raise NotImplementedError("Nodes that inherit HalNode must implement typeInfo")
@@ -663,14 +554,11 @@ class HalNode(Node):
 
     def halQueuePut(self, value):
         print("halQueuePut - ", value)
-        self._hal_queue.put_nowait(value)
+        self._hal_queue.put_nowait(bool(value))
 
-    def halQueueManualPut(self, value):
+    def halQueueClear(self):
         with self._hal_queue.mutex:
             self._hal_queue.queue.clear()
-
-        self._hal_queue.put_nowait(value)
-
 
     def halPinType(self):
         return self._hal_pin_type
@@ -687,6 +575,15 @@ class HalNode(Node):
                 self._hal_pin_type = None
         return locals()
     halPin = property(**halPin())
+
+    def queueMaxSize():
+        def fget(self): return self._queue_max_size
+        def fset(self,value):
+            self._queue_max_size = int(value)
+            self._hal_queue = queue.Queue(maxsize=self._queue_max_size)
+        return locals()
+    queueMaxSize= property(**queueMaxSize())
+
 
 
 
@@ -705,7 +602,7 @@ class DigitalInputNode(HalNode):
     def data(self, c):
         r = super().data(c)
         if   c is col.HAL_VALUE : r = self._hal_val
-        elif c is col.VALUE     : r = self._hal_val #self._on_name if self._hal_val else self._off_name
+        elif c is col.VALUE     : r = self._hal_val 
         elif c is col.OFF_NAME  : r = self.offName
         elif c is col.ON_NAME   : r = self.onName
 
@@ -713,8 +610,7 @@ class DigitalInputNode(HalNode):
 
     def setData(self, c, value):
         super().setData(c, value)
-        if   c is col.HAL_VALUE : self._hal_val = True if bool(value) == True else False
-        #elif c is col.VALUE     : self._hal_val = True if bool(value) == True else False #
+        if   c is col.HAL_VALUE : self._hal_val = bool(value) #True if bool(value) == True else False
         elif c is col.OFF_NAME  : self.offName = value
         elif c is col.ON_NAME   : self.onName  = value
 
@@ -765,8 +661,6 @@ class DigitalOutputNode(DigitalInputNode):
 
     def data(self, c):
         r = super().data(c)
-
-
         return r
 
     def setData(self, c, value):
@@ -776,22 +670,13 @@ class DigitalOutputNode(DigitalInputNode):
             self.halQueuePut(value)
 
 
-
-#TODO figure out the number type part
 class AnalogInputNode(HalNode):
-    '''
-        Represents an analog input (i.e. 0-10 VDC) for a device
-            - calibration_table_model : Calibration of analog signal to HAL numbers
-            - calibration_table_data : This property is used to load and save cal data
-            - display_digits : number of digits to display on default
-            - display_scientific : If true use scientific notation
-    '''
     def __init__(self, parent=None):
         super().__init__(parent)
-        self._name = 'Analog_Input_Node'
 
-        self._hal_val = 0
-        self._val = 0
+        self._name = 'Analog_Input_Node'
+        self._hal_val = 0.0
+        self._val = 0.0
         self._units = ''
 
         self._display_digits = defaults.A_DISPLAY_DIGITS
@@ -870,12 +755,7 @@ class AnalogInputNode(HalNode):
 
     def displayScientific():
         def fget(self): return self._display_scientific
-        def fset(self, value):
-            if value == True or value == 'True':
-                self._display_scientific = True
-            else:
-                self._display_scientific = False
-
+        def fset(self, value): self._display_scientific = bool(value)
         return locals()
     displayScientific = property(**displayScientific())
 
@@ -994,12 +874,7 @@ class BoolVarNode(Node):
 
     def userManualSet():
         def fget(self): return self._user_manual_set
-        def fset(self, value):
-            if value == True or value == 'True':
-                self._user_manual_set = True
-            else:
-                self._user_manual_set = False
-
+        def fset(self, value): self._user_manual_set = bool(value)
         return locals()
     userManualSet = property(**userManualSet())
 
@@ -1081,12 +956,7 @@ class IntVarNode(Node):
 
     def userManualSet():
         def fget(self): return self._user_manual_set
-        def fset(self, value):
-            if value == True or value == 'True':
-                self._user_manual_set = True
-            else:
-                self._user_manual_set = False
-
+        def fset(self, value): self._user_manual_set = bool(value)
         return locals()
     userManualSet = property(**userManualSet())
 
@@ -1180,23 +1050,13 @@ class FloatVarNode(Node):
 
     def displayScientific():
         def fget(self): return self._display_scientific
-        def fset(self, value):
-            if value == True or value == 'True':
-                self._display_scientific = True
-            else:
-                self._display_scientific = False
-
+        def fset(self, value): self._display_scientific = bool(value)
         return locals()
     displayScientific = property(**displayScientific())
 
     def userManualSet():
         def fget(self): return self._user_manual_set
-        def fset(self, value):
-            if value == True or value == 'True':
-                self._user_manual_set = True
-            else:
-                self._user_manual_set = False
-
+        def fset(self, value): self._user_manual_set = bool(value)
         return locals()
     userManualSet = property(**userManualSet())
 
