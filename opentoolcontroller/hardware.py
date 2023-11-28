@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import subprocess
 import time
+import os
 
 from threading import Thread
 from queue import Queue, Empty
