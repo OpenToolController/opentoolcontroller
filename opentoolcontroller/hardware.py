@@ -19,6 +19,9 @@ import ctypes
 '''
 Do I need to call find pins when HalReader is made?
 
+
+
+--- call stop when exit the whole thing
 '''
 
 
@@ -126,6 +129,7 @@ class HalReader():
         time.sleep(1) #Give time for hal to unload everything
 
         period_ns = 'period1=%i' % (1e6*self._hal_period_ms)
+        print('time': period_ns)
         #subprocess.call(['halcmd', 'loadrt', 'threads', 'name1=gui', 'period1=100000000']) #period in ns
         subprocess.call(['halcmd', 'loadrt', 'threads', 'name1=gui', period_ns]) #period in ns
 

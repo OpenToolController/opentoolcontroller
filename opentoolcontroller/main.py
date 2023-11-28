@@ -204,6 +204,7 @@ class Window(QtWidgets.QMainWindow):
         self._settings.setValue('main_window_geometry', geometry)
         state = self.saveState()
         self._settings.setValue('main_window_state', state)
+        self.reader.stop()
         super().closeEvent(event)
 
     #normal close
