@@ -122,7 +122,7 @@ class Window(QtWidgets.QMainWindow):
         self.setDockNestingEnabled(True) #needed for left/right arranging
 
 
-        #self.reader.setModel(self.tool_model)
+        self.reader.setModel(self.tool_model)
         #self.reader.start()
 
         #Start the behavior tree
