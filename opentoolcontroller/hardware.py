@@ -88,6 +88,8 @@ class HalReader():
             #Sampler is on all the used hal pins
             self.connected_sampler_pins = self.connectedPins(HalNode.hal_pins, self.samplerIndexes())
             print("number_connected_sampler_pins", self.connected_sampler_pins)
+            print(HalNode.hal_pins)
+            print(self.SamplerIndexes())
             if len(self.connected_sampler_pins) > 0:
                 self.sampler_cfg = self.cfgFromPins(self.connected_sampler_pins)
                 cfg = 'cfg=' + str(self.sampler_cfg)
