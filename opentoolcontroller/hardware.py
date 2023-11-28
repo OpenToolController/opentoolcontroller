@@ -112,6 +112,7 @@ class HalReader():
             subprocess.call(['halcmd', 'start'])
 
             self.timer.start(self._hal_period_ms)
+            print("started")
             self._running = True
 
 
