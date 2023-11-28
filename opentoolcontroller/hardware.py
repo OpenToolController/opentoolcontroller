@@ -284,9 +284,11 @@ class HalReader():
 
     def processData(self):
         if len(self.connected_sampler_pins) > 0:
+            print('read sampler')
             self.readSampler()
 
         if len(self.connected_streamer_pins) > 0:
+            print('write sampler')
             self.writeStreamer()
 
 
@@ -333,6 +335,7 @@ class HalReader():
             node = index.internalPointer()
 
             new_val = node.halQueueGet()
+            print("new val: ", new_val)
             if new_val is not None:
                 if node.halPinType() in ['bit','s32','u32']:
                     print('halQueueGet', int(new_val))
