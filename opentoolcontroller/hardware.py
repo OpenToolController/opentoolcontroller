@@ -87,9 +87,6 @@ class HalReader():
 
             #Sampler is on all the used hal pins
             self.connected_sampler_pins = self.connectedPins(HalNode.hal_pins, self.samplerIndexes())
-            print("number_connected_sampler_pins", self.connected_sampler_pins)
-            print(HalNode.hal_pins)
-            print(self.samplerIndexes())
             if len(self.connected_sampler_pins) > 0:
                 self.sampler_cfg = self.cfgFromPins(self.connected_sampler_pins)
                 cfg = 'cfg=' + str(self.sampler_cfg)
@@ -115,7 +112,6 @@ class HalReader():
             subprocess.call(['halcmd', 'start'])
 
             self.timer.start(self._hal_period_ms)
-            print("started")
             self._running = True
 
 
@@ -289,11 +285,9 @@ class HalReader():
 
     def processData(self):
         if len(self.connected_sampler_pins) > 0:
-            print('read sampler')
             self.readSampler()
 
         if len(self.connected_streamer_pins) > 0:
-            print('write sampler')
             self.writeStreamer()
 
 
@@ -340,7 +334,6 @@ class HalReader():
             node = index.internalPointer()
 
             new_val = node.halQueueGet()
-            print("new val: ", new_val)
             if new_val is not None:
                 if node.halPinType() in ['bit','s32','u32']:
                     print('halQueueGet', int(new_val))
