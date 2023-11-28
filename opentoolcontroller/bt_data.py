@@ -810,7 +810,8 @@ class SetNode(Node):
                         tool_model.setData(child.setIndex().siblingAtColumn(col.VALUE), value)
 
                     elif type_info == typ.D_OUT_NODE:
-                        pass #FIXME  TODO HAL
+                        child.halQueuePut(value)
+
                     elif type_info == typ.A_OUT_NODE:
                         pass #FIXME TODO HAL
                         #hal que stuff
