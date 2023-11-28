@@ -167,8 +167,9 @@ class HalReader():
 
 
     def samplerIndexes(self):
-        indexes = []
+        return self.model().indexesOfTypes([typ.D_IN_NODE, typ.D_OUT_NODE, typ.A_IN_NODE, typ.A_OUT_NODE])
 
+        indexes = []
         if self.model() is not None:
             tool_model = self.model()
             tool_index = tool_model.index(0, 0, QtCore.QModelIndex())
