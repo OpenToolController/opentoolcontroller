@@ -10,14 +10,13 @@ from PyQt5 import QtCore, QtWidgets, QtGui
 from opentoolcontroller.tool_data import HalNode
 
 from opentoolcontroller.strings import col, typ
+from opentoolcontroller.strings import defaults
 import ctypes
 #use ctypes.c_ulong, c_long and c_float
 
 
 '''
-TODO: some of this should get moved into a config file!
-
-
+Do I need to call find pins when HalReader is made?
 
 '''
 
@@ -25,9 +24,10 @@ TODO: some of this should get moved into a config file!
 class HalReader():
     def __init__(self):
         super().__init__()
-        self._running = False
-        self.sampler_queue = Queue()
+        self._hal_config_file = '/hal/hal_config.hal'
+        self._hal_period_ms = 100
 
+        self.sampler_queue = Queue()
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.processData)
 
@@ -35,16 +35,14 @@ class HalReader():
         self.connected_sampler_pins = []
         self.connected_streamer_pins = []
         self._previous_stream = []
+        self._running = False
         self._hal_exists = False
 
 
         try:
             self.setupHal()
-            self.setupHalTesting()
-            #self.setupHalEthercat()
             self.findPins()
             self._hal_exists = True
-
 
         except FileNotFoundError:
             self._hal_exists = False
@@ -62,14 +60,25 @@ class HalReader():
     def running(self):
         return self._running
 
-    def reload(self):
-        return
+    def loadHalMeter(self):
+        if self.running():
+            try:
+                subprocess.call(['halcmd', 'loadusr', 'halmeter'])
+            except:
+                pass
+
+
+    def loadHalScope(self):
+        if self.running():
+            try:
+                subprocess.call(['halcmd', 'loadusr', 'halscope'])
+            except:
+                pass
+
 
     def start(self):
         if self._hal_exists:
             self.setupHal()
-            self.setupHalTesting()
-            #self.setupHalEthercat()
             self.findPins()
 
             #Sampler is on all the used hal pins
@@ -97,9 +106,8 @@ class HalReader():
 
 
             subprocess.call(['halcmd', 'start'])
-            #subprocess.call(['halcmd', 'loadusr', 'halmeter'])
 
-            self.timer.start(100)
+            self.timer.start(self._hal_period_ms)
             self._running = True
 
 
@@ -111,39 +119,20 @@ class HalReader():
             self._running = False
 
 
-    def setupHalEthercat(self):
-        if self._hal_exists:
-            subprocess.call(['halcmd', 'loadusr', '-W', 'lcec_conf', 'ethercat_config.xml'])
-            subprocess.call(['halcmd', 'loadrt', 'lcec'])
-            subprocess.call(['halcmd', 'addf', 'lcec.read-all', 'gui'])
-            subprocess.call(['halcmd', 'addf', 'lcec.write-all', 'gui'])
-
-
     def setupHal(self):
         subprocess.call(['halcmd', 'stop'])
         subprocess.check_output(['halcmd', 'unload', 'all']) #wait until cmd finishes
         time.sleep(1) #Give time for hal to unload everything
 
-        subprocess.call(['halcmd', 'loadrt', 'threads', 'name1=gui', 'period1=100000000']) #0.1 ses / 100,000,000 ns
+        period_ns = 'period1=%i' % (1e6*self._hal_period_ms)
+        #subprocess.call(['halcmd', 'loadrt', 'threads', 'name1=gui', 'period1=100000000']) #period in ns
+        subprocess.call(['halcmd', 'loadrt', 'threads', 'name1=gui', period_ns]) #period in ns
 
-        #sudo halcompile --install opentoolcontroller/HAL/hardware_sim.comp
-        subprocess.call(['halcmd', 'loadrt', 'hardware_sim'])
-        #subprocess.call(['halcmd', 'loadusr', 'halscope'])
-
-
-    def setupHalTesting(self):
-
-        #Simulating a digital input with siggen.0.square in tool_model_1
-        #subprocess.call(['halcmd', 'loadrt', 'siggen'])
-        #subprocess.call(['halcmd', 'addf', 'siggen.0.update', 'gui'])
-        #subprocess.call(['halcmd', 'setp', 'siggen.0.amplitude', '0.5'])
-        #subprocess.call(['halcmd', 'setp', 'siggen.0.offset', '0.5'])
-        #subprocess.call(['halcmd', 'setp', 'siggen.0.frequency', '0.5'])
-
-        subprocess.call(['halcmd', 'loadrt', 'sim_encoder', 'num_chan=1'])
-        subprocess.call(['halcmd', 'setp', 'sim-encoder.0.speed', '0.005'])
-        subprocess.call(['halcmd', 'addf', 'sim-encoder.make-pulses', 'gui'])
-        subprocess.call(['halcmd', 'addf', 'sim-encoder.update-speed', 'gui'])
+    
+        config_full_path = defaults.TOOL_DIR + self._hal_config_file
+        if os.path.isfile(config_full_path):
+            subprocess.call(['halcmd', '-f', config_full_path])
+            
 
 
 
@@ -367,3 +356,42 @@ class HalReader():
         for line in iter(out.readline, b''):
             queue.put(line)
         out.close()
+
+
+
+
+
+
+
+
+
+
+    #########################
+    #old stuff
+    #########################
+
+
+    #sudo halcompile --install opentoolcontroller/HAL/hardware_sim.comp
+    #subprocess.call(['halcmd', 'loadrt', 'hardware_sim'])
+
+    def setupHalEthercat(self):
+        if self._hal_exists:
+            subprocess.call(['halcmd', 'loadusr', '-W', 'lcec_conf', 'ethercat_config.xml'])
+            subprocess.call(['halcmd', 'loadrt', 'lcec'])
+            subprocess.call(['halcmd', 'addf', 'lcec.read-all', 'gui'])
+            subprocess.call(['halcmd', 'addf', 'lcec.write-all', 'gui'])
+
+    def setupHalTesting(self):
+        #Simulating a digital input with siggen.0.square in tool_model_1
+        #subprocess.call(['halcmd', 'loadrt', 'siggen'])
+        #subprocess.call(['halcmd', 'addf', 'siggen.0.update', 'gui'])
+        #subprocess.call(['halcmd', 'setp', 'siggen.0.amplitude', '0.5'])
+        #subprocess.call(['halcmd', 'setp', 'siggen.0.offset', '0.5'])
+        #subprocess.call(['halcmd', 'setp', 'siggen.0.frequency', '0.5'])
+
+        subprocess.call(['halcmd', 'loadrt', 'sim_encoder', 'num_chan=1'])
+        subprocess.call(['halcmd', 'setp', 'sim-encoder.0.speed', '0.005'])
+        subprocess.call(['halcmd', 'addf', 'sim-encoder.make-pulses', 'gui'])
+        subprocess.call(['halcmd', 'addf', 'sim-encoder.update-speed', 'gui'])
+
+
