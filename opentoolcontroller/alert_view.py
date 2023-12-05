@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtWidgets, QtCore, QtGui
 from datetime import datetime
+from opentoolcontroller.strings import defaults
+import csv
+from pathlib import Path
+
 
 class AlertView(QtWidgets.QMainWindow):
     def __init__(self, alert_model):
@@ -63,6 +67,10 @@ class AlertTableModel(QtCore.QAbstractTableModel):
         self._data = []
         self._horizontal_header_labels = ['Type','Time', 'System', 'Device', 'Alert']
 
+        self._log_file = Path(defaults.TOOL_DIR + '/logs/alerts_' + datetime.today().strftime('%Y_%m_%d') + '.csv')
+        if not self._log_file.is_file():
+            self.logToFile(self._horizontal_header_labels)
+
     def data(self, index, role):
         if role == QtCore.Qt.DisplayRole:
             return self._data[index.row()][index.column()]
@@ -110,12 +118,20 @@ class AlertTableModel(QtCore.QAbstractTableModel):
         self._data.append(new_row)
         self.endInsertRows()
 
+        self.logToFile([str(alert_text), str(current_time), str(system), str(device), str(alert)])
 
         clear_alarm_callback = lambda y=row_count: self.clearAlertByRow(y)
         set_user_clearable = lambda y=row_count: self.setUserClearByRow(y)
 
         return clear_alarm_callback, set_user_clearable
     
+
+    def logToFile(self, row):
+        with open(self._log_file, 'a') as f:
+            csv_writer = csv.writer(f)
+            csv_writer.writerow(row)
+
+
     def clearAlertByRow(self, row):
         self._data[row][6] = True
         index_1 = self.index(row, 0)
@@ -176,6 +192,10 @@ class ActionLogTableModel(QtCore.QAbstractTableModel):
         self._horizontal_header_labels = ['Time','User', 'Action']
         self._current_user_callback = None
 
+        self._log_file = Path(defaults.TOOL_DIR + '/logs/actions_' + datetime.today().strftime('%Y_%m_%d') + '.csv')
+        if not self._log_file.is_file():
+            self.logToFile(self._horizontal_header_labels)
+
     def currentUser(self):
         return self._current_user()
 
@@ -209,7 +229,13 @@ class ActionLogTableModel(QtCore.QAbstractTableModel):
         self._data.append(new_row)
         self.endInsertRows()
 
+        self.logToFile([str(current_time), str(user), str(action_text)])
     
+    def logToFile(self, row):
+        with open(self._log_file, 'a') as f:
+            csv_writer = csv.writer(f)
+            csv_writer.writerow(row)
+
 
 
     #Add something for saving and loading

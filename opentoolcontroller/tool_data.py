@@ -553,8 +553,7 @@ class HalNode(Node):
             return None
 
     def halQueuePut(self, value):
-        print("halQueuePut - ", value)
-        self._hal_queue.put_nowait(bool(value))
+        self._hal_queue.put_nowait(value)
 
     def halQueueClear(self):
         with self._hal_queue.mutex:
@@ -669,6 +668,8 @@ class DigitalOutputNode(DigitalInputNode):
             value = True if value == True else False
             self.halQueuePut(value)
 
+    def halQueuePut(self, value):
+        self._hal_queue.put_nowait(bool(value))
 
 class AnalogInputNode(HalNode):
     def __init__(self, parent=None):
@@ -801,6 +802,9 @@ class AnalogOutputNode(AnalogInputNode):
         pins = [item[0] for item in sub_pins if item[2] == 'IN']
         pins.insert(0, '')
         return enum(pins)
+    
+    def halQueuePut(self, value):
+        self._hal_queue.put_nowait(float(value))
 
     def min():
         def fget(self): return self._min

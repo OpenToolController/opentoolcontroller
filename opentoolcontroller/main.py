@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 # -.- coding: utf-8 -.-
 import sys, json, os
+import argparse
+
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 import xml.etree.ElementTree as ET
@@ -122,11 +124,7 @@ class Window(QtWidgets.QMainWindow):
         self.setDockNestingEnabled(True) #needed for left/right arranging
 
 
-
         self.reader.setModel(self.tool_model)
-
-        #self.reader.start()
-
         #Start the behavior tree
         #self.tool_model.runBehaviorTrees()
 
@@ -238,7 +236,8 @@ class Window(QtWidgets.QMainWindow):
             self.toggleHalAction.setText('Stop Hal Reader')
             self.reader.start()
 
-
+    def startHalReader(self):
+        self.reader.start()
 
 
 
@@ -247,15 +246,28 @@ class Window(QtWidgets.QMainWindow):
 
 if __name__ == '__main__':
     tool_dir = None
-    try:
-        tool_dir = sys.argv[1]
-        tool_dir = tool_dir.rstrip("/")
-    except:
-        print("Please pass the tool directory")
+
+    parser = argparse.ArgumentParser(
+                    prog='Open Tool Controller',
+                    description='TODO',
+                    epilog='TODO')
+
+    parser.add_argument('tool_dir', help='The directory containing the tool definition.')
+    parser.add_argument('-S', '--Start', action='store_true', help='Starts HAL reader on launch')
+    #TODO add option to start a tool behavior?
+    #parser.add_argument('-v', '--verbose')
+
+    args = parser.parse_args()
+    tool_dir = args.tool_dir
+    tool_dir = tool_dir.rstrip("/")
+
 
     app = QtWidgets.QApplication(sys.argv)
     #app.setStyle("fusion") #Changing the style
     w = Window(tool_dir)
+    if args.Start:
+        w.startHalReader()
     w.show()
     sys.exit(app.exec_())
+
 

@@ -18,10 +18,6 @@ import ctypes
 
 '''
 Do I need to call find pins when HalReader is made?
-
-
-
---- call stop when exit the whole thing
 '''
 
 
@@ -316,7 +312,9 @@ class HalReader():
                 for index in self.connected_sampler_pins[pin]:
                     if val != self._tool_model.data(index.siblingAtColumn(col.HAL_VALUE), QtCore.Qt.DisplayRole):
                         self._tool_model.setData(index.siblingAtColumn(col.HAL_VALUE), val)
-                        print("setting: ", index.internalPointer().name,  ': ', val, ' was ', self._tool_model.data(index.siblingAtColumn(col.HAL_VALUE), QtCore.Qt.DisplayRole))
+                        print("setting: ", 
+                              index.internalPointer().name,  ': ', val, ' was ', 
+                              self._tool_model.data(index.siblingAtColumn(col.HAL_VALUE), QtCore.Qt.DisplayRole))
 
 
     def baseStream(self, cfg):
@@ -379,24 +377,24 @@ class HalReader():
     #sudo halcompile --install opentoolcontroller/HAL/hardware_sim.comp
     #subprocess.call(['halcmd', 'loadrt', 'hardware_sim'])
 
-    def setupHalEthercat(self):
-        if self._hal_exists:
-            subprocess.call(['halcmd', 'loadusr', '-W', 'lcec_conf', 'ethercat_config.xml'])
-            subprocess.call(['halcmd', 'loadrt', 'lcec'])
-            subprocess.call(['halcmd', 'addf', 'lcec.read-all', 'gui'])
-            subprocess.call(['halcmd', 'addf', 'lcec.write-all', 'gui'])
+    #def setupHalEthercat(self):
+    #    if self._hal_exists:
+    #        subprocess.call(['halcmd', 'loadusr', '-W', 'lcec_conf', 'ethercat_config.xml'])
+    #        subprocess.call(['halcmd', 'loadrt', 'lcec'])
+    #        subprocess.call(['halcmd', 'addf', 'lcec.read-all', 'gui'])
+    #        subprocess.call(['halcmd', 'addf', 'lcec.write-all', 'gui'])
 
-    def setupHalTesting(self):
-        #Simulating a digital input with siggen.0.square in tool_model_1
-        #subprocess.call(['halcmd', 'loadrt', 'siggen'])
-        #subprocess.call(['halcmd', 'addf', 'siggen.0.update', 'gui'])
-        #subprocess.call(['halcmd', 'setp', 'siggen.0.amplitude', '0.5'])
-        #subprocess.call(['halcmd', 'setp', 'siggen.0.offset', '0.5'])
-        #subprocess.call(['halcmd', 'setp', 'siggen.0.frequency', '0.5'])
+    #def setupHalTesting(self):
+    #    #Simulating a digital input with siggen.0.square in tool_model_1
+    #    #subprocess.call(['halcmd', 'loadrt', 'siggen'])
+    #    #subprocess.call(['halcmd', 'addf', 'siggen.0.update', 'gui'])
+    #    #subprocess.call(['halcmd', 'setp', 'siggen.0.amplitude', '0.5'])
+    #    #subprocess.call(['halcmd', 'setp', 'siggen.0.offset', '0.5'])
+    #    #subprocess.call(['halcmd', 'setp', 'siggen.0.frequency', '0.5'])
 
-        subprocess.call(['halcmd', 'loadrt', 'sim_encoder', 'num_chan=1'])
-        subprocess.call(['halcmd', 'setp', 'sim-encoder.0.speed', '0.005'])
-        subprocess.call(['halcmd', 'addf', 'sim-encoder.make-pulses', 'gui'])
-        subprocess.call(['halcmd', 'addf', 'sim-encoder.update-speed', 'gui'])
+    #    subprocess.call(['halcmd', 'loadrt', 'sim_encoder', 'num_chan=1'])
+    #    subprocess.call(['halcmd', 'setp', 'sim-encoder.0.speed', '0.005'])
+    #    subprocess.call(['halcmd', 'addf', 'sim-encoder.make-pulses', 'gui'])
+    #    subprocess.call(['halcmd', 'addf', 'sim-encoder.update-speed', 'gui'])
 
 

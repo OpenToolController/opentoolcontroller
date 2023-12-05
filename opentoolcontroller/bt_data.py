@@ -804,19 +804,13 @@ class SetNode(Node):
 
                 if child.setType == bt.VAL:
                     child_name = child.setName
+                    value = child.value
 
                     if type_info in [typ.BOOL_VAR_NODE, typ.FLOAT_VAR_NODE]:
-                        value = child.value
                         tool_model.setData(child.setIndex().siblingAtColumn(col.VALUE), value)
 
-                    elif type_info == typ.D_OUT_NODE:
-                        value = bool(child.value)
+                    elif type_info in [typ.D_OUT_NODE, typ.A_OUT_NODE]:
                         child.setIndex().internalPointer().halQueuePut(value)
-
-                    elif type_info == typ.A_OUT_NODE:
-                        pass #FIXME TODO HAL
-                        #hal que stuff
-                        #node.halQueuePut(setpoint)
 
                 elif child.setType == bt.VAR:
                     child_name = child.setName
@@ -825,6 +819,7 @@ class SetNode(Node):
                         value = child.varIndex().internalPointer().value() 
                         tool_model.setData(child.setIndex().siblingAtColumn(col.VALUE), value)#child.varIndex().internalPointer().value())
 
+                #not using since set nodes don't wait
                 #if child_name:
                 #    if len(info_names) > 0:
                 #        info_names += ', '
