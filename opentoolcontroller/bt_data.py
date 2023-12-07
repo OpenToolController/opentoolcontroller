@@ -810,6 +810,7 @@ class SetNode(Node):
                         tool_model.setData(child.setIndex().siblingAtColumn(col.VALUE), value)
 
                     elif type_info in [typ.D_OUT_NODE, typ.A_OUT_NODE]:
+                        print("test: ", value)
                         child.setIndex().internalPointer().halQueuePut(value)
 
                 elif child.setType == bt.VAR:
