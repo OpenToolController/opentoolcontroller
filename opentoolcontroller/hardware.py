@@ -332,7 +332,6 @@ class HalReader():
             node = index.internalPointer()
 
             new_val = node.halQueueGet()
-            print("new val", new_val)
             if new_val is not None:
                 if node.halPinType() in ['bit','s32','u32']:
                     print('halQueueGet', int(new_val))
