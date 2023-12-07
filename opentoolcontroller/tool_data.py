@@ -724,7 +724,7 @@ class AnalogInputNode(HalNode):
 
         if   c is col.HAL_VALUE:
             self._hal_val = value
-            self._val = halToDisplay(value)
+            self._val = self.halToDisplay(value)
         elif c is col.UNITS              : self.units = value
         elif c is col.DISPLAY_DIGITS     : self.displayDigits = value
         elif c is col.DISPLAY_SCIENTIFIC : self.displayScientific = value
@@ -818,7 +818,7 @@ class AnalogOutputNode(AnalogInputNode):
         return enum(pins)
     
     def halQueuePut(self, value):
-        super().halQueuePut(float(value))
+        super().halQueuePut(self.displayToHal(float(value)))
 
     def min():
         def fget(self): return self._min
