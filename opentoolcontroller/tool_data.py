@@ -8,7 +8,9 @@ import xml.etree.ElementTree as ET
 import json
 import os.path
 import numpy as np
-import queue
+#import queue
+from collections import deque
+
 
 from opentoolcontroller.bt_model import BTModel
 from opentoolcontroller.strings import defaults, col, typ
@@ -516,7 +518,9 @@ class HalNode(Node):
         self._hal_pin = ''
         self._hal_pin_type = None
         self._queue_max_size = 10
-        self._hal_queue = queue.Queue(maxsize=self._queue_max_size)
+        #self._hal_queue = queue.Queue(maxsize=self._queue_max_size)
+        self._hal_queue = deque([], maxlen=self._queue_max_size)
+
 
     def typeInfo(self):
         raise NotImplementedError("Nodes that inherit HalNode must implement typeInfo")
@@ -548,16 +552,22 @@ class HalNode(Node):
 
     def halQueueGet(self):
         try:
-            return self._hal_queue.get_nowait()
-        except queue.Empty:
+            self._hal_queue.popleft()
+        except IndexError:
             return None
+        #try:
+        #    return self._hal_queue.get_nowait()
+        #except queue.Empty:
+        #    return None
 
     def halQueuePut(self, value):
-        self._hal_queue.put_nowait(value)
+        self._hal_queue.append(value)
+        #self._hal_queue.put_nowait(value)
 
     def halQueueClear(self):
-        with self._hal_queue.mutex:
-            self._hal_queue.queue.clear()
+        self._hal_queue.clear()
+        #with self._hal_queue.mutex:
+        #    self._hal_queue.queue.clear()
 
     def halPinType(self):
         return self._hal_pin_type
@@ -579,7 +589,8 @@ class HalNode(Node):
         def fget(self): return self._queue_max_size
         def fset(self,value):
             self._queue_max_size = int(value)
-            self._hal_queue = queue.Queue(maxsize=self._queue_max_size)
+            self._hal_queue = deque([], maxlen=self._queue_max_size)
+            #self._hal_queue = queue.Queue(maxsize=self._queue_max_size)
         return locals()
     queueMaxSize= property(**queueMaxSize())
 
@@ -664,12 +675,10 @@ class DigitalOutputNode(DigitalInputNode):
 
     def setData(self, c, value):
         super().setData(c, value)
-        if   c is col.VALUE:
-            value = True if value == True else False
-            self.halQueuePut(value)
+        if c is col.VALUE: self.halQueuePut(bool(value))
 
     def halQueuePut(self, value):
-        self._hal_queue.put_nowait(bool(value))
+        super().halQueuePut(bool(value))
 
 class AnalogInputNode(HalNode):
     def __init__(self, parent=None):
@@ -701,7 +710,7 @@ class AnalogInputNode(HalNode):
         r = super().data(c)
 
         if   c is col.HAL_VALUE               : r = self._hal_val
-        elif c is col.VALUE                   : r = self.value()
+        elif c is col.VALUE                   : r = self._val #self.value()
         elif c is col.UNITS                   : r = self.units
         elif c is col.DISPLAY_DIGITS          : r = self.displayDigits
         elif c is col.DISPLAY_SCIENTIFIC      : r = self.displayScientific
@@ -713,14 +722,19 @@ class AnalogInputNode(HalNode):
     def setData(self, c, value):
         super().setData(c, value)
 
-        if   c is col.HAL_VALUE          : self._hal_val = value
-        elif c is col.VALUE              : pass
+        if   c is col.HAL_VALUE:
+            self._hal_val = value
+            self._val = halToDisplay(value)
         elif c is col.UNITS              : self.units = value
         elif c is col.DISPLAY_DIGITS     : self.displayDigits = value
         elif c is col.DISPLAY_SCIENTIFIC : self.displayScientific = value
 
     def value(self):
-        return float(np.interp(self._hal_val, self._xp, self._yp))
+        return self._val
+        #return float(np.interp(self._hal_val, self._xp, self._yp))
+
+    def halToDisplay(self, val):
+        return float(np.interp(val, self._xp, self._yp))
 
     def displayToHal(self, val):
         return np.interp(val, self._yp, self._xp)
@@ -804,7 +818,7 @@ class AnalogOutputNode(AnalogInputNode):
         return enum(pins)
     
     def halQueuePut(self, value):
-        self._hal_queue.put_nowait(float(value))
+        super().halQueuePut(float(value))
 
     def min():
         def fget(self): return self._min
