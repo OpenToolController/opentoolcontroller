@@ -715,6 +715,8 @@ class AnalogOutputEditor(a_out_base, a_out_form):
         self.mapper.addMapping(self.ui_hal_pin_type      , col.HAL_PIN_TYPE)
         self.mapper.addMapping(self.ui_hal_value         , col.HAL_VALUE)
         self.mapper.addMapping(self.ui_value             , col.VALUE)
+        self.mapper.addMapping(self.ui_min               , col.MIN)
+        self.mapper.addMapping(self.ui_max               , col.MAX)
         self.mapper.addMapping(self.ui_units             , col.UNITS)
         self.mapper.addMapping(self.ui_display_digits    , col.DISPLAY_DIGITS)
         self.mapper.addMapping(self.ui_display_scientific, col.DISPLAY_SCIENTIFIC)
