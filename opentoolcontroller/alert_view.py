@@ -127,7 +127,7 @@ class AlertTableModel(QtCore.QAbstractTableModel):
     
 
     def logToFile(self, row):
-        with open(self._log_file, 'a') as f:
+        with open(str(self._log_file), 'a') as f:
             csv_writer = csv.writer(f)
             csv_writer.writerow(row)
 
@@ -232,7 +232,8 @@ class ActionLogTableModel(QtCore.QAbstractTableModel):
         self.logToFile([str(current_time), str(user), str(action_text)])
     
     def logToFile(self, row):
-        with open(self._log_file, 'a') as f:
+        #remove the str in python 3.6
+        with open(str(self._log_file), 'a') as f:
             csv_writer = csv.writer(f)
             csv_writer.writerow(row)
 
