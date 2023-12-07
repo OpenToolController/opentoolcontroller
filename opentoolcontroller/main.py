@@ -237,6 +237,7 @@ class Window(QtWidgets.QMainWindow):
             self.reader.start()
 
     def startHalReader(self):
+        self.toggleHalAction.setText('Stop Hal Reader')
         self.reader.start()
 
 
