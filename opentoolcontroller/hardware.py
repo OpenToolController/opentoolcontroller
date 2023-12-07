@@ -309,6 +309,7 @@ class HalReader():
                 elif self.sampler_cfg[i] == ['f']:
                     val = float(data[i])
 
+                print('val: ', self.sampler_cfg[i])
                 for index in self.connected_sampler_pins[pin]:
                     if val != self._tool_model.data(index.siblingAtColumn(col.HAL_VALUE), QtCore.Qt.DisplayRole):
                         self._tool_model.setData(index.siblingAtColumn(col.HAL_VALUE), val)
