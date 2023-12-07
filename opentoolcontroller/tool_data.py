@@ -552,7 +552,7 @@ class HalNode(Node):
 
     def halQueueGet(self):
         try:
-            self._hal_queue.popleft()
+            return self._hal_queue.popleft()
         except IndexError:
             return None
         #try:
