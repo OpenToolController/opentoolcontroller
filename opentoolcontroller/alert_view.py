@@ -67,7 +67,7 @@ class AlertTableModel(QtCore.QAbstractTableModel):
         self._data = []
         self._horizontal_header_labels = ['Type','Time', 'System', 'Device', 'Alert']
 
-        self._log_file = Path(defaults.TOOL_DIR + '/logs/alerts_' + datetime.today().strftime('%Y_%m_%d') + '.csv')
+        self._log_file = Path(defaults.TOOL_DIR + '/logs/alerts_' + datetime.today().strftime('%Y_%m') + '.csv')
         if not self._log_file.is_file():
             self.logToFile(self._horizontal_header_labels)
 
@@ -192,7 +192,7 @@ class ActionLogTableModel(QtCore.QAbstractTableModel):
         self._horizontal_header_labels = ['Time','User', 'Action']
         self._current_user_callback = None
 
-        self._log_file = Path(defaults.TOOL_DIR + '/logs/actions_' + datetime.today().strftime('%Y_%m_%d') + '.csv')
+        self._log_file = Path(defaults.TOOL_DIR + '/logs/actions_' + datetime.today().strftime('%Y_%m') + '.csv')
         if not self._log_file.is_file():
             self.logToFile(self._horizontal_header_labels)
 
