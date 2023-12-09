@@ -8,7 +8,6 @@ import xml.etree.ElementTree as ET
 import json
 import os.path
 import numpy as np
-#import queue
 from collections import deque
 
 
@@ -518,7 +517,6 @@ class HalNode(Node):
         self._hal_pin = ''
         self._hal_pin_type = None
         self._queue_max_size = 10
-        #self._hal_queue = queue.Queue(maxsize=self._queue_max_size)
         self._hal_queue = deque([], maxlen=self._queue_max_size)
 
 
@@ -555,19 +553,12 @@ class HalNode(Node):
             return self._hal_queue.popleft()
         except IndexError:
             return None
-        #try:
-        #    return self._hal_queue.get_nowait()
-        #except queue.Empty:
-        #    return None
 
     def halQueuePut(self, value):
         self._hal_queue.append(value)
-        #self._hal_queue.put_nowait(value)
 
     def halQueueClear(self):
         self._hal_queue.clear()
-        #with self._hal_queue.mutex:
-        #    self._hal_queue.queue.clear()
 
     def halPinType(self):
         return self._hal_pin_type
@@ -590,7 +581,6 @@ class HalNode(Node):
         def fset(self,value):
             self._queue_max_size = int(value)
             self._hal_queue = deque([], maxlen=self._queue_max_size)
-            #self._hal_queue = queue.Queue(maxsize=self._queue_max_size)
         return locals()
     queueMaxSize= property(**queueMaxSize())
 
@@ -668,7 +658,6 @@ class DigitalOutputNode(DigitalInputNode):
 
         return enum(pins)
 
-
     def data(self, c):
         r = super().data(c)
         return r
@@ -679,6 +668,7 @@ class DigitalOutputNode(DigitalInputNode):
 
     def halQueuePut(self, value):
         super().halQueuePut(bool(value))
+
 
 class AnalogInputNode(HalNode):
     def __init__(self, parent=None):

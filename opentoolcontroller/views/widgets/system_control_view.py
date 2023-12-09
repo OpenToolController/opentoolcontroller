@@ -136,9 +136,7 @@ class SystemControlView(QtWidgets.QAbstractItemView):
         if hasattr(index.model(), 'mapToSource'):
             index = index.model().mapToSource(index)
 
-        if self._previous_index == index:
-            return
-
+        #this gets a double call if you select it via the graphic icon right now
         model = index.model()
         node  = index.internalPointer()
 
@@ -150,7 +148,6 @@ class SystemControlView(QtWidgets.QAbstractItemView):
             self._current_system_index = index
             self.displaySystem(self._current_system_index)
 
-
         elif type_info == typ.DEVICE_NODE:
             if index.parent() != self._current_system_index:
                 self._current_system_index = index.parent()
@@ -160,8 +157,8 @@ class SystemControlView(QtWidgets.QAbstractItemView):
                 icon.clearSelected()
 
             self._device_icons[index.row()].setSelected()
-            self._previous_index = index
-            self.setCurrentIndex(index)
+
+        self.setCurrentIndex(index)
 
     def setIconPosition(self, index, pos):
         self.model().setData(index.siblingAtColumn(col.POS), pos, QtCore.Qt.EditRole)
