@@ -142,17 +142,28 @@ class Window(QtWidgets.QMainWindow):
         self.saveToolAsAction = QtWidgets.QAction("Save As", self)
         self.saveToolAsAction.triggered.connect(self.saveToolAs)
 
+        self.halMeterAction = QtWidgets.QAction("HAL Meter", self)
+        self.halMeterAction.triggered.connect(self.reader.loadHalMeter)
+
+        self.halScopeAction = QtWidgets.QAction("HAL Scope", self)
+        self.halScopeAction.triggered.connect(self.reader.loadHalScope)
 
         self.file_menu = self.menuBar().addMenu('&File')
+        self.hal_menu = self.menuBar().addMenu('&HAL')
         self.file_menu.addAction(extractAction)
         if self._allow_save:
             self.file_menu.addAction(self.saveToolAction)
         self.file_menu.addAction(self.saveToolAsAction)
-        self.file_menu.addAction(self.toggleHalAction)
+
+        self.hal_menu.addAction(self.toggleHalAction)
+        self.hal_menu.addAction(self.halMeterAction)
+        self.hal_menu.addAction(self.halScopeAction)
 
 
         if not self.reader.halExists():
             self.toggleHalAction.setDisabled(True)
+            self.halMeterAction.setDisabled(True)
+            self.halScopeAction.setDisabled(True)
 
 
         #Add enable direct io control to the menu?

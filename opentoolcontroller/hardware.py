@@ -16,11 +16,7 @@ import ctypes
 #use ctypes.c_ulong, c_long and c_float
 
 
-'''
-Do I need to call find pins when HalReader is made?
-'''
-
-
+#Only setData on HAL nodes here since this is the closest to the hardware
 class HalReader():
     def __init__(self):
         super().__init__()
@@ -312,9 +308,9 @@ class HalReader():
                 for index in self.connected_sampler_pins[pin]:
                     if val != self._tool_model.data(index.siblingAtColumn(col.HAL_VALUE), QtCore.Qt.DisplayRole):
                         self._tool_model.setData(index.siblingAtColumn(col.HAL_VALUE), val)
-                        print("setting: ", 
-                              index.internalPointer().name,  ': ', val, ' was ', 
-                              self._tool_model.data(index.siblingAtColumn(col.HAL_VALUE), QtCore.Qt.DisplayRole))
+                        #print("setting: ", 
+                        #      index.internalPointer().name,  ': ', val, ' was ', 
+                        #      self._tool_model.data(index.siblingAtColumn(col.HAL_VALUE), QtCore.Qt.DisplayRole))
 
 
     def baseStream(self, cfg):
@@ -334,7 +330,7 @@ class HalReader():
             new_val = node.halQueueGet()
             if new_val is not None:
                 if node.halPinType() in ['bit','s32','u32']:
-                    print('halQueueGet', int(new_val))
+                    #print('halQueueGet', int(new_val))
                     new_val = int(new_val) #It wants a 0 or 1 for False/True
                 elif node.halPinType() == 'float':
                     new_val = float(new_val)
@@ -342,7 +338,7 @@ class HalReader():
                 new_stream[i] = new_val
 
         if new_stream != self._previous_stream:
-            print("new_stream: ", new_stream)
+            #print("new_stream: ", new_stream)
             tmp = ''
             for item in new_stream:
                 tmp += str(item) #This might need some truncation
