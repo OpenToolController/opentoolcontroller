@@ -7,17 +7,76 @@ from opentoolcontroller.strings import defaults
 
 import json
 import os.path
-import pprint
-pp = pprint.PrettyPrinter(width=82, compact=True)
+import time
+
+class BehaviorRunner():
+    def __init__(self):
+        super().__init__()
+        self._tick_rate_ms = 500
+        self._timer = QtCore.QTimer()
+        self._timer.timeout.connect(self.tick)
+        self._timer.start(self._tick_rate_ms)
+
+        self._running_behaviors = []
+        self._max_elapsed_ms = 0
+
+    def runAbortSiblings(self, new_behavior):
+        #Remove and reset siblings of the one we're starting
+        self._tmp_running = []
+        for behavior in self._running_behaviors:
+            if new_behavior.toolIndex() == behavior.toolIndex():
+                behavior.setStopped()
+            else:
+                self._tmp_running.append(behavior)
+        self._running_behaviors = self._tmp_running
+
+        new_behavior.setRunning()
+        self._running_behaviors.append(new_behavior)
+
+
+    def stopBehavior(self, behavior):
+        self._running_behaviors = [x for x in self._running_behaviors if x != behavior]
+        behavior.setStopped()
+
+
+    def tick(self):
+        behaviors_to_stop = []
+
+        start_time = time.time()
+
+        for behavior in self._running_behaviors:
+            try:
+                result = behavior.tick()
+                if result in {bt.SUCCESS, bt.FAILURE}:
+                    behaviors_to_stop.append(behavior)
+
+            except:
+                print("failed to run behavior")
+                behaviors_to_stop.append(behavior)
+
+        for behavior in behaviors_to_stop:
+            self.stopBehavior(behavior)
+
+
+        elapsed_sec = time.time() - start_time
+        elapsed_ms = elapsed_sec * 1e3
+        
+        if elapsed_ms > self._max_elapsed_ms:
+            print("Tick time: %0.2f ms" % elapsed_ms)
+            self._max_elapsed_ms = elapsed_ms
+
+
+                
+
+
 
 class BTModel(QtCore.QAbstractItemModel):
+    behaviorRunner = None
 
     def __init__(self, parent=None):
         super().__init__(parent)
         self._root_node = RootSequenceNode()
         self._root_index = self.createIndex(0, 0, self._root_node) #There's a empty index w/out a valid parent above this
-        self._timer = QtCore.QTimer()
-        self._timer.timeout.connect(self.tick)
 
         self._tool_callback = None
         self._index_icon = None
@@ -25,9 +84,17 @@ class BTModel(QtCore.QAbstractItemModel):
         self._tool_model = None
         self._tool_index = None
 
-        self._node_types = {}
 
 
+    '''The tool needs a single timer that all the behaviors use, or maybe per System?
+        if we run the behavior then we need to add ourselvs to our timers tick loop?
+        Probs subclass Qtimer and add a tick thing that we loop through
+
+        Once the behavior finishes then we eject ourselves from the timer, or if it fails
+
+        The timer should track how long all its ticks take
+
+    '''
 
     def setToolModel(self, tool_model):
         self._tool_model = tool_model
@@ -672,28 +739,46 @@ class BTModel(QtCore.QAbstractItemModel):
 
         return indexes
 
+    
 
     def tick(self):
-        #result = self._root_node.child(0).tick()
         result = self._root_node.tick()
         info_text = self._root_node.infoText()
         self.toolModel().setData(self.toolIndex().siblingAtColumn(col.BEHAVIOR_INFO_TEXT), info_text)
 
-        #TODO For the BT_STATUS column it will just update the status from all of them
-        #Might want to change that to update all of them that are in view at some point
         index_1 = self.index(0, col.BT_STATUS, self._root_index)
         self.dataChanged.emit(index_1, index_1)
 
-        if result == bt.SUCCESS or result == bt.FAILURE:
-            self._timer.stop()
-            self.toolModel().setData(self.toolIndex().siblingAtColumn(col.BEHAVIOR_INFO_TEXT), "")
-            self.toolModel().setData(self.toolIndex().siblingAtColumn(col.RUNNING_BEHAVIOR_NAME), '')
-            self.toolModel().setData(self.toolIndex().siblingAtColumn(col.RUNNING_BEHAVIOR), None)
+        return result
+
+    def setRunning(self):
+        self._root_node.reset()
+        self.toolModel().setData(self.toolIndex().siblingAtColumn(col.RUNNING_BEHAVIOR_NAME), self._root_node.name)
+        self.toolModel().setData(self.toolIndex().siblingAtColumn(col.RUNNING_BEHAVIOR), self)
+
+    def setStopped(self):
+        self.toolModel().setData(self.toolIndex().siblingAtColumn(col.BEHAVIOR_INFO_TEXT), '')
+        self.toolModel().setData(self.toolIndex().siblingAtColumn(col.RUNNING_BEHAVIOR_NAME), '')
+        self.toolModel().setData(self.toolIndex().siblingAtColumn(col.RUNNING_BEHAVIOR), None)
+
+
+    def runAbortOthers(self):
+        BTModel.behaviorRunner.runAbortSiblings(self)
+
+    def abort(self):
+        BTModel.behaviorRunner.stopBehavior(self)
+
+
+
+
+
+
+
 
         #if result != bt.RUNNING and result != bt.FAILURE:
         #    self._root_node.reset()
 
-    def run(self):#, var_data=None):
+    #def run(self):#, var_data=None):
         #if var_data is not None:
         #    for key, value in var_data.items():
         #        for index in indexes:
@@ -704,26 +789,15 @@ class BTModel(QtCore.QAbstractItemModel):
         #        #if key in self.indexesOfTypes([typ.BOOL_VAR_NODE, typ.FLOAT_VAR_NODE])
 
 
-        self._timer.stop()
-        self._root_node.reset()
-        self._timer.start(self._root_node.tick_rate_ms)
-        self.toolModel().setData(self.toolIndex().siblingAtColumn(col.RUNNING_BEHAVIOR_NAME), self._root_node.name)
-        self.toolModel().setData(self.toolIndex().siblingAtColumn(col.RUNNING_BEHAVIOR), self)
-        #TODO this timer might not be the most consistent
-        self.tick()
+        #self._timer.stop()
+    #def runAbortOthers(self):
+    #    tool_node = self.toolIndex().internalPointer()
+    #    for behavior in tool_node.behaviors():
+    #        if behavior is not self:
+    #            behavior.abort()
+
+    #    self.run()
 
 
-    def runAbortOthers(self):
-        tool_node = self.toolIndex().internalPointer()
-        for behavior in tool_node.behaviors():
-            if behavior is not self:
-                behavior.abort()
 
-        self.run()
-
-    def abort(self):
-        self._timer.stop()
-        self.toolModel().setData(self.toolIndex().siblingAtColumn(col.BEHAVIOR_INFO_TEXT), '')
-        self.toolModel().setData(self.toolIndex().siblingAtColumn(col.RUNNING_BEHAVIOR_NAME), '')
-        self.toolModel().setData(self.toolIndex().siblingAtColumn(col.RUNNING_BEHAVIOR), None)
 

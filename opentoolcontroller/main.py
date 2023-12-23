@@ -12,7 +12,7 @@ from opentoolcontroller.tool_control_view import ToolControlView
 from opentoolcontroller.alert_view import AlertView, AlertTableModel, ActionLogView, ActionLogTableModel
 from opentoolcontroller.login import LoginView, LoginModel
 
-from opentoolcontroller.bt_model import BTModel
+from opentoolcontroller.bt_model import BTModel, BehaviorRunner
 
 from opentoolcontroller.hardware import HalReader
 from opentoolcontroller.strings import defaults
@@ -59,6 +59,9 @@ class Window(QtWidgets.QMainWindow):
 
         self.reader = HalReader()
         self.tool_model = ToolModel()
+
+        self.behavior_runner = BehaviorRunner()
+        BTModel.behaviorRunner = self.behavior_runner
 
 
         '''Work on enforcing this next! '''
