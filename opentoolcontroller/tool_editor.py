@@ -8,9 +8,6 @@ from opentoolcontroller.views.widgets.behavior_editor_view import BTEditorWindow
 
 from opentoolcontroller.strings import col, typ, defaults
 
-import random
-import pprint
-pp = pprint.PrettyPrinter(width=82, compact=True)
 
 d_in_base,  d_in_form  = uic.loadUiType("opentoolcontroller/views/DigitalInputEditor.ui")
 d_out_base, d_out_form = uic.loadUiType("opentoolcontroller/views/DigitalOutputEditor.ui")
@@ -71,14 +68,13 @@ class CommonEditor(common_editor_base, common_editor_form):
         self.enableEditTool(False)
 
 
-
     def hideEditors(self):
         self._behavior_state_editor.setVisible(False)
         for editor in self._specific_editors.values():
             editor.setVisible(False)
 
 
-    """INPUTS: QModelIndex, QModelIndex"""
+    #INPUTS: QModelIndex, QModelIndex
     def setSelection(self, current, old):
         model = current.model()
 
@@ -106,7 +102,7 @@ class CommonEditor(common_editor_base, common_editor_form):
         self._model = model
         self._proxy_model =  LeafFilterProxyModel(self) #maybe not self?
 
-        """VIEW <------> PROXY MODEL <------> DATA MODEL"""
+        #VIEW <------> PROXY MODEL <------> DATA MODEL
         self._proxy_model.setSourceModel(self._model)
         self._proxy_model.setDynamicSortFilter(True)
         self._proxy_model.setFilterCaseSensitivity(QtCore.Qt.CaseInsensitive)
@@ -145,7 +141,6 @@ class CommonEditor(common_editor_base, common_editor_form):
         self._behavior_state_editor.enableEditBehaviors(enable)
 
 
-
 class NodeEditor(node_base, node_form):
     def __init__(self, parent=None):
         super(node_base, self).__init__(parent)
@@ -174,7 +169,6 @@ class ToolEditor(tool_base, tool_form):
         self.setupUi(self)
         self.mapper = QtWidgets.QDataWidgetMapper()
 
-
     def setModel(self, model):
         if hasattr(model, 'sourceModel'):
             model = model.sourceModel()
@@ -187,12 +181,6 @@ class ToolEditor(tool_base, tool_form):
         parent = current.parent()
         self.mapper.setRootIndex(parent)
         self.mapper.setCurrentModelIndex(current)
-
-
-
-
-
-
 
 
 class SystemEditor(system_base, system_form):
@@ -242,14 +230,6 @@ class SystemEditor(system_base, system_form):
             self.file_signal.emit()
 
 
-        #if file and os.path.isfile(file):
-        #    relative_path = os.path.relpath(file, defaults.TOOL_DIR)
-        #    self.ui_background_svg.setText(relative_path)
-        #    self.file_signal.emit()
-        #else:
-        #    pass
-
-
 class BehaviorStateEditor(QtWidgets.QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -278,7 +258,6 @@ class BehaviorStateEditor(QtWidgets.QWidget):
         self._grid.addWidget(wid, ui_row, 0, 1, 2)
 
 
-
         #state
         self.ui_state = QtWidgets.QLineEdit('')
         self.ui_state.setEnabled(False)
@@ -298,7 +277,6 @@ class BehaviorStateEditor(QtWidgets.QWidget):
         ui_row += 1
         self._grid.addWidget(self._ui_states, ui_row, 0,1,-1)
 
-
         insert_state_action = QtWidgets.QAction("Insert", self)
         insert_state_action.triggered.connect(self.insertState)
 
@@ -307,7 +285,6 @@ class BehaviorStateEditor(QtWidgets.QWidget):
 
         self._ui_states.addActions([insert_state_action, remove_state_action])
         self._ui_states.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
-
 
 
     def setModel(self, model):
@@ -359,7 +336,6 @@ class BehaviorStateEditor(QtWidgets.QWidget):
             editor.setModel(behavior)
             editor.setEditable(False)
             editor.show()
-
 
     def removeBehavior(self, row):
         self.behaviors.pop(row)
@@ -502,9 +478,6 @@ class DeviceEditor(QtWidgets.QWidget):
         self.mapper.setCurrentModelIndex(current)
 
 
-
-
-
 class DeviceIconEditor(device_icon_base, device_icon_form):
     file_signal = QtCore.pyqtSignal()
 
@@ -518,14 +491,11 @@ class DeviceIconEditor(device_icon_base, device_icon_form):
         self.file_signal.connect(self.mapper.submit)
         self.ui_select_image.clicked.connect(self.selectSVG)
         self.ui_svg.textChanged.connect(lambda update_system_svg: self.ui_svg_widget.load(self.fullPath(self.ui_svg.text())))
-        #self.ui_svg_widget.load(self.ui_svg.text())
 
         self.ui_default_layer.currentIndexChanged.connect(self.defaultLayerChanged)
 
         self.ui_color_button.clicked.connect(self.colorDialog)
         self._font_color = QtGui.QColor(0xFFFFFF) 
-
-
 
     def fullPath(self, relative_path):
         return defaults.TOOL_DIR +'/'+ relative_path
@@ -550,13 +520,11 @@ class DeviceIconEditor(device_icon_base, device_icon_form):
         self._font_color = color
         self.updateColorBox()
 
-
     def setModel(self, model):
         if hasattr(model, 'sourceModel'):
             model = model.sourceModel()
         self.mapper.setModel(model)
         self.mapper2.setModel(model)
-
 
         self.mapper.addMapping(self.ui_svg      , col.SVG)
         self.mapper.addMapping(self.ui_x        , col.X)
@@ -627,7 +595,6 @@ class DeviceIconEditor(device_icon_base, device_icon_form):
             self.ui_svg.setText(relative_path)
             self.file_signal.emit()
             self.loadDefaultLayerBox()
-
 
     
     fontColorZ = QtCore.pyqtProperty(QtCore.QVariant, getFontColor, setFontColor)
