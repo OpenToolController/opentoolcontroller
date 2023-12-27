@@ -39,7 +39,6 @@ class CommonEditor(common_editor_base, common_editor_form):
         self._node_editor = NodeEditor(self)
         self._behavior_state_editor = BehaviorStateEditor(self)
         self.ui_common_box.addWidget(self._node_editor)
-        #self.ui_common_box.addWidget(self._behavior_state_editor)
 
         #Only one of these is shown at a time
         self._specific_editors = { typ.TOOL_NODE        : ToolEditor(self),
@@ -59,7 +58,6 @@ class CommonEditor(common_editor_base, common_editor_form):
 
         self.ui_specific_box.addWidget(self._behavior_state_editor)
         self.hideEditors()
-        #self.ui_splitter.setSizes([self.width()*0.6, self.width()*0.4])
 
 
         self._settings = QtCore.QSettings('OpenToolController', 'test1')
@@ -220,7 +218,7 @@ class SystemEditor(system_base, system_form):
             model = model.sourceModel()
 
         self.mapper.setModel(model)
-        self.mapper.addMapping(self.ui_background_svg, col.SVG)
+        self.mapper.addMapping(self.ui_background_svg, col.BACKGROUND_SVG)
         self.mapper.addMapping(self.ui_movable_icons, col.MOVABLE_ICONS)
 
 
@@ -238,13 +236,18 @@ class SystemEditor(system_base, system_form):
         file = QtWidgets.QFileDialog.getOpenFileName(self,"QFileDialog.getOpenFileName()", starting_dir, 
                                                             "SVG (*.svg);;All Files (*)", options=options)
         file = file[0]
-
         if file and os.path.isfile(file):
             relative_path = os.path.relpath(file, defaults.TOOL_DIR)
             self.ui_background_svg.setText(relative_path)
             self.file_signal.emit()
-        else:
-            pass
+
+
+        #if file and os.path.isfile(file):
+        #    relative_path = os.path.relpath(file, defaults.TOOL_DIR)
+        #    self.ui_background_svg.setText(relative_path)
+        #    self.file_signal.emit()
+        #else:
+        #    pass
 
 
 class BehaviorStateEditor(QtWidgets.QWidget):
@@ -620,6 +623,7 @@ class DeviceIconEditor(device_icon_base, device_icon_form):
         file = file[0]
         if file and os.path.isfile(file):
             relative_path = os.path.relpath(file, defaults.TOOL_DIR)
+            print("Path: ", relative_path)
             self.ui_svg.setText(relative_path)
             self.file_signal.emit()
             self.loadDefaultLayerBox()
