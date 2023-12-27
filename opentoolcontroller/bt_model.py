@@ -20,6 +20,14 @@ class BehaviorRunner():
         self._running_behaviors = []
         self._max_elapsed_ms = 0
 
+    def setTickRateMS(self, tick_rate_ms):
+        self._tick_rate_ms = int(tick_rate_ms)
+        self._timer.stop()
+        self._timer.start(self._tick_rate_ms)
+
+    def tickRateMS(self):
+        return self._tick_rate_ms
+
     def runAbortSiblings(self, new_behavior):
         #Remove and reset siblings of the one we're starting
         self._tmp_running = []

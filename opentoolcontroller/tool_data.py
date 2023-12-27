@@ -239,9 +239,25 @@ class BehaviorNode(Node):
 class ToolNode(BehaviorNode):
     def __init__(self, parent=None):
         super().__init__(parent)
+        self._tick_rate_ms = 250
 
     def typeInfo(self):
         return typ.TOOL_NODE
+
+    def data(self, c):
+        r = super().data(c)
+        if   c is col.TICK_RATE_MS: r = self.tickRateMS
+        return r
+
+    def setData(self, c, value):
+        super().setData(c, value)
+        if c is col.TICK_RATE_MS : self.tickRateMS = value
+
+    def tickRateMS():
+        def fget(self): return self._tick_rate_ms
+        def fset(self, value): self._tick_rate_ms = int(value)
+        return locals()
+    tickRateMS = property(**tickRateMS())
 
 
 class SystemNode(BehaviorNode):

@@ -7,7 +7,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 import xml.etree.ElementTree as ET
 from opentoolcontroller.tool_model import ToolModel
-from opentoolcontroller.tool_editor import ToolEditor
+from opentoolcontroller.tool_editor import CommonEditor
 from opentoolcontroller.tool_control_view import ToolControlView
 from opentoolcontroller.alert_view import AlertView, AlertTableModel, ActionLogView, ActionLogTableModel
 from opentoolcontroller.login import LoginView, LoginModel
@@ -15,7 +15,7 @@ from opentoolcontroller.login import LoginView, LoginModel
 from opentoolcontroller.bt_model import BTModel, BehaviorRunner
 
 from opentoolcontroller.hardware import HalReader
-from opentoolcontroller.strings import defaults
+from opentoolcontroller.strings import defaults, col
 
 import gc, pprint
 
@@ -60,8 +60,6 @@ class Window(QtWidgets.QMainWindow):
         self.reader = HalReader()
         self.tool_model = ToolModel()
 
-        self.behavior_runner = BehaviorRunner()
-        BTModel.behaviorRunner = self.behavior_runner
 
 
         '''Work on enforcing this next! '''
@@ -72,6 +70,17 @@ class Window(QtWidgets.QMainWindow):
         self.tool_model.setLaunchValues()
         self.tool_model.loadBehaviors()
 
+
+
+
+        tool_index = self.tool_model.index(0, 0, QtCore.QModelIndex())
+        tick_rate_ms = self.tool_model.data(tool_index.siblingAtColumn(col.TICK_RATE_MS), QtCore.Qt.DisplayRole)
+        self.behavior_runner = BehaviorRunner()
+        BTModel.behaviorRunner = self.behavior_runner
+        print("Tick Rate: ", tick_rate_ms)
+
+
+
         self.setWindowTitle('Open Tool Controller')
         self.resize(800,600)
 
@@ -81,7 +90,7 @@ class Window(QtWidgets.QMainWindow):
         self._login_model.addLoginChangedCallback(self._control_view.enableRunDeviceBehaviors, self._login_model.RUN_BEHAVIORS)
         self._login_model.addLoginChangedCallback(self._control_view.enableEditBehaviors, self._login_model.EDIT_BEHAVIOR)
 
-        self._tool_editor = ToolEditor()
+        self._tool_editor = CommonEditor()
         self._tool_editor.setModel(self.tool_model)
         self._tool_editor.setWindowTitle('Tool Editor')
         self._login_model.addLoginChangedCallback(self._tool_editor.enableEditTool, self._login_model.EDIT_TOOL)
