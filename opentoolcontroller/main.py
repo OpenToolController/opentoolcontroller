@@ -263,7 +263,8 @@ class Window(QtWidgets.QMainWindow):
         self.toggleHalAction.setText('Stop Hal Reader')
         self.reader.start()
 
-
+    def setMovableIcons(self):
+        self._control_view.setMovableIcons(True)
 
 
 
@@ -278,6 +279,7 @@ if __name__ == '__main__':
 
     parser.add_argument('tool_dir', help='The directory containing the tool definition.')
     parser.add_argument('-S', '--Start', action='store_true', help='Starts HAL reader on launch')
+    parser.add_argument('-m', '--movable_icons', action='store_true', help='Allows device icons to be moved by the mouse')
     #TODO add option to start a tool behavior?
     #parser.add_argument('-v', '--verbose')
 
@@ -291,6 +293,8 @@ if __name__ == '__main__':
     w = Window(tool_dir)
     if args.Start:
         w.startHalReader()
+    if args.movable_icons:
+        w.setMovableIcons()
     w.show()
     sys.exit(app.exec_())
 

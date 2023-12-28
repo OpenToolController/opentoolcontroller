@@ -64,3 +64,6 @@ class ToolControlView(tool_control_view_base, tool_control_view_form):
     def enableEditBehaviors(self, enable):
         self.ui_node_control_view.enableEditBehaviors(enable)
 
+
+    def setMovableIcons(self, value):
+        self.ui_system_control_view.setMovableIcons(value)

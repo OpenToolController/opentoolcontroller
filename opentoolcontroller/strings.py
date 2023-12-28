@@ -50,7 +50,6 @@ class col():
 
     #SystemNode
     BACKGROUND_SVG = 3
-    MOVABLE_ICONS = 4
 
     #BehaviorNode
     STATE = 5

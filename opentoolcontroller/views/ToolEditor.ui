@@ -52,6 +52,12 @@
          <height>0</height>
         </size>
        </property>
+       <property name="minimum">
+        <number>50</number>
+       </property>
+       <property name="maximum">
+        <number>2000</number>
+       </property>
       </widget>
      </item>
     </layout>

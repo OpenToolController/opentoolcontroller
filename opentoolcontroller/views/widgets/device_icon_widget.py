@@ -48,6 +48,10 @@ class DeviceIconWidget(QtSvg.QGraphicsSvgItem):
     def mousePressEvent(self, event):
         super().mousePressEvent(event)
         self._callback(self._index.parent())
+        event.accept()
+
+    def mouseReleaseEvent(self, event):
+        super().mouseReleaseEvent(event)
         self._pos_callback(self._index, self.scenePos())
         event.accept()
 

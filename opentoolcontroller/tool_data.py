@@ -263,7 +263,6 @@ class ToolNode(BehaviorNode):
 class SystemNode(BehaviorNode):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self._movable_icons = False
         self._system_is_online = False
         self._device_manual_control = False
         self._background_svg_relative_path = defaults.SYSTEM_BACKGROUND
@@ -274,7 +273,6 @@ class SystemNode(BehaviorNode):
     def data(self, c):
         r = super().data(c)
         if   c is col.BACKGROUND_SVG        : r = self.backgroundSVG
-        elif c is col.MOVABLE_ICONS         : r = self.movableIcons()
         elif c is col.SYSTEM_IS_ONLINE      : r = self.systemIsOnline
         elif c is col.DEVICE_MANUAL_CONTROL : r = self.deviceManualControl
         return r
@@ -282,12 +280,9 @@ class SystemNode(BehaviorNode):
     def setData(self, c, value):
         super().setData(c, value)
         if   c is col.BACKGROUND_SVG        : self.backgroundSVG = value
-        elif c is col.MOVABLE_ICONS         : self._movable_icons = value
         elif c is col.SYSTEM_IS_ONLINE      : self.systemIsOnline = value
         elif c is col.DEVICE_MANUAL_CONTROL : self.deviceManualControl = value
 
-    def movableIcons(self):
-        return self._movable_icons
 
     def backgroundSVGFullPath(self):
         full_path = defaults.TOOL_DIR + '/' + self._background_svg_relative_path

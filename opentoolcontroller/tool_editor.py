@@ -11,7 +11,6 @@ from opentoolcontroller.strings import col, typ, defaults
 
 d_in_base,  d_in_form  = uic.loadUiType("opentoolcontroller/views/DigitalInputEditor.ui")
 d_out_base, d_out_form = uic.loadUiType("opentoolcontroller/views/DigitalOutputEditor.ui")
-
 a_in_base,  a_in_form  = uic.loadUiType("opentoolcontroller/views/AnalogInputEditor.ui")
 a_out_base, a_out_form = uic.loadUiType("opentoolcontroller/views/AnalogOutputEditor.ui")
 
@@ -195,7 +194,6 @@ class SystemEditor(system_base, system_form):
         self.file_signal.connect(self.mapper.submit)
         self.ui_select_image.clicked.connect(self.selectSVG)
         self.ui_background_svg.textChanged.connect(lambda update_system_svg: self.ui_svg_widget.load(self.fullPath(self.ui_background_svg.text())))
-        self.ui_movable_icons.stateChanged.connect(self.mapper.submit)
     
 
     def fullPath(self, relative_path):
@@ -207,7 +205,6 @@ class SystemEditor(system_base, system_form):
 
         self.mapper.setModel(model)
         self.mapper.addMapping(self.ui_background_svg, col.BACKGROUND_SVG)
-        self.mapper.addMapping(self.ui_movable_icons, col.MOVABLE_ICONS)
 
 
     def setSelection(self, current):

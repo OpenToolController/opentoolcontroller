@@ -4,7 +4,6 @@ from PyQt5 import QtGui, QtCore, QtWidgets, QtSvg
 from opentoolcontroller.strings import typ, col
 from opentoolcontroller.views.widgets.device_icon_widget import DeviceIconWidget
 
-'''Need to display button for the system and tool! '''
 #TODO Change name to SystemGraphicView ???
 class SystemControlView(QtWidgets.QAbstractItemView):
     def __init__(self, parent=None):
@@ -27,7 +26,13 @@ class SystemControlView(QtWidgets.QAbstractItemView):
         self.setLayout(self.h_layout)
 
         self._current_system_index = None
+        self._movable_icons = False
 
+    def setMovableIcons(self, value):
+        self._movable_icons = bool(value)
+
+    def movableIcons(self):
+        return self._movable_icons
 
     def resizeEvent(self, event):
         self._view.fitInView(self._scene_box, QtCore.Qt.KeepAspectRatio)
@@ -43,9 +48,6 @@ class SystemControlView(QtWidgets.QAbstractItemView):
                 if index.column() == col.BACKGROUND_SVG:
                     self.setBackground(tool_model.data(index, QtCore.Qt.DisplayRole))
 
-                elif index.column() == col.MOVABLE_ICONS:
-                    for wid in self._device_icons:
-                        wid.setMovable(index.internalPointer().movableIcons())
 
 
             elif index.internalPointer().typeInfo() == typ.DEVICE_ICON_NODE and  index.parent().parent() == self._current_system_index:
@@ -107,7 +109,6 @@ class SystemControlView(QtWidgets.QAbstractItemView):
         except:
             pass
 
-            #print(index_top_left.row(), index_top_left.column(), index_bottom_right.row(), index_bottom_right.column())
 
 
     def rowsAboutToBeRemoved(self, parent_index, start, end):
@@ -173,7 +174,7 @@ class SystemControlView(QtWidgets.QAbstractItemView):
 
         system_node = system_index.internalPointer()
         svg_image = system_node.backgroundSVGFullPath()
-        movable = system_node.movableIcons()
+        movable = self.movableIcons()
 
         #Border line around background image
         rectangle = QtWidgets.QGraphicsRectItem(self._scene_box)
@@ -199,7 +200,6 @@ class SystemControlView(QtWidgets.QAbstractItemView):
             wid.setPosCallback(self.setIconPosition)
             wid.setIndex(icon_index)
             wid.setElementId(icon_node.layer())
-            print("icon_node layer", icon_node.layer())
             wid.setMovable(movable)
 
             #wid.setPos(float(icon_node.x) , float(icon_node.y))
