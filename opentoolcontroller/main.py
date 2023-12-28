@@ -160,12 +160,17 @@ class Window(QtWidgets.QMainWindow):
         self.halScopeAction = QtWidgets.QAction("HAL Scope", self)
         self.halScopeAction.triggered.connect(self.reader.loadHalScope)
 
+        self.toggleMovableIconsAction = QtWidgets.QAction("Movable Icons", self)
+        self.toggleMovableIconsAction.triggered.connect(self.toggleMovableIcons)
+        self.toggleMovableIconsAction.setCheckable(True)
+
         self.file_menu = self.menuBar().addMenu('&File')
         self.hal_menu = self.menuBar().addMenu('&HAL')
         self.file_menu.addAction(extractAction)
         if self._allow_save:
             self.file_menu.addAction(self.saveToolAction)
         self.file_menu.addAction(self.saveToolAsAction)
+        self.file_menu.addAction(self.toggleMovableIconsAction)
 
         self.hal_menu.addAction(self.toggleHalAction)
         self.hal_menu.addAction(self.halMeterAction)
@@ -266,6 +271,14 @@ class Window(QtWidgets.QMainWindow):
     def setMovableIcons(self):
         self._control_view.setMovableIcons(True)
 
+    def toggleMovableIcons(self):
+        if self._control_view.movableIcons():
+            self.toggleMovableIconsAction.setChecked(False)
+            self._control_view.setMovableIcons(False)
+        else:
+            self.toggleMovableIconsAction.setChecked(True)
+            self._control_view.setMovableIcons(True)
+
 
 
 
@@ -279,8 +292,8 @@ if __name__ == '__main__':
 
     parser.add_argument('tool_dir', help='The directory containing the tool definition.')
     parser.add_argument('-S', '--Start', action='store_true', help='Starts HAL reader on launch')
-    parser.add_argument('-m', '--movable_icons', action='store_true', help='Allows device icons to be moved by the mouse')
     #TODO add option to start a tool behavior?
+    #TODO add option to allow or not allow editing, maybe hide the editor tab, or hide it depending on login level
     #parser.add_argument('-v', '--verbose')
 
     args = parser.parse_args()
@@ -293,8 +306,6 @@ if __name__ == '__main__':
     w = Window(tool_dir)
     if args.Start:
         w.startHalReader()
-    if args.movable_icons:
-        w.setMovableIcons()
     w.show()
     sys.exit(app.exec_())
 

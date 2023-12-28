@@ -30,6 +30,7 @@ class SystemControlView(QtWidgets.QAbstractItemView):
 
     def setMovableIcons(self, value):
         self._movable_icons = bool(value)
+        self.setSelection(self._current_system_index)
 
     def movableIcons(self):
         return self._movable_icons
@@ -104,8 +105,6 @@ class SystemControlView(QtWidgets.QAbstractItemView):
                             wid.text_wid = None
 
 
-
-
         except:
             pass
 
@@ -134,6 +133,8 @@ class SystemControlView(QtWidgets.QAbstractItemView):
 
     #This abstract view needs to emit a currentChanged(
     def setSelection(self, index):
+        if index is None:
+            return
         if hasattr(index.model(), 'mapToSource'):
             index = index.model().mapToSource(index)
 
