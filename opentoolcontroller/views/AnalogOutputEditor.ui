@@ -42,7 +42,7 @@
       <widget class="QLabel" name="label_4">
        <property name="minimumSize">
         <size>
-         <width>0</width>
+         <width>150</width>
          <height>0</height>
         </size>
        </property>
@@ -71,7 +71,7 @@
       <widget class="QLabel" name="label_3">
        <property name="minimumSize">
         <size>
-         <width>0</width>
+         <width>150</width>
          <height>0</height>
         </size>
        </property>
@@ -87,7 +87,7 @@
       <widget class="QLabel" name="label_5">
        <property name="minimumSize">
         <size>
-         <width>0</width>
+         <width>150</width>
          <height>0</height>
         </size>
        </property>
@@ -106,7 +106,7 @@
       <widget class="QLabel" name="label_6">
        <property name="minimumSize">
         <size>
-         <width>0</width>
+         <width>150</width>
          <height>0</height>
         </size>
        </property>
@@ -132,7 +132,7 @@
       <widget class="QLabel" name="label_7">
        <property name="minimumSize">
         <size>
-         <width>0</width>
+         <width>150</width>
          <height>0</height>
         </size>
        </property>
@@ -161,7 +161,7 @@
       <widget class="QLabel" name="label_8">
        <property name="minimumSize">
         <size>
-         <width>0</width>
+         <width>150</width>
          <height>0</height>
         </size>
        </property>
@@ -184,16 +184,30 @@
       </widget>
      </item>
      <item row="5" column="1">
-      <widget class="QDoubleSpinBox" name="ui_min"/>
+      <widget class="QDoubleSpinBox" name="ui_min">
+       <property name="minimum">
+        <double>-999999999.000000000000000</double>
+       </property>
+       <property name="maximum">
+        <double>999999999.000000000000000</double>
+       </property>
+      </widget>
      </item>
      <item row="6" column="1">
-      <widget class="QDoubleSpinBox" name="ui_max"/>
+      <widget class="QDoubleSpinBox" name="ui_max">
+       <property name="minimum">
+        <double>-999999999.000000000000000</double>
+       </property>
+       <property name="maximum">
+        <double>999999999.000000000000000</double>
+       </property>
+      </widget>
      </item>
      <item row="6" column="0">
       <widget class="QLabel" name="label_10">
        <property name="minimumSize">
         <size>
-         <width>0</width>
+         <width>150</width>
          <height>0</height>
         </size>
        </property>
@@ -209,7 +223,7 @@
       <widget class="QLabel" name="label_9">
        <property name="minimumSize">
         <size>
-         <width>0</width>
+         <width>150</width>
          <height>0</height>
         </size>
        </property>

@@ -5,7 +5,6 @@ import os
 from opentoolcontroller.views.widgets.tool_tree_view import ToolTreeView
 from opentoolcontroller.tool_model import LeafFilterProxyModel
 from opentoolcontroller.views.widgets.behavior_editor_view import BTEditorWindow, BTEditor
-
 from opentoolcontroller.strings import col, typ, defaults
 
 

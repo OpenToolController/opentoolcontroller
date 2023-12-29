@@ -10,7 +10,6 @@ import os.path
 import numpy as np
 from collections import deque
 
-
 from opentoolcontroller.bt_model import BTModel
 from opentoolcontroller.strings import defaults, col, typ
 from opentoolcontroller.message_box import MessageBox
@@ -332,11 +331,11 @@ class DeviceNode(BehaviorNode):
 class DeviceIconNode(Node):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self._name     = 'Icon'
-        self._x        = 50.0
-        self._y        = 50.0
+        self._name = 'Icon'
+        self._x = 50.0
+        self._y = 50.0
         self._rotation = 0.0
-        self._scale    = 1.0
+        self._scale = 1.0
         self._default_layer = None
 
         self._layer = None
@@ -594,8 +593,6 @@ class HalNode(Node):
             self._hal_queue = deque([], maxlen=self._queue_max_size)
         return locals()
     queueMaxSize= property(**queueMaxSize())
-
-
 
 
 class DigitalInputNode(HalNode):
@@ -990,6 +987,7 @@ class IntVarNode(Node):
         def fset(self, value): self._use_launch_value = bool(value)
         return locals()
     useLaunchValue = property(**useLaunchValue())
+
 
 class FloatVarNode(Node):
     def __init__(self, parent=None):

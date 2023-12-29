@@ -41,28 +41,24 @@ class Window(QtWidgets.QMainWindow):
                 pass
 
         '''Add something to select where to save if we start a new one '''
-
         self._login_model = LoginModel()
         self._login_view = LoginView(self._login_model)
         self._login_view.setWindowTitle('Login')
 
-        self._alert_model =  AlertTableModel()
+        self._alert_model = AlertTableModel()
         self._alert_view = AlertView(self._alert_model)
         self._alert_view.setWindowTitle('Alerts')
         self._login_model.addLoginChangedCallback(self._alert_view.enableClearAlerts, self._login_model.CLEAR_ALERTS)
 
-        self._action_log_model =  ActionLogTableModel()
+        self._action_log_model = ActionLogTableModel()
         self._action_log_model.setCurrentUser(self._login_model.currentUser)
         self._action_log_view = ActionLogView(self._action_log_model)
         self._action_log_view.setWindowTitle('Action Log')
-
 
         self.reader = HalReader()
         self.tool_model = ToolModel()
 
 
-
-        '''Work on enforcing this next! '''
         if json_data is not None:
             self.tool_model.loadJSON(json_data)
         self.tool_model.setAlertCallback(self._alert_model.addAlert)
@@ -71,19 +67,13 @@ class Window(QtWidgets.QMainWindow):
         self.tool_model.loadBehaviors()
 
 
-
-
         tool_index = self.tool_model.index(0, 0, QtCore.QModelIndex())
         tick_rate_ms = self.tool_model.data(tool_index.siblingAtColumn(col.TICK_RATE_MS), QtCore.Qt.DisplayRole)
         self.behavior_runner = BehaviorRunner()
         BTModel.behaviorRunner = self.behavior_runner
-        print("Tick Rate: ", tick_rate_ms)
-
-
 
         self.setWindowTitle('Open Tool Controller')
         self.resize(800,600)
-
 
         self._control_view = ToolControlView(self.tool_model)
         self._control_view.setWindowTitle('Control')
@@ -100,7 +90,6 @@ class Window(QtWidgets.QMainWindow):
         dock1.setWidget(self._control_view)
         dock1.setContextMenuPolicy(QtCore.Qt.PreventContextMenu)
 
-
         dock2 = QtWidgets.QDockWidget('Tool Editor', self, objectName='editor')
         dock2.setWidget(self._tool_editor)
         dock2.setContextMenuPolicy(QtCore.Qt.PreventContextMenu)
@@ -116,7 +105,6 @@ class Window(QtWidgets.QMainWindow):
         dock5 = QtWidgets.QDockWidget('Action Log', self, objectName='action_log')
         dock5.setWidget(self._action_log_view)
         dock5.setContextMenuPolicy(QtCore.Qt.PreventContextMenu)
-
 
         dock1.setFeatures(QtWidgets.QDockWidget.DockWidgetFloatable | QtWidgets.QDockWidget.DockWidgetMovable)
         dock2.setFeatures(QtWidgets.QDockWidget.DockWidgetFloatable | QtWidgets.QDockWidget.DockWidgetMovable)
@@ -241,8 +229,7 @@ class Window(QtWidgets.QMainWindow):
         reply = QtWidgets.QMessageBox.question(self, 'Message', quit_msg, QtWidgets.QMessageBox.Yes, QtWidgets.QMessageBox.No)
 
         if reply == QtWidgets.QMessageBox.Yes:
-            #self.reader.stop()
-
+            self.reader.stop()
             self._tool_editor.close()
             self._control_view.close()
             self._alert_view.close()
@@ -302,7 +289,6 @@ if __name__ == '__main__':
 
 
     app = QtWidgets.QApplication(sys.argv)
-    #app.setStyle("fusion") #Changing the style
     w = Window(tool_dir)
     if args.Start:
         w.startHalReader()
