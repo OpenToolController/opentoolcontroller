@@ -8,6 +8,7 @@ from opentoolcontroller.strings import defaults
 import json
 import os.path
 import time
+import pickle
 
 class BehaviorRunner():
     def __init__(self):
@@ -602,6 +603,44 @@ class BTModel(QtCore.QAbstractItemModel):
 
         return True
 
+    def itemFromIndex(self, index):
+        if index.isValid():
+            return index.internalPointer()
+        return self._root_node
+
+    def mimeTypes(self):
+        types = QtCore.QStringList()
+        types.append('application/x-pyobj')
+        return types
+
+    def mimeData(self, index):
+        '''Encode serialized data from the item at the given index into a QMimeData object.'''
+        data = ''
+        item = self.itemFromIndex(index)
+
+        print(item)
+        for k, v in item.__dict__.items():
+            try:
+                pickle.dumps(v)
+                print("can pickle: ", k, " - ", v)
+            except:
+                attribute = k
+                print("can't pickle: ", attribute)
+
+
+
+        #try:
+        #    data += pickle.dumps( item )
+        #except:
+        #    pass
+        #
+        #print("mimeData")
+        #print(data)
+
+        #mimedata = QtCore.QMimeData()
+        #mimedata.setData('application/x-pynode-item-instance', data )
+        #print(mimedata)
+        #return mimedata
 
 
     #TODO might be buggy casue not all nodes have position now

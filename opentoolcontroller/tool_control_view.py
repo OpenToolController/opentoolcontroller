@@ -31,8 +31,8 @@ class ToolControlView(tool_control_view_base, tool_control_view_form):
         self.ui_node_control_view.setModel(self._model)
         self.ui_node_control_view.show()
 
-        self.ui_splitter_horizontal.setSizes([self.width()*0.6, self.width()*0.4])
-        self.ui_splitter_vertical.setSizes([self.height()*0.4, self.height()*0.6])
+        self.ui_splitter_horizontal.setSizes([int(self.width()*0.6), int(self.width()*0.4)])
+        self.ui_splitter_vertical.setSizes([int(self.height()*0.4), int(self.height()*0.6)])
         self.ui_tree.setColumnWidth(0,200)
         self.ui_tree.expandToDepth(1)
         self.ui_tree.setColumnHidden(1, True)

@@ -443,6 +443,7 @@ class BTEditor(QtWidgets.QAbstractItemView):
         item.setIndexPos(QtCore.QPersistentModelIndex(index.siblingAtColumn(col.POS)))
         item.setCallback(self.setData)
         item.setDeleteCallback(self.removeGraphicItem)
+        item.setCutCallback(self.cutGraphicItem)
         item.setAddCallback(self.addGraphicItem)
 
 
@@ -552,6 +553,14 @@ class BTEditor(QtWidgets.QAbstractItemView):
         p_index = self.indexFromGraphicItem(g_item)
         if p_index is not None:
             self.model().removeRows(p_index.row(), 1, p_index.parent())
+    
+    def cutGraphicItem(self, g_item):
+        p_index = self.indexFromGraphicItem(g_item)
+        if p_index is not None:
+            index = QtCore.QModelIndex(p_index)
+            self.model().mimeData(index)
+
+
 
 
     #Called from the scene to insert a node into the model

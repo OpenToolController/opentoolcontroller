@@ -174,6 +174,9 @@ class NodeGraphicsItem(QtWidgets.QGraphicsItem):
     def setDeleteCallback(self, value):
         self._delete_callback = value
 
+    def setCutCallback(self, value):
+        self._cut_callback = value
+
     def setAddCallback(self, value):
         self._add_callback = value
 
@@ -381,12 +384,15 @@ class NodeGraphicsItem(QtWidgets.QGraphicsItem):
         menu = QtWidgets.QMenu()
         if self._allow_delete:
             delete_action = menu.addAction("Delete")
+            cut_action = menu.addAction("Cut")
 
         selected = menu.exec(event.screenPos())
 
         if self._allow_delete:
             if selected == delete_action:
                 self._delete_callback(self)
+            if selected == cut_action:
+                self._cut_callback(self)
 
 class SequenceNodeGraphicsItem(NodeGraphicsItem):
     def __init__(self, type=typ.SEQUENCE_NODE):
