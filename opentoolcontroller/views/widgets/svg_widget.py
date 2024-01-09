@@ -18,7 +18,7 @@ class SVGWidget(QtSvg.QSvgWidget):
             ratio = size.height()/size.width()
             #length = min(self.width(), self.height())
             length = self.width()
-            self.setMinimumHeight(ratio * length)
+            self.setMinimumHeight(int(ratio * length))
             if renderer.elementExists(self._element_id):
                 renderer.render(painter, self._element_id, QtCore.QRectF(0, 0, length, ratio * length))
             else:
