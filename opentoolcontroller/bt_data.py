@@ -370,6 +370,7 @@ class RepeatNode(Node):
 
         else:
             self._status = bt.RUNNING
+            result = bt.SUCCESS
             for i, child in enumerate(self._children[self._current_child:]):
                 result = child.tick()
 
