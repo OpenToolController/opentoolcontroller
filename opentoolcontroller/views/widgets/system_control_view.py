@@ -223,6 +223,7 @@ class SystemControlView(QtWidgets.QAbstractItemView):
 
                 font = QtGui.QFont("Helvetica", icon_node.fontSize)
                 text_wid = self._scene.addText(icon_node.text(), font)
+                print("text: ", icon_node.text())
                 text_wid.setPos(float(icon_node.x + icon_node.textX) , float(icon_node.y + icon_node.textY))
                 text_wid.setDefaultTextColor(icon_node.fontColor())
                 wid.text_wid = text_wid
