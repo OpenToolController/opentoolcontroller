@@ -59,8 +59,9 @@ class BehaviorRunner():
                 if result in {bt.SUCCESS, bt.FAILURE}:
                     behaviors_to_stop.append(behavior)
 
-            except:
+            except Exception as e:
                 print("failed to run behavior")
+                print(e)
                 behaviors_to_stop.append(behavior)
 
         for behavior in behaviors_to_stop:
