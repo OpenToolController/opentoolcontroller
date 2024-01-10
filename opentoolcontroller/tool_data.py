@@ -391,7 +391,7 @@ class DeviceIconNode(Node):
         elif c is col.FONT_SIZE     : r = self.fontSize
         elif c is col.FONT_COLOR    : r = self._font_color
 
-        elif c is col.POS           : r = QtCore.QPointF(self.x, self.y)
+        elif c is col.POS           : r = self.pos()
 
         return r
 
@@ -453,7 +453,7 @@ class DeviceIconNode(Node):
     svg = property(**svg())
 
     def pos(self):
-        return QtCore.QPoint(self._x, self._y)
+        return QtCore.QPoint(int(self._x), int(self._y))
 
     def x():
         def fget(self): return self._x
