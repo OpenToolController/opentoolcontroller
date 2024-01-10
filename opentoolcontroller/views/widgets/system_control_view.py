@@ -182,7 +182,7 @@ class SystemControlView(QtWidgets.QAbstractItemView):
         self._scene.addItem(rectangle)
 
         background = QtGui.QPixmap(svg_image)
-        background = background.scaled(self._scene_box.width(), self._scene_box.height(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
+        background = background.scaled(int(self._scene_box.width()), int(self._scene_box.height()), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
         self._scene.addPixmap(background)
 
 
