@@ -211,19 +211,10 @@ class SystemControlView(QtWidgets.QAbstractItemView):
             self._device_icons.append(wid)
             self._scene.addItem(wid)
 
+            wid.text_wid = None
             if icon_node.hasText:
-                #text_wid = self._scene.addWidget(QtWidgets.QLabel(icon_node.text()))
-                #text_wid.setPos(float(icon_node.x + icon_node.textX) , float(icon_node.y + icon_node.textY))
-
-                #font = text_wid.font()
-                #font.setPointSize(icon_node.fontSize)
-                #text_wid.setFont(font)
-                #wid.text_wid = text_wid
-
-
                 font = QtGui.QFont("Helvetica", icon_node.fontSize)
                 text_wid = self._scene.addText(icon_node.text(), font)
-                print("text: ", icon_node.text())
                 text_wid.setPos(float(icon_node.x + icon_node.textX) , float(icon_node.y + icon_node.textY))
                 text_wid.setDefaultTextColor(icon_node.fontColor())
                 wid.text_wid = text_wid
