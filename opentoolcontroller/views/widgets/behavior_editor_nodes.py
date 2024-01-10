@@ -446,7 +446,7 @@ class SelectorNodeGraphicsItem(NodeGraphicsItem):
         h_center = width/2
 
         #paint shape
-        painter.drawArc(h_center-10, 30, 20, 20, -35*16, 225*16)
+        painter.drawArc(int(h_center-10), 30, 20, 20, -35*16, 225*16)
 
         painter.setPen(pen2)
         painter.drawPolyline(QtCore.QPointF(h_center+6,v_center-1.8),
