@@ -479,7 +479,7 @@ class WaitTimeNode(Node):
 
     def tick(self):
         if self._status == None:
-            self._timer.setInterval(self._wait_time * 1000)
+            self._timer.setInterval(int(self._wait_time * 1000))
             self._timer.start()
             self._status = bt.RUNNING
             self.setInfoText(self._wait_time)
