@@ -166,10 +166,10 @@ class NodeGraphicsItem(QtWidgets.QGraphicsItem):
         self.scene().addItem(self._tmp_line)
 
     def centerTopPos(self):
-        return QtCore.QPoint(self.x() + self.boxWidth()*0.5, self.y())
+        return QtCore.QPoint(int(self.x() + self.boxWidth()*0.5), int(self.y()))
 
     def centerBottomPos(self):
-        return QtCore.QPoint(self.x() + self.boxWidth()*0.5, self.y() + self.boxHeight())
+        return QtCore.QPoint(int(self.x() + self.boxWidth()*0.5), int(self.y() + self.boxHeight()))
 
     def setDeleteCallback(self, value):
         self._delete_callback = value
