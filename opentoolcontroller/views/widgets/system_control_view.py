@@ -39,7 +39,7 @@ class SystemControlView(QtWidgets.QAbstractItemView):
         self._view.fitInView(self._scene_box, QtCore.Qt.KeepAspectRatio)
 
     def drawBackground(self, painter, rect):
-        background_brush = QtGui.QBrush( QtGui.QColor(255,170,255), QtCore.Qt.SolidPattern)
+        background_brush = QtGui.QBrush( QtGui.QColor(17,17,51), QtCore.Qt.SolidPattern)
         painter.fillRect(rect, background_brush)
 
 
