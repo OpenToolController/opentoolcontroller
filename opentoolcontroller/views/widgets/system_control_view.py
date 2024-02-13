@@ -38,6 +38,10 @@ class SystemControlView(QtWidgets.QAbstractItemView):
     def resizeEvent(self, event):
         self._view.fitInView(self._scene_box, QtCore.Qt.KeepAspectRatio)
 
+    def drawBackground(self, painter, rect):
+        background_brush = QtGui.QBrush( QtGui.QColor(255,170,255), QtCore.Qt.SolidPattern)
+        painter.fillRect(rect, background_brush)
+
 
     def dataChanged(self, index_top_left, index_bottom_right, roles):
         index = index_top_left #TODO
@@ -165,6 +169,10 @@ class SystemControlView(QtWidgets.QAbstractItemView):
     def setIconPosition(self, index, pos):
         self.model().setData(index.siblingAtColumn(col.POS), pos, QtCore.Qt.EditRole)
 
+    def drawBackground(self, painter, rect):
+        background_brush = QtGui.QBrush( QtGui.QColor(255,170,255), QtCore.Qt.SolidPattern)
+        painter.fillRect(rect, background_brush)
+
     def displaySystem(self, system_index):
         self._view.resetTransform() #Needed?
         self._scene.clear()
@@ -184,6 +192,7 @@ class SystemControlView(QtWidgets.QAbstractItemView):
         background = QtGui.QPixmap(svg_image)
         background = background.scaled(int(self._scene_box.width()), int(self._scene_box.height()), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
         self._scene.addPixmap(background)
+
 
 
         #Add the Device Icons
