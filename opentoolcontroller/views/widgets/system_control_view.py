@@ -4,7 +4,21 @@ from PyQt5 import QtGui, QtCore, QtWidgets, QtSvg
 from opentoolcontroller.strings import typ, col
 from opentoolcontroller.views.widgets.device_icon_widget import DeviceIconWidget
 
-#TODO Change name to SystemGraphicView ???
+class SystemGraphicsView(QtWidgets.QGraphicsView):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def drawBackground(self, painter, rect):
+        center = self.sceneRect().center()
+        gradient = QtGui.QRadialGradient(center, 900)
+        gradient.setColorAt(0, QtGui.QColor(26, 45, 87))
+        gradient.setColorAt(1, QtGui.QColor(17, 17, 51))
+
+        brush = QtGui.QBrush(gradient)
+        painter.setBrush(brush)
+        painter.drawRect(rect)
+
+
 class SystemControlView(QtWidgets.QAbstractItemView):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -15,7 +29,7 @@ class SystemControlView(QtWidgets.QAbstractItemView):
         self._device_icons = []
 
         #UI Stuff
-        self._view = QtWidgets.QGraphicsView(self)
+        self._view = SystemGraphicsView(self)
         self._view.setScene(self._scene)
         self._view.scale(1, 1)
 
@@ -37,11 +51,6 @@ class SystemControlView(QtWidgets.QAbstractItemView):
 
     def resizeEvent(self, event):
         self._view.fitInView(self._scene_box, QtCore.Qt.KeepAspectRatio)
-
-    def drawBackground(self, painter, rect):
-        background_brush = QtGui.QBrush( QtGui.QColor(17,17,51), QtCore.Qt.SolidPattern)
-        painter.fillRect(rect, background_brush)
-
 
     def dataChanged(self, index_top_left, index_bottom_right, roles):
         index = index_top_left #TODO
@@ -169,10 +178,6 @@ class SystemControlView(QtWidgets.QAbstractItemView):
     def setIconPosition(self, index, pos):
         self.model().setData(index.siblingAtColumn(col.POS), pos, QtCore.Qt.EditRole)
 
-    def drawBackground(self, painter, rect):
-        background_brush = QtGui.QBrush( QtGui.QColor(255,170,255), QtCore.Qt.SolidPattern)
-        painter.fillRect(rect, background_brush)
-
     def displaySystem(self, system_index):
         self._view.resetTransform() #Needed?
         self._scene.clear()
@@ -184,10 +189,6 @@ class SystemControlView(QtWidgets.QAbstractItemView):
         system_node = system_index.internalPointer()
         svg_image = system_node.backgroundSVGFullPath()
         movable = self.movableIcons()
-
-        #Border line around background image
-        rectangle = QtWidgets.QGraphicsRectItem(self._scene_box)
-        self._scene.addItem(rectangle)
 
         background = QtGui.QPixmap(svg_image)
         background = background.scaled(int(self._scene_box.width()), int(self._scene_box.height()), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
