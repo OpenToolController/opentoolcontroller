@@ -190,27 +190,6 @@ class SystemControlView(QtWidgets.QAbstractItemView):
         svg_image = system_node.backgroundSVGFullPath()
         movable = self.movableIcons()
 
-
-
-
-
-    
-        #renderer = QtSvg.QSvgRenderer(svg_image)
-
-        ## Create QPixmap and paint SVG onto it
-        #pixmap = QtGui.QPixmap(renderer.defaultSize())
-        #pixmap.fill(QtCore.Qt.transparent)
-        #painter = QtGui.QPainter(pixmap)
-        #painter.setRenderHints(QtGui.QPainter.TextAntialiasing)
-
-        #renderer.render(painter)
-        #painter.end()
-
-        ## Display the result in a QGraphicsPixmapItem
-        #pixmap_item = QtWidgets.QGraphicsPixmapItem(pixmap)
-        #self._scene.addItem(pixmap_item)
-
-
         background = QtGui.QPixmap(svg_image)
         #background = background.scaled(int(self._scene_box.width()), int(self._scene_box.height()), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
         self._scene.addPixmap(background)
