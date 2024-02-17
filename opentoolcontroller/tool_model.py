@@ -178,6 +178,14 @@ class ToolModel(QtCore.QAbstractItemModel):
                 for bt_model in parent_node.behaviors():
                     bt_model.syncToTool()
 
+            #Insert Device Icon for the device
+            if child_type == typ.DEVICE_NODE and not from_load:
+                insert_row = 0
+                self.beginInsertRows(new_child_index, insert_row, insert_row)
+                new_child_node.insertChild(insert_row, DeviceIconNode())
+                self.endInsertRows()
+
+
 
 
 
