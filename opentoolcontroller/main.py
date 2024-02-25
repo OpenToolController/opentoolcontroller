@@ -152,6 +152,9 @@ class Window(QtWidgets.QMainWindow):
         self.toggleMovableIconsAction = QtWidgets.QAction("Movable Icons", self)
         self.toggleMovableIconsAction.triggered.connect(self.toggleMovableIcons)
         self.toggleMovableIconsAction.setCheckable(True)
+        
+        self.launchTickTimeHistogramAction = QtWidgets.QAction("Tick Time Histogram", self)
+        self.launchTickTimeHistogramAction.triggered.connect(self.launchTickTimeHistogram)
 
         self.file_menu = self.menuBar().addMenu('&File')
         self.hal_menu = self.menuBar().addMenu('&HAL')
@@ -160,6 +163,7 @@ class Window(QtWidgets.QMainWindow):
             self.file_menu.addAction(self.saveToolAction)
         self.file_menu.addAction(self.saveToolAsAction)
         self.file_menu.addAction(self.toggleMovableIconsAction)
+        self.file_menu.addAction(self.launchTickTimeHistogramAction)
 
         self.hal_menu.addAction(self.toggleHalAction)
         self.hal_menu.addAction(self.halMeterAction)
@@ -267,6 +271,8 @@ class Window(QtWidgets.QMainWindow):
             self.toggleMovableIconsAction.setChecked(True)
             self._control_view.setMovableIcons(True)
 
+    def launchTickTimeHistogram(self):
+        self.behavior_runner.launchHistogram()
 
 
 

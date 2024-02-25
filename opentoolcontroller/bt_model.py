@@ -10,6 +10,14 @@ import os.path
 import time
 import pickle
 
+
+
+import sys
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+
+
 class BehaviorRunner():
     def __init__(self):
         super().__init__()
@@ -20,7 +28,11 @@ class BehaviorRunner():
 
         self._running_behaviors = []
         self._max_elapsed_ms = 0
+        self._histogram_window = None
 
+    def launchHistogram(self):
+        self._histogram_window = LiveHistogramWindow()
+        self._histogram_window.show()
 
     def setTickRateMS(self, tick_rate_ms):
         self._tick_rate_ms = int(tick_rate_ms)
@@ -72,12 +84,72 @@ class BehaviorRunner():
         elapsed_sec = time.time() - start_time
         elapsed_ms = elapsed_sec * 1e3
         
-        if elapsed_ms > self._max_elapsed_ms:
-            print("Tick time: %0.2f ms" % elapsed_ms)
-            self._max_elapsed_ms = elapsed_ms
+        if self._histogram_window:
+            self._histogram_window.update([elapsed_ms])
 
 
                 
+class LiveHistogramWindow(QtWidgets.QWidget):
+    def __init__(self):
+        super().__init__()
+
+        self.max_points = 50
+
+        self.setWindowTitle("Tick Time")
+        self.setGeometry(100, 100, 400, 400)
+
+        self._layout = QtWidgets.QVBoxLayout()
+        self.setLayout(self._layout)
+
+        self.figure, self.ax = plt.subplots()
+        self.canvas = FigureCanvas(self.figure)
+        self._layout.addWidget(self.canvas)
+
+        self.data = []  # List to store the data points for the histogram
+
+        # Create the initial histogram
+        self.bins = np.arange(1, 11)
+        self.bars = self.ax.bar(self.bins[:-1], np.zeros_like(self.bins[:-1]), align='edge', edgecolor='black')
+
+       
+        # Set labels and title
+        self.ax.set_xlabel('Time (ms)')
+        self.ax.set_ylabel('Frequency')
+        self.ax.set_title('Tick Time')
+
+
+    def update(self, new_values=None):
+        if new_values is None:
+            new_values = []
+
+        # Add new values to the data
+        self.data.extend(new_values)
+
+        if len(self.data) > self.max_points:
+            self.data = self.data[-self.max_points:]
+
+
+        # Calculate bins dynamically based on the range of the data
+        min_value = min(self.data)
+        max_value = max(self.data)
+        self.bins = np.linspace(min_value, max_value, 11)
+
+        # Update the existing bars in the histogram
+        hist, _ = np.histogram(self.data, bins=self.bins)
+        for bar, h, bin_left, bin_right in zip(self.bars, hist, self.bins[:-1], self.bins[1:]):
+            bin_width = bin_right - bin_left
+            bin_center = (bin_left + bin_right) / 2
+            bar.set_height(h)
+            bar.set_x(bin_left)
+            bar.set_width(bin_width)
+
+
+        self.ax.set_ylim(0, max(hist))
+        self.ax.set_xlim(0, max_value)
+        self.canvas.draw()
+
+
+
 
 
 
