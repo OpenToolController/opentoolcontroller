@@ -341,6 +341,7 @@ class RepeatNode(Node):
         self._number_repeats_remaining = 0
         self._ignore_failure = False
         self._current_child = 0
+        self._current_child_result = None
 
     def typeInfo(self):
         return typ.REPEAT_NODE
@@ -351,6 +352,7 @@ class RepeatNode(Node):
     def reset(self):
         super().reset()
         self._current_child = 0
+        self._current_child_result = None
         self._number_repeats_remaining = self._number_repeats 
 
     def data(self, column):
@@ -364,41 +366,54 @@ class RepeatNode(Node):
         if   column is col.NUMBER_REPEATS : self.numberRepeats = value
         elif column is col.IGNORE_FAILURE : self.ignoreFailure = value
 
+    '''
+    Return failure on failure
+    '''
     def tick(self):
+        if not self._children:
+            self._status = bt.SUCCESS
+
         if self._status in [bt.SUCCESS, bt.FAILURE]:
             return self._status
 
         else:
             self._status = bt.RUNNING
-            result = bt.SUCCESS
-            for i, child in enumerate(self._children[self._current_child:]):
-                result = child.tick()
+            
+            #Reset first in order to display status of children
+            if self._current_child == len(self._children)-1 and self._current_child_result is bt.SUCCESS:
+                self._current_child = 0
+                for child in self.children():
+                    child.reset()
 
-                if result is bt.RUNNING:
-                    self._status = result
+            if self._current_child_result is bt.FAILURE and self._ignore_failure:
+                self._current_child = 0
+                for child in self.children():
+                    child.reset()
+
+
+            for i, child in enumerate(self._children[self._current_child:]):
+                self._current_child_result = child.tick()
+                self._current_child = i
+
+                if self._current_child_result is bt.RUNNING:
+                    self._status = bt.RUNNING
                     return self._status
 
-                elif result is bt.FAILURE:
+                elif self._current_child_result is bt.FAILURE:
                     if self._ignore_failure:
                         break
                     else:
-                        self._status = result
+                        self._status = bt.FAILURE
                         return self._status
 
-                self._current_child = i
 
+            self._number_repeats_remaining -= 1
 
-            if self._number_repeats_remaining > 0:
-                self._number_repeats_remaining -= 1
-                for child in self.children():
-                    child.reset()
-                self._current_child = 0
+            if self._current_child == len(self._children)-1 and self._number_repeats_remaining == 0 and self._current_child_result == bt.SUCCESS:
+                self._status = bt.SUCCESS
             
-            else:
-                if result == bt.SUCCESS:
-                    self._status = bt.SUCCESS
-                elif result == bt.FAILURE:
-                    self._status = bt.FAILURE
+            if self._number_repeats_remaining == 0 and self._current_child_result == bt.FAILURE:
+                self._status = bt.FAILURE
 
             return self._status
 

@@ -21,6 +21,7 @@ class BehaviorRunner():
         self._running_behaviors = []
         self._max_elapsed_ms = 0
 
+
     def setTickRateMS(self, tick_rate_ms):
         self._tick_rate_ms = int(tick_rate_ms)
         self._timer.stop()

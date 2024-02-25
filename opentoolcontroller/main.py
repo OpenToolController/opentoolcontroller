@@ -70,6 +70,7 @@ class Window(QtWidgets.QMainWindow):
         tool_index = self.tool_model.index(0, 0, QtCore.QModelIndex())
         tick_rate_ms = self.tool_model.data(tool_index.siblingAtColumn(col.TICK_RATE_MS), QtCore.Qt.DisplayRole)
         self.behavior_runner = BehaviorRunner()
+        self.behavior_runner.setTickRateMS(tick_rate_ms)
         BTModel.behaviorRunner = self.behavior_runner
 
         self.setWindowTitle('Open Tool Controller')
