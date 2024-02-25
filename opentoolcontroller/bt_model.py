@@ -541,6 +541,7 @@ class BTModel(QtCore.QAbstractItemModel):
 
             if    child_type == typ.SEQUENCE_NODE         : parent_node.insertChild(insert_row, SequenceNode())
             elif  child_type == typ.REPEAT_NODE           : parent_node.insertChild(insert_row, RepeatNode())
+            elif  child_type == typ.REPEAT_NUMBER_NODE    : parent_node.insertChild(insert_row, RepeatNumberNode())
             elif  child_type == typ.SELECTOR_NODE         : parent_node.insertChild(insert_row, SelectorNode())
             elif  child_type == typ.WHILE_NODE            : parent_node.insertChild(insert_row, WhileNode())
             elif  child_type == typ.SET_NODE              : parent_node.insertChild(insert_row, SetNode())

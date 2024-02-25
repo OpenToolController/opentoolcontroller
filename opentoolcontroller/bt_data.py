@@ -334,7 +334,65 @@ class RootSequenceNode(SequenceNode):
     manualButtonSpanColEnd = property(**manualButtonSpanColEnd())
 
 
+
 class RepeatNode(Node):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self._current_child_index = 0
+        self._current_child_result = None
+
+    def typeInfo(self):
+        return typ.REPEAT_NODE
+
+    def treeType(self):
+        return bt.BRANCH
+
+    def reset(self):
+        super().reset()
+        self._current_child_index = 0
+        self._current_child_result = None
+
+    def data(self, column):
+        r = super().data(column)
+        return r
+
+    def setData(self, column, value):
+        super().setData(column, value)
+
+    def tick(self):
+        if not self._children:
+            self._status = bt.SUCCESS
+
+        if self._status in [bt.SUCCESS, bt.FAILURE]:
+            return self._status
+
+        else:
+            self._status = bt.RUNNING
+            
+            #Reset first in order to display status of children
+            if self._current_child_index == len(self._children)-1 and self._current_child_result is bt.SUCCESS:
+                self._current_child_index = 0
+                for child in self.children():
+                    child.reset()
+
+            for i, child in enumerate(self._children[self._current_child_index:]):
+                self._current_child_result = child.tick()
+                self._current_child_index = i
+
+                if self._current_child_result is bt.RUNNING:
+                    self._status = bt.RUNNING
+                    return self._status
+
+                elif self._current_child_result is bt.FAILURE:
+                    self._status = bt.FAILURE
+                    return self._status
+
+            
+
+            return self._status
+
+
+class RepeatNumberNode(Node):
     def __init__(self, parent=None):
         super().__init__(parent)
         self._number_repeats = 0
@@ -344,7 +402,7 @@ class RepeatNode(Node):
         self._current_child_result = None
 
     def typeInfo(self):
-        return typ.REPEAT_NODE
+        return typ.REPEAT_NUMBER_NODE
 
     def treeType(self):
         return bt.BRANCH
@@ -367,7 +425,7 @@ class RepeatNode(Node):
         elif column is col.IGNORE_FAILURE : self.ignoreFailure = value
 
     '''
-    Return failure on failure
+    ToDo Return failure on failure
     '''
     def tick(self):
         if not self._children:
@@ -431,7 +489,6 @@ class RepeatNode(Node):
         def fset(self, value): self._ignore_failure = bool(value)
         return locals()
     ignoreFailure = property(**ignoreFailure())
-
 
 
 class FailureNode(Node):

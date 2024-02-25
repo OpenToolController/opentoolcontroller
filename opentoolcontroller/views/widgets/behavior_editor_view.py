@@ -73,6 +73,7 @@ class BTEditorWindow(QtWidgets.QMainWindow):
         if node_typeInfo == typ.TOOL_NODE:
             menu_data = [('opentoolcontroller/resources/icons/menu/behavior_tree/sequencer.png',"Sequencer", typ.SEQUENCE_NODE),
                  ('opentoolcontroller/resources/icons/menu/behavior_tree/repeat.png',"Repeat", typ.REPEAT_NODE),
+                 ('opentoolcontroller/resources/icons/menu/behavior_tree/repeat_number.png',"Repeat Number", typ.REPEAT_NUMBER_NODE),
                  ('opentoolcontroller/resources/icons/menu/behavior_tree/selector.png',"Selector", typ.SELECTOR_NODE),
                  ('opentoolcontroller/resources/icons/menu/behavior_tree/wait_time.png',"Wait Time", typ.WAIT_TIME_NODE),
                  ('opentoolcontroller/resources/icons/menu/behavior_tree/alert.png',"Alert", typ.ALERT_NODE),
@@ -88,6 +89,7 @@ class BTEditorWindow(QtWidgets.QMainWindow):
         elif node_typeInfo == typ.SYSTEM_NODE:
             menu_data = [('opentoolcontroller/resources/icons/menu/behavior_tree/sequencer.png',"Sequencer", typ.SEQUENCE_NODE),
                  ('opentoolcontroller/resources/icons/menu/behavior_tree/repeat.png',"Repeat", typ.REPEAT_NODE),
+                 ('opentoolcontroller/resources/icons/menu/behavior_tree/repeat_number.png',"Repeat Number", typ.REPEAT_NUMBER_NODE),
                  ('opentoolcontroller/resources/icons/menu/behavior_tree/selector.png',"Selector", typ.SELECTOR_NODE),
                  ('opentoolcontroller/resources/icons/menu/behavior_tree/wait_time.png',"Wait Time", typ.WAIT_TIME_NODE),
                  ('opentoolcontroller/resources/icons/menu/behavior_tree/alert.png',"Alert", typ.ALERT_NODE),
@@ -102,6 +104,7 @@ class BTEditorWindow(QtWidgets.QMainWindow):
         elif node_typeInfo == typ.DEVICE_NODE:
             menu_data = [('opentoolcontroller/resources/icons/menu/behavior_tree/sequencer.png',"Sequencer", typ.SEQUENCE_NODE),
                  ('opentoolcontroller/resources/icons/menu/behavior_tree/repeat.png',"Repeat", typ.REPEAT_NODE),
+                 ('opentoolcontroller/resources/icons/menu/behavior_tree/repeat_number.png',"Repeat Number", typ.REPEAT_NUMBER_NODE),
                  ('opentoolcontroller/resources/icons/menu/behavior_tree/selector.png',"Selector", typ.SELECTOR_NODE),
                  ('opentoolcontroller/resources/icons/menu/behavior_tree/wait_time.png',"Wait Time", typ.WAIT_TIME_NODE),
                  ('opentoolcontroller/resources/icons/menu/behavior_tree/set.png',"Set", typ.SET_NODE),
@@ -380,7 +383,10 @@ class BTEditor(QtWidgets.QAbstractItemView):
             item = FailureNodeGraphicsItem(type) 
 
         elif type == typ.REPEAT_NODE:
-            item = RepeatNodeGraphicsItem(type, node.children())
+            item = RepeatNodeGraphicsItem(type)
+
+        elif type == typ.REPEAT_NUMBER_NODE:
+            item = RepeatNumberNodeGraphicsItem(type, node.children())
             item.setModelAndIndex(self.model(), index)
         
         elif type == typ.SET_NODE:

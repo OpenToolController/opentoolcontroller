@@ -172,6 +172,7 @@ class typ():
     ROOT_SEQUENCE_NODE = 'Root_Sequence'
     SEQUENCE_NODE = 'Sequence'
     REPEAT_NODE = 'Repeat'
+    REPEAT_NUMBER_NODE = 'Repeat_Number'
     SELECTOR_NODE = 'Selector'
     WAIT_TIME_NODE = 'Wait_Time'
     WHILE_NODE = 'While'

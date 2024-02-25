@@ -507,8 +507,43 @@ class FailureNodeGraphicsItem(NodeGraphicsItem):
 
 
 
-
 class RepeatNodeGraphicsItem(NodeGraphicsItem):
+    def __init__(self, type=typ.SELECTOR_NODE):
+        super().__init__(type)
+    
+    def drawCustomShape(self, painter):
+        width = self.boxWidth()
+        height = self.boxHeight() 
+
+        pen, pen2 = QtGui.QPen(), QtGui.QPen()
+        pen.setWidth(7)
+        pen2.setWidth(7)
+        pen.setCosmetic(False)
+        pen2.setCosmetic(False)
+        pen.setCapStyle(QtCore.Qt.RoundCap)
+        pen2.setCapStyle(QtCore.Qt.SquareCap)
+        pen.setColor(QtGui.QColor('#DDDDDD'))
+        pen2.setColor(QtGui.QColor('#DDDDDD'))
+        painter.setPen(pen)
+
+        border = 50
+        v_center = (height )/2
+        h_center = width/2
+
+        #paint shape
+        #arc: x,y,w,h,start,stop
+        shape_rect = QtCore.QRectF(int(h_center-20), 30, 40, 40)
+        painter.drawArc(shape_rect, 45*16, 300*16)
+
+        #Separate arrow lines for curved center
+        painter.drawPolyline(QtCore.QPointF(h_center+10,v_center+8),
+                             QtCore.QPointF(h_center+19.2,v_center+5))
+        
+        painter.drawPolyline(QtCore.QPointF(h_center+19.2,v_center+5),
+                             QtCore.QPointF(h_center+23,v_center+13))
+
+
+class RepeatNumberNodeGraphicsItem(NodeGraphicsItem):
     def __init__(self, type=typ.REPEAT_NODE, children_indexes=None):
         super().__init__(type)
         self._mapper = QtWidgets.QDataWidgetMapper()
