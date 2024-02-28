@@ -284,7 +284,9 @@ class HalReader():
 
 
     def readSampler(self):
+        number_reads = 0
         while not self.sampler_queue.empty():
+            number_reads += 1
             data = self.sampler_queue.get_nowait()
             #print('sampler:', data)
 
@@ -312,6 +314,8 @@ class HalReader():
                         #      index.internalPointer().name,  ': ', val, ' was ', 
                         #      self._tool_model.data(index.siblingAtColumn(col.HAL_VALUE), QtCore.Qt.DisplayRole))
 
+        if number_reads > 1:
+            print(number_reads, " sampler reads")
 
     def baseStream(self, cfg):
         stream = []
@@ -338,7 +342,7 @@ class HalReader():
                 new_stream[i] = new_val
 
         if new_stream != self._previous_stream:
-            #print("new_stream: ", new_stream)
+            print("new_stream: ", new_stream)
             tmp = ''
             for item in new_stream:
                 tmp += str(item) #This might need some truncation

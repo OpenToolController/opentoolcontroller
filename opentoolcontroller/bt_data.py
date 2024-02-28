@@ -1037,7 +1037,6 @@ class WaitNode(Node): #This one is used by the device on IO
         if self._status == bt.RUNNING:
             if (time.time() - self._start_time)  > self._timeout_sec:
                 self._status = bt.FAILURE
-                print("timed out: ", (time.time() - self._start_time))
 
         #self._status = bt.SUCCESS
         return self._status
