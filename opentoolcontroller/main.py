@@ -71,7 +71,7 @@ class Window(QtWidgets.QMainWindow):
         #tick_rate_ms = self.tool_model.data(tool_index.siblingAtColumn(col.TICK_RATE_MS), QtCore.Qt.DisplayRole)
 
 
-        reader_periods = [100,200,500]
+        reader_periods = [50,100,200]
         self.reader_group = HalReaderGroup(reader_periods)
 
         self.behavior_runners = []
