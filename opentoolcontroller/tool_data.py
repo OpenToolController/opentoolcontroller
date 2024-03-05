@@ -177,6 +177,9 @@ class BehaviorNode(Node):
         self._running_behavior = None
         self._running_behavior_name = ''
         self._behavior_info_text = ''
+        self._hal_reader_number = 1
+        self._behavior_runner = None
+
 
     def data(self, c):
         r = super().data(c)
@@ -186,6 +189,7 @@ class BehaviorNode(Node):
         elif c is col.RUNNING_BEHAVIOR_NAME : r = self._running_behavior_name
         elif c is col.RUNNING_BEHAVIOR      : r = self._running_behavior
         elif c is col.BEHAVIOR_INFO_TEXT    : r = self._behavior_info_text
+        elif c is col.HAL_READER_NUMBER     : r = self.halReaderNumber
         return r
 
     def setData(self, c, value):
@@ -196,6 +200,9 @@ class BehaviorNode(Node):
         elif c is col.RUNNING_BEHAVIOR_NAME : self._running_behavior_name = value
         elif c is col.RUNNING_BEHAVIOR      : self._running_behavior = value
         elif c is col.BEHAVIOR_INFO_TEXT    : self._behavior_info_text = value
+        elif c is col.HAL_READER_NUMBER     : 
+            print("HMMM")
+            self.halReaderNumber = value
 
     def state(self):
         return self._state
@@ -210,6 +217,13 @@ class BehaviorNode(Node):
 
     def runningBehavior(self):
         return self._running_behavior
+
+    def behaviorRunner(self):
+        return self._behavior_runner
+    
+    def setBehaviorRunner(self, runner):
+        self._behavior_runner = runnner
+    
 
     def behaviorFiles():
         def fget(self):
@@ -233,30 +247,114 @@ class BehaviorNode(Node):
         def fset(self,value): self._states = value
         return locals()
     states = property(**states())
+    
+    def halReaderNumber():
+        def fget(self): return self._hal_reader_number
+        def fset(self,value): 
+            print("halReaderNumber Set ", value)
+            self._hal_reader_number = int(value)
+        return locals()
+    halReaderNumber = property(**halReaderNumber())
 
 
 class ToolNode(BehaviorNode):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self._tick_rate_ms = 250
+        self._number_of_hal_readers = 1
+        self._tick_rate_ms_1 = 250
+        self._tick_rate_ms_2 = 250
+        self._tick_rate_ms_3 = 250
+        self._tick_rate_ms_4 = 250
+        self._tick_rate_ms_5 = 250
+        self._tick_rate_ms_6 = 250
+        self._tick_rate_ms_7 = 250
+        self._tick_rate_ms_8 = 250
 
     def typeInfo(self):
         return typ.TOOL_NODE
 
     def data(self, c):
         r = super().data(c)
-        if   c is col.TICK_RATE_MS: r = self.tickRateMS
+        if   c is col.NUMBER_OF_HAL_READERS : r = self.numberOfHalReaders
+        elif c is col.TICK_RATE_MS_1        : r = self.tickRateMS1
+        elif c is col.TICK_RATE_MS_2        : r = self.tickRateMS2
+        elif c is col.TICK_RATE_MS_3        : r = self.tickRateMS3
+        elif c is col.TICK_RATE_MS_4        : r = self.tickRateMS4
+        elif c is col.TICK_RATE_MS_5        : r = self.tickRateMS5
+        elif c is col.TICK_RATE_MS_6        : r = self.tickRateMS6
+        elif c is col.TICK_RATE_MS_7        : r = self.tickRateMS7
+        elif c is col.TICK_RATE_MS_8        : r = self.tickRateMS8
+
         return r
 
     def setData(self, c, value):
         super().setData(c, value)
-        if c is col.TICK_RATE_MS : self.tickRateMS = value
-
-    def tickRateMS():
-        def fget(self): return self._tick_rate_ms
-        def fset(self, value): self._tick_rate_ms = int(value)
+        if   c is col.NUMBER_OF_HAL_READERS : self.tickRateMS = value
+        elif c is col.TICK_RATE_MS_1        : self.tickRateMS1 = value
+        elif c is col.TICK_RATE_MS_2        : self.tickRateMS2 = value
+        elif c is col.TICK_RATE_MS_3        : self.tickRateMS3 = value
+        elif c is col.TICK_RATE_MS_4        : self.tickRateMS4 = value
+        elif c is col.TICK_RATE_MS_5        : self.tickRateMS5 = value
+        elif c is col.TICK_RATE_MS_6        : self.tickRateMS6 = value
+        elif c is col.TICK_RATE_MS_7        : self.tickRateMS7 = value
+        elif c is col.TICK_RATE_MS_8        : self.tickRateMS8 = value
+    
+    def numberOfHalReaders():
+        def fget(self): return self._number_of_hal_readers
+        def fset(self, value): self._number_of_hal_readers = int(value)
         return locals()
-    tickRateMS = property(**tickRateMS())
+    numberOfHalReaders = property(**numberOfHalReaders())
+    
+    def tickRateMS1():
+        def fget(self): return self._tick_rate_ms_1
+        def fset(self, value): self._tick_rate_ms_1 = int(value)
+        return locals()
+    tickRateMS1 = property(**tickRateMS1())
+
+    def tickRateMS2():
+        def fget(self): return self._tick_rate_ms_2
+        def fset(self, value): self._tick_rate_ms_2 = int(value)
+        return locals()
+    tickRateMS2 = property(**tickRateMS2())
+
+    def tickRateMS3():
+        def fget(self): return self._tick_rate_ms_3
+        def fset(self, value): self._tick_rate_ms_3 = int(value)
+        return locals()
+    tickRateMS3 = property(**tickRateMS3())
+
+    def tickRateMS4():
+        def fget(self): return self._tick_rate_ms_4
+        def fset(self, value): self._tick_rate_ms_4 = int(value)
+        return locals()
+    tickRateMS4 = property(**tickRateMS4())
+
+    def tickRateMS5():
+        def fget(self): return self._tick_rate_ms_5
+        def fset(self, value): self._tick_rate_ms_5 = int(value)
+        return locals()
+    tickRateMS5 = property(**tickRateMS5())
+
+    def tickRateMS6():
+        def fget(self): return self._tick_rate_ms_6
+        def fset(self, value): self._tick_rate_ms_6 = int(value)
+        return locals()
+    tickRateMS6 = property(**tickRateMS6())
+
+    def tickRateMS7():
+        def fget(self): return self._tick_rate_ms_7
+        def fset(self, value): self._tick_rate_ms_7 = int(value)
+        return locals()
+    tickRateMS7 = property(**tickRateMS7())
+
+    def tickRateMS8():
+        def fget(self): return self._tick_rate_ms_8
+        def fset(self, value): self._tick_rate_ms_8 = int(value)
+        return locals()
+    tickRateMS8 = property(**tickRateMS8())
+
+
+
 
 
 class SystemNode(BehaviorNode):
@@ -322,10 +420,12 @@ class DeviceNode(BehaviorNode):
 
     def data(self, c):
         r = super().data(c)
+
         return r
 
     def setData(self, c, value):
         super().setData(c, value)
+
 
 
 class DeviceIconNode(Node):

@@ -16,45 +16,79 @@ import ctypes
 #use ctypes.c_ulong, c_long and c_float
 
 
-#Only setData on HAL nodes here since this is the closest to the hardware
-class HalReader():
-    def __init__(self):
+class HalReaderGroup():
+    def __init__(self, reader_periods_ms=[100]):
         super().__init__()
+        self._hal_reader_periods_ms = reader_periods_ms
         self._hal_config_file = '/hal/hal_config.hal'
-        self._hal_period_ms = 100
-
-        self.sampler_queue = Queue()
-        self.timer = QtCore.QTimer()
-        self.timer.timeout.connect(self.processData)
-
-        self._tool_model = None
-        self.connected_sampler_pins = []
-        self.connected_streamer_pins = []
-        self._previous_stream = []
-        self._running = False
         self._hal_exists = False
-
+        self._hal_readers = []
 
         try:
             self.setupHal()
             self.findPins()
             self._hal_exists = True
+            
+            for i, period_ms in enumerate(reader_periods):
+                self._hal_readers.append(HalReader(period_ms, i))
 
-        except FileNotFoundError:
+        except OSError as e:
             self._hal_exists = False
 
 
+
+    def setupHal(self):
+        subprocess.call(['halcmd', 'stop'])
+        subprocess.check_output(['halcmd', 'unload', 'all']) #wait until cmd finishes
+        time.sleep(1) #Give time for hal to unload everything
+        
+
+        period_ns_string = ''
+        name_string = ''
+
+        for i, period_ms in enumerate(self._hal_reader_periods_ms):
+            n = i+1
+            period_ns_string += 'period%i=%i ' % (n, 1e6*period_ms)
+            name_string += 'name%i=gui_%i ' % (n, n)
+
+
+        #period_ns = 'period1=%i' % (1e6*period_ms)
+        subprocess.call(['halcmd', 'loadrt', 'threads', name_string, period_ns_string])
+
+        config_full_path = defaults.TOOL_DIR + self._hal_config_file
+        if os.path.isfile(config_full_path):
+            subprocess.call(['halcmd', '-f', config_full_path])
+            
+
     def halExists(self):
         return self._hal_exists
+    
+    def running(self):
+        return self._running
 
     def setModel(self, value):
         self._tool_model = value
 
+        for reader in self._hal_readers:
+            reader.setModel(self.tool_model)
+    
     def model(self):
         return self._tool_model
-
-    def running(self):
-        return self._running
+    
+    def start(self):
+        if self.halExists():
+            for reader in self._hal_readers:
+                reader.start()
+            
+            subprocess.call(['halcmd', 'start'])
+    
+    def stop(self):
+        if self.halExists():
+            for reader in self._hal_readers:
+                reader.stop()
+            
+            subprocess.check_output(['halcmd', 'stop']) #wait until cmd finishes
+            subprocess.check_output(['halcmd', 'unload', 'all']) #wait until cmd finishes
 
     def loadHalMeter(self):
         if self.running():
@@ -63,75 +97,12 @@ class HalReader():
             except:
                 pass
 
-
     def loadHalScope(self):
         if self.running():
             try:
                 subprocess.call(['halcmd', 'loadusr', 'halscope'])
             except:
                 pass
-
-
-    def start(self):
-        if self._hal_exists:
-            self.setupHal()
-            self.findPins()
-
-            #Sampler is on all the used hal pins
-            self.connected_sampler_pins = self.connectedPins(HalNode.hal_pins, self.samplerIndexes())
-            if len(self.connected_sampler_pins) > 0:
-                self.sampler_cfg = self.cfgFromPins(self.connected_sampler_pins)
-                cfg = 'cfg=' + str(self.sampler_cfg)
-
-                subprocess.call(['halcmd', 'loadrt', 'sampler', 'depth=100', cfg])
-                print("\nSampler CFG: ", self.sampler_cfg)
-                self.connectSamplerSignals(self.connected_sampler_pins)
-
-            #Streamer is only on output hal pins that are used
-            self.connected_streamer_pins = self.connectedPins(HalNode.hal_pins, self.streamerIndexes())
-            if len(self.connected_streamer_pins) > 0:
-                self.streamer_cfg = self.cfgFromPins(self.connected_streamer_pins)
-                cfg = 'cfg=' + str(self.streamer_cfg)
-
-
-                subprocess.call(['halcmd', 'loadrt', 'streamer', 'depth=100', cfg])
-                print("\nStreamer CFG: ", self.streamer_cfg)
-                self.connectStreamerSignals(self.connected_streamer_pins)
-
-                self._previous_stream = self.baseStream(self.streamer_cfg)
-
-
-            subprocess.call(['halcmd', 'start'])
-
-            self.timer.start(self._hal_period_ms)
-            self._running = True
-
-
-    def stop(self):
-        if self._hal_exists:
-            self.timer.stop()
-            subprocess.check_output(['halcmd', 'stop']) #wait until cmd finishes
-            subprocess.check_output(['halcmd', 'unload', 'all']) #wait until cmd finishes
-            self._running = False
-
-
-    def setupHal(self):
-        subprocess.call(['halcmd', 'stop'])
-        subprocess.check_output(['halcmd', 'unload', 'all']) #wait until cmd finishes
-        time.sleep(1) #Give time for hal to unload everything
-
-        period_ns = 'period1=%i' % (1e6*self._hal_period_ms)
-        #subprocess.call(['halcmd', 'loadrt', 'threads', 'name1=gui', 'period1=100000000']) #period in ns
-        subprocess.call(['halcmd', 'loadrt', 'threads', 'name1=gui', period_ns]) #period in ns
-
-    
-        config_full_path = defaults.TOOL_DIR + self._hal_config_file
-        if os.path.isfile(config_full_path):
-            subprocess.call(['halcmd', '-f', config_full_path])
-            
-
-
-
 
     def findPins(self):
         pins = subprocess.check_output(['halcmd', 'show', 'pin']).splitlines()
@@ -154,6 +125,71 @@ class HalReader():
 
 
 
+
+
+
+#Only setData on HAL nodes here since this is the closest to the hardware
+class HalReader():
+    def __init__(self, period_ms, reader_number):
+        self._hal_period_ms = int(period_ms)
+        self._reader_number = int(reader_number)
+
+        self.sampler_queue = Queue()
+        self.timer = QtCore.QTimer()
+        self.timer.timeout.connect(self.processData)
+
+        self._tool_model = None
+        self.connected_sampler_pins = []
+        self.connected_streamer_pins = []
+        self._previous_stream = []
+        self._running = False
+
+
+    def setModel(self, value):
+        self._tool_model = value
+
+    def model(self):
+        return self._tool_model
+
+    def running(self):
+        return self._running
+
+
+    def start(self):
+        #Sampler is on all the used hal pins
+        self.connected_sampler_pins = self.connectedPins(HalNode.hal_pins, self.samplerIndexes())
+        if len(self.connected_sampler_pins) > 0:
+            self.sampler_cfg = self.cfgFromPins(self.connected_sampler_pins)
+            cfg = 'cfg=' + str(self.sampler_cfg)
+
+            subprocess.call(['halcmd', 'loadrt', 'sampler', 'depth=100', cfg])
+            print("\nSampler CFG: ", self.sampler_cfg)
+            self.connectSamplerSignals(self.connected_sampler_pins)
+
+        #Streamer is only on output hal pins that are used
+        self.connected_streamer_pins = self.connectedPins(HalNode.hal_pins, self.streamerIndexes())
+        if len(self.connected_streamer_pins) > 0:
+            self.streamer_cfg = self.cfgFromPins(self.connected_streamer_pins)
+            cfg = 'cfg=' + str(self.streamer_cfg)
+
+
+            subprocess.call(['halcmd', 'loadrt', 'streamer', 'depth=100', cfg])
+            print("\nStreamer CFG: ", self.streamer_cfg)
+            self.connectStreamerSignals(self.connected_streamer_pins)
+
+            self._previous_stream = self.baseStream(self.streamer_cfg)
+
+        self.timer.start(self._hal_period_ms)
+        self._running = True
+
+
+    def stop(self):
+        self.timer.stop()
+        self._running = False
+
+
+
+    '''Add something to check what streamer to use! '''
     def samplerIndexes(self):
         return self.model().indexesOfTypes([typ.D_IN_NODE, typ.D_OUT_NODE, typ.A_IN_NODE, typ.A_OUT_NODE])
 
@@ -239,11 +275,12 @@ class HalReader():
             if len(connected_pins[pin_name]) > 1: #signify pin has multiple connections
                 signal_name += '*'
 
-            subprocess.call(['halcmd', 'net', signal_name, pin_name, '=>','sampler.0.pin.'+str(i)])
+            #subprocess.call(['halcmd', 'net', signal_name, pin_name, '=>','sampler.0.pin.'+str(i)])
+            subprocess.call(['halcmd', 'net', signal_name, pin_name, '=>','sampler.'+str(self._reader_number)+'.pin.'+str(i)])
 
         #node.setSamplerPins(node_sampler_pins) # This is a list of indexes
-        subprocess.call(['halcmd', 'setp', 'sampler.0.enable', 'True'])
-        subprocess.call(['halcmd', 'addf', 'sampler.0', 'gui'])
+        subprocess.call(['halcmd', 'setp', 'sampler.'+str(self._reader_number)+'.enable', 'True'])
+        subprocess.call(['halcmd', 'addf', 'sampler.'+str(self._reader_number), 'gui'])
 
 
         # Sampler userspace component, stdbuf fixes bufering issue
@@ -263,11 +300,11 @@ class HalReader():
             if len(connected_pins[pin_name]) > 1: #signify pin has multiple connections
                 raise ValueError("Cannot have halpin connected from multiple output nodes")
 
-            subprocess.call(['halcmd', 'net', signal_name, pin_name, '=>','streamer.0.pin.'+str(i)])
+            subprocess.call(['halcmd', 'net', signal_name, pin_name, '=>','streamer.'+str(self._reader_number)+'.pin.'+str(i)])
 
         #node.setSamplerPins(node_sampler_pins) # This is a list of indexes
-        subprocess.call(['halcmd', 'setp', 'streamer.0.enable', 'True'])
-        subprocess.call(['halcmd', 'addf', 'streamer.0', 'gui'])
+        subprocess.call(['halcmd', 'setp', 'streamer.'+str(self._reader_number)+'.enable', 'True'])
+        subprocess.call(['halcmd', 'addf', 'streamer.'+str(self._reader_number), 'gui'])
 
 
         # Streamer userspace component, stdbuf fixes bufering issue

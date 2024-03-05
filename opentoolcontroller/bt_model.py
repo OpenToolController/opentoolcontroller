@@ -19,9 +19,10 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
 
 class BehaviorRunner():
-    def __init__(self):
-        super().__init__()
-        self._tick_rate_ms = 500
+    def __init__(self, period_ms, i):
+        self._tick_rate_ms = int(period_ms)
+        self._behavior_runner_number = i
+
         self._timer = QtCore.QTimer()
         self._timer.timeout.connect(self.tick)
         self._timer.start(self._tick_rate_ms)
@@ -30,17 +31,17 @@ class BehaviorRunner():
         self._max_elapsed_ms = 0
         self._histogram_window = None
 
+
+    def behaviorRunnerNumber(self):
+        return self._behavior_runner_number
+    
+    def tickRateMS(self):
+        return self._tick_rate_ms
+
     def launchHistogram(self):
         self._histogram_window = LiveHistogramWindow()
         self._histogram_window.show()
 
-    def setTickRateMS(self, tick_rate_ms):
-        self._tick_rate_ms = int(tick_rate_ms)
-        self._timer.stop()
-        self._timer.start(self._tick_rate_ms)
-
-    def tickRateMS(self):
-        return self._tick_rate_ms
 
     def runAbortSiblings(self, new_behavior):
         #Remove and reset siblings of the one we're starting
@@ -154,7 +155,7 @@ class LiveHistogramWindow(QtWidgets.QWidget):
 
 
 class BTModel(QtCore.QAbstractItemModel):
-    behaviorRunner = None
+    #behaviorRunner = None
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -167,6 +168,7 @@ class BTModel(QtCore.QAbstractItemModel):
         self._tool_model = None
         self._tool_index = None
 
+        self._behavior_runner = None
 
 
     '''The tool needs a single timer that all the behaviors use, or maybe per System?
@@ -190,6 +192,12 @@ class BTModel(QtCore.QAbstractItemModel):
 
     def toolIndex(self):
         return self._tool_index
+
+    def behaviorRunner(self):
+        return self._behavior_runner
+    
+    def setBehaviorRunner(self, runner):
+        self._behavior_runner = runner
 
     def syncMessageIndex(self, index):
         message_node = index.internalPointer()
@@ -885,10 +893,12 @@ class BTModel(QtCore.QAbstractItemModel):
 
 
     def runAbortOthers(self):
-        BTModel.behaviorRunner.runAbortSiblings(self)
+        #BTModel.behaviorRunner.runAbortSiblings(self)
+        self.behaviorRunner().runAbortSiblings(self)
 
     def abort(self):
-        BTModel.behaviorRunner.stopBehavior(self)
+        #BTModel.behaviorRunner.stopBehavior(self)
+        self.behaviorRunner().stopBehavior(self)
 
 
 

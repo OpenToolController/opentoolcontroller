@@ -114,7 +114,6 @@ class col():
     #Message, Dialog, and Alert Nodes
     SUCCESS_TEXT = 103
     FAIL_TEXT = 104
-    TICK_RATE_MS = 105
 
     DEVICE_STATE = 106
     NEW_LINE = 107
@@ -152,6 +151,19 @@ class col():
 
     LAUNCH_VALUE = 130
     USE_LAUNCH_VALUE = 131
+    
+    HAL_READER_NUMBER = 132
+    NUMBER_OF_HAL_READERS = 133
+    
+    TICK_RATE_MS_1 = 134
+    TICK_RATE_MS_2 = 135
+    TICK_RATE_MS_3 = 136
+    TICK_RATE_MS_4 = 137
+    TICK_RATE_MS_5 = 138
+    TICK_RATE_MS_6 = 139
+    TICK_RATE_MS_7 = 140
+    TICK_RATE_MS_8 = 141
+
 
 class typ():
     TOOL_NODE = 'Tool_Node'

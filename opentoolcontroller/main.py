@@ -14,7 +14,7 @@ from opentoolcontroller.login import LoginView, LoginModel
 
 from opentoolcontroller.bt_model import BTModel, BehaviorRunner
 
-from opentoolcontroller.hardware import HalReader
+from opentoolcontroller.hardware import HalReaderGroup
 from opentoolcontroller.strings import defaults, col
 
 import gc, pprint
@@ -55,7 +55,7 @@ class Window(QtWidgets.QMainWindow):
         self._action_log_view = ActionLogView(self._action_log_model)
         self._action_log_view.setWindowTitle('Action Log')
 
-        self.reader = HalReader()
+
         self.tool_model = ToolModel()
 
 
@@ -68,10 +68,21 @@ class Window(QtWidgets.QMainWindow):
 
 
         tool_index = self.tool_model.index(0, 0, QtCore.QModelIndex())
-        tick_rate_ms = self.tool_model.data(tool_index.siblingAtColumn(col.TICK_RATE_MS), QtCore.Qt.DisplayRole)
-        self.behavior_runner = BehaviorRunner()
-        self.behavior_runner.setTickRateMS(tick_rate_ms)
-        BTModel.behaviorRunner = self.behavior_runner
+        #tick_rate_ms = self.tool_model.data(tool_index.siblingAtColumn(col.TICK_RATE_MS), QtCore.Qt.DisplayRole)
+
+
+        reader_periods = [100,200,500]
+        self.reader_group = HalReaderGroup(reader_periods)
+
+        self.behavior_runners = []
+
+        for i, period_ms in enumerate(reader_periods):
+            self.behavior_runners.append(BehaviorRunner(period_ms, i+1))
+        self.tool_model.setBehaviorRunners(self.behavior_runners)
+
+            
+        '''FIXME '''
+        #BTModel.behaviorRunner = self.behavior_runner
 
         self.setWindowTitle('Open Tool Controller')
         self.resize(800,600)
@@ -125,7 +136,7 @@ class Window(QtWidgets.QMainWindow):
         self.setDockNestingEnabled(True) #needed for left/right arranging
 
 
-        self.reader.setModel(self.tool_model)
+        self.reader_group.setModel(self.tool_model)
         #Start the behavior tree
         #self.tool_model.runBehaviorTrees()
 
@@ -144,10 +155,10 @@ class Window(QtWidgets.QMainWindow):
         self.saveToolAsAction.triggered.connect(self.saveToolAs)
 
         self.halMeterAction = QtWidgets.QAction("HAL Meter", self)
-        self.halMeterAction.triggered.connect(self.reader.loadHalMeter)
+        self.halMeterAction.triggered.connect(self.reader_group.loadHalMeter)
 
         self.halScopeAction = QtWidgets.QAction("HAL Scope", self)
-        self.halScopeAction.triggered.connect(self.reader.loadHalScope)
+        self.halScopeAction.triggered.connect(self.reader_group.loadHalScope)
 
         self.toggleMovableIconsAction = QtWidgets.QAction("Movable Icons", self)
         self.toggleMovableIconsAction.triggered.connect(self.toggleMovableIcons)
@@ -170,7 +181,7 @@ class Window(QtWidgets.QMainWindow):
         self.hal_menu.addAction(self.halScopeAction)
 
 
-        if not self.reader.halExists():
+        if not self.reader_group.halExists():
             self.toggleHalAction.setDisabled(True)
             self.halMeterAction.setDisabled(True)
             self.halScopeAction.setDisabled(True)
@@ -225,7 +236,7 @@ class Window(QtWidgets.QMainWindow):
         self._settings.setValue('main_window_geometry', geometry)
         state = self.saveState()
         self._settings.setValue('main_window_state', state)
-        self.reader.stop()
+        self.reader_group.stop()
         super().closeEvent(event)
 
     #normal close
@@ -234,7 +245,7 @@ class Window(QtWidgets.QMainWindow):
         reply = QtWidgets.QMessageBox.question(self, 'Message', quit_msg, QtWidgets.QMessageBox.Yes, QtWidgets.QMessageBox.No)
 
         if reply == QtWidgets.QMessageBox.Yes:
-            self.reader.stop()
+            self.reader_group.stop()
             self._tool_editor.close()
             self._control_view.close()
             self._alert_view.close()
@@ -249,16 +260,16 @@ class Window(QtWidgets.QMainWindow):
             event.ignore()
 
     def toggleHalReader(self):
-        if self.reader.running():
+        if self.reader_group.running():
             self.toggleHalAction.setText('Start Hal Reader')
-            self.reader.stop()
+            self.reader_group.stop()
         else:
             self.toggleHalAction.setText('Stop Hal Reader')
-            self.reader.start()
+            self.reader_group.start()
 
     def startHalReader(self):
         self.toggleHalAction.setText('Stop Hal Reader')
-        self.reader.start()
+        self.reader_group.start()
 
     def setMovableIcons(self):
         self._control_view.setMovableIcons(True)

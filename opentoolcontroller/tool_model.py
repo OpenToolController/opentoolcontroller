@@ -14,6 +14,14 @@ class ToolModel(QtCore.QAbstractItemModel):
         self._alert_callback = None
         self._action_log_callback = None
 
+        self._behavior_runners = []
+
+
+    def behaviorRunners(self):
+        return self._behavior_runner
+
+    def setBehaviorRunners(self, runners):
+        self._behavior_runner = runners
 
     def alertCallback(self):
         return self._alert_callback
@@ -69,6 +77,7 @@ class ToolModel(QtCore.QAbstractItemModel):
             bt_model.setToolModel(self)
             bt_model.setToolIndex(index)
             bt_model.syncToTool()
+            bt_model.setBehaviorRunner(index.internalPointer().behaviorRunner())
             
         return bt_model
 

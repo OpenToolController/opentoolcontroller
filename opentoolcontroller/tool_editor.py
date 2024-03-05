@@ -18,6 +18,7 @@ int_var_base, int_var_form = uic.loadUiType("opentoolcontroller/views/IntVarEdit
 float_var_base, float_var_form = uic.loadUiType("opentoolcontroller/views/FloatVarEditor.ui")
 
 device_icon_base, device_icon_form  = uic.loadUiType("opentoolcontroller/views/DeviceIconEditor.ui")
+device_base, device_form  = uic.loadUiType("opentoolcontroller/views/DeviceEditor.ui")
 tool_base, tool_form  = uic.loadUiType("opentoolcontroller/views/ToolEditor.ui")
 system_base, system_form  = uic.loadUiType("opentoolcontroller/views/SystemEditor.ui")
 node_base, node_form  = uic.loadUiType("opentoolcontroller/views/NodeEditor.ui")
@@ -172,7 +173,15 @@ class ToolEditor(tool_base, tool_form):
             model = model.sourceModel()
 
         self.mapper.setModel(model)
-        self.mapper.addMapping(self.ui_tick_rate_ms, col.TICK_RATE_MS)
+        self.mapper.addMapping(self.ui_number_of_hal_readers, col.NUMBER_OF_HAL_READERS)
+        self.mapper.addMapping(self.ui_tick_rate_ms_1, col.TICK_RATE_MS_1)
+        self.mapper.addMapping(self.ui_tick_rate_ms_2, col.TICK_RATE_MS_2)
+        self.mapper.addMapping(self.ui_tick_rate_ms_3, col.TICK_RATE_MS_3)
+        self.mapper.addMapping(self.ui_tick_rate_ms_4, col.TICK_RATE_MS_4)
+        self.mapper.addMapping(self.ui_tick_rate_ms_5, col.TICK_RATE_MS_5)
+        self.mapper.addMapping(self.ui_tick_rate_ms_6, col.TICK_RATE_MS_6)
+        self.mapper.addMapping(self.ui_tick_rate_ms_7, col.TICK_RATE_MS_7)
+        self.mapper.addMapping(self.ui_tick_rate_ms_8, col.TICK_RATE_MS_8)
 
 
     def setSelection(self, current):
@@ -253,6 +262,13 @@ class BehaviorStateEditor(QtWidgets.QWidget):
         wid.setLayout(self._list_grid)
         self._grid.addWidget(wid, ui_row, 0, 1, 2)
 
+        
+        #Hal Reader Number
+        ui_row += 1
+        self.ui_hal_reader_number = QtWidgets.QComboBox()
+        #self.ui_hal_reader_number.currentIndexChanged.connect(self._mapper2.submit)
+        self._grid.addWidget(QtWidgets.QLabel('Hal Reader Number'), ui_row, 0)
+        self._grid.addWidget(self.ui_hal_reader_number, ui_row, 1, 1, -1)
 
         #state
         self.ui_state = QtWidgets.QLineEdit('')
@@ -290,6 +306,7 @@ class BehaviorStateEditor(QtWidgets.QWidget):
         self._mapper1.setModel(model)
         self._mapper2.setModel(model)
         self._mapper1.addMapping(self.ui_state, col.STATE)
+        self._mapper2.addMapping(self.ui_hal_reader_number, col.HAL_READER_NUMBER,  b"currentIndex") #index of the dropdown item
         self._mapper1.addMapping(self, col.BEHAVIORS, bytes('behaviors','ascii'))
         self._mapper2.addMapping(self, col.STATES, bytes('states','ascii'))
 
@@ -300,6 +317,25 @@ class BehaviorStateEditor(QtWidgets.QWidget):
 
         self._mapper2.setRootIndex(parent)
         self._mapper2.setCurrentModelIndex(current)
+
+
+        #HAL Reader number is same as Behavior Runner Number
+        self.ui_hal_reader_number.clear()
+        self.ui_hal_reader_number.addItem("") #Empty for none
+        
+        #runners = current.internalPointer().model().behaviorRunners()
+        runners = self._mapper1.model().behaviorRunners()
+        for runner in runners:
+            name = "%i - %i ms" % (runner.behaviorRunnerNumber(), runner.tickRateMS())
+            self.ui_hal_reader_number.addItem(name)
+
+        index = current.internalPointer().halReaderNumber
+        if index is not None:
+            self.ui_hal_reader_number.setCurrentIndex(index)
+
+
+
+        
 
     def insertBehavior(self, row):
         starting_dir = defaults.TOOL_DIR + '/behaviors'
@@ -452,21 +488,17 @@ class BehaviorStateEditor(QtWidgets.QWidget):
     states = QtCore.pyqtProperty(QtCore.QVariant, getStates, setStates)
 
 
-class DeviceEditor(QtWidgets.QWidget):
+class DeviceEditor(device_base, device_form):
     def __init__(self, parent=None):
-        super().__init__(parent)
+        super(device_base, self).__init__(parent)
+        self.setupUi(self)
         self.mapper = QtWidgets.QDataWidgetMapper()
-
-        #ui setup
-        self._grid = QtWidgets.QGridLayout()
-        self._grid.setVerticalSpacing(5)
-        self.setLayout(self._grid)
-
 
     def setModel(self, model):
         if hasattr(model, 'sourceModel'):
             model = model.sourceModel()
 
+        self.mapper.setModel(model)
 
     def setSelection(self, current):
         parent = current.parent()
