@@ -29,7 +29,7 @@ class HalReaderGroup():
             self.findPins()
             self._hal_exists = True
             
-            for i, period_ms in enumerate(reader_periods):
+            for i, period_ms in enumerate(reader_periods_ms):
                 self._hal_readers.append(HalReader(period_ms, i))
 
         except OSError as e:
