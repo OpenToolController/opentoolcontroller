@@ -50,11 +50,11 @@ class HalReaderGroup():
         time.sleep(1) #Give time for hal to unload everything
         
 
-        period_ns_string_list = []
-        name_string_list = []
+        period_ns_string_list = ['name1=ethercat']
+        name_string_list = ['period1=1000000']
 
         for i, period_ms in enumerate(self._hal_reader_periods_ms):
-            n = i+1
+            n = i+2
             period_ns_string_list.append('period%i=%i' % (n, 1e6*period_ms))
             name_string_list.append('name%i=gui_%i' % (n, n))
 
