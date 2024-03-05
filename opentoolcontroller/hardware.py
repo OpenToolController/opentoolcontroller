@@ -51,7 +51,7 @@ class HalReaderGroup():
         
 
         name_string_list = ['name1=ethercat']
-        period_ns_string_list = ['peirod1=1000000']
+        period_ns_string_list = ['period1=1000000']
 
         for i, period_ms in enumerate(self._hal_reader_periods_ms):
             n = i+1
