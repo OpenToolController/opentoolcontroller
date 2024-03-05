@@ -164,6 +164,8 @@ class col():
     TICK_RATE_MS_7 = 140
     TICK_RATE_MS_8 = 141
 
+    TICK_RATE_MS_GROUP = [TICK_RATE_MS_1, TICK_RATE_MS_2, TICK_RATE_MS_3, TICK_RATE_MS_4,
+                          TICK_RATE_MS_5, TICK_RATE_MS_6, TICK_RATE_MS_7, TICK_RATE_MS_8]    
 
 class typ():
     TOOL_NODE = 'Tool_Node'
@@ -223,4 +225,6 @@ class defaults():
     DEVICE_ICON          = 'opentoolcontroller/resources/icons/general/unknown.svg'
     A_DISPLAY_DIGITS     = 2
     A_DISPLAY_DIGITS_MAX = 10
+
+    MAX_HAL_READERS      = 8 
 

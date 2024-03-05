@@ -168,26 +168,63 @@ class ToolEditor(tool_base, tool_form):
         self.setupUi(self)
         self.mapper = QtWidgets.QDataWidgetMapper()
 
+        self.ui_number_of_hal_readers.valueChanged.connect(self.updateTickRateBoxDisplay)
+        self._tick_rate_boxes = []
+        self._tick_rate_labels = []
+
+        for i in range(defaults.MAX_HAL_READERS):
+            spin_box = QtWidgets.QSpinBox()
+            spin_box.setRange(50, 2000)
+            spin_box.setSingleStep(50)
+            spin_box.valueChanged.connect(self.updateTickRateBoxRange)
+
+            n = i + 1
+            label = QtWidgets.QLabel("Tick Rate %i (ms)" % n)
+
+            self.ui_form_layout.addRow(label, spin_box)
+            self._tick_rate_labels.append(label)
+            self._tick_rate_boxes.append(spin_box)
+
+
+    def updateTickRateBoxDisplay(self):
+        number_of_readers = self.ui_number_of_hal_readers.value()
+
+        for i, box in enumerate(self._tick_rate_boxes):
+            if i < number_of_readers:
+                self._tick_rate_boxes[i].show()
+                self._tick_rate_labels[i].show()
+            else:
+                self._tick_rate_boxes[i].hide()
+                self._tick_rate_labels[i].hide()
+
+    
+    def updateTickRateBoxRange(self):
+        current_min = 50
+
+        for i, box in enumerate(self._tick_rate_boxes):
+            if box.value() >= current_min:
+                current_min = box.value()
+            else:
+                box.setValue(current_min)
+
+
     def setModel(self, model):
         if hasattr(model, 'sourceModel'):
             model = model.sourceModel()
 
         self.mapper.setModel(model)
         self.mapper.addMapping(self.ui_number_of_hal_readers, col.NUMBER_OF_HAL_READERS)
-        self.mapper.addMapping(self.ui_tick_rate_ms_1, col.TICK_RATE_MS_1)
-        self.mapper.addMapping(self.ui_tick_rate_ms_2, col.TICK_RATE_MS_2)
-        self.mapper.addMapping(self.ui_tick_rate_ms_3, col.TICK_RATE_MS_3)
-        self.mapper.addMapping(self.ui_tick_rate_ms_4, col.TICK_RATE_MS_4)
-        self.mapper.addMapping(self.ui_tick_rate_ms_5, col.TICK_RATE_MS_5)
-        self.mapper.addMapping(self.ui_tick_rate_ms_6, col.TICK_RATE_MS_6)
-        self.mapper.addMapping(self.ui_tick_rate_ms_7, col.TICK_RATE_MS_7)
-        self.mapper.addMapping(self.ui_tick_rate_ms_8, col.TICK_RATE_MS_8)
+        
+        for i, box in enumerate(self._tick_rate_boxes):
+            self.mapper.addMapping(box, col.TICK_RATE_MS_GROUP[i])
 
 
     def setSelection(self, current):
         parent = current.parent()
         self.mapper.setRootIndex(parent)
         self.mapper.setCurrentModelIndex(current)
+
+
 
 
 class SystemEditor(system_base, system_form):

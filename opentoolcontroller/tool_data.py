@@ -289,7 +289,7 @@ class ToolNode(BehaviorNode):
 
     def setData(self, c, value):
         super().setData(c, value)
-        if   c is col.NUMBER_OF_HAL_READERS : self.tickRateMS = value
+        if   c is col.NUMBER_OF_HAL_READERS : self.numberOfHalReaders = value
         elif c is col.TICK_RATE_MS_1        : self.tickRateMS1 = value
         elif c is col.TICK_RATE_MS_2        : self.tickRateMS2 = value
         elif c is col.TICK_RATE_MS_3        : self.tickRateMS3 = value

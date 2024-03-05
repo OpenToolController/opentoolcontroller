@@ -15,199 +15,27 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <layout class="QFormLayout" name="formLayout">
+    <layout class="QFormLayout" name="ui_form_layout">
      <property name="fieldGrowthPolicy">
       <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
      </property>
      <property name="formAlignment">
       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
      </property>
-     <item row="1" column="0">
+     <item row="0" column="0">
       <widget class="QLabel" name="label_2">
        <property name="text">
         <string>Number of HAL Readers</string>
        </property>
       </widget>
      </item>
-     <item row="1" column="1">
+     <item row="0" column="1">
       <widget class="QSpinBox" name="ui_number_of_hal_readers">
        <property name="minimum">
         <number>1</number>
        </property>
        <property name="maximum">
         <number>8</number>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="0">
-      <widget class="QLabel" name="label_9">
-       <property name="text">
-        <string>Tick Rate 1 (ms)</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="1">
-      <widget class="QSpinBox" name="ui_tick_rate_ms_1">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>200</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="minimum">
-        <number>50</number>
-       </property>
-       <property name="maximum">
-        <number>2000</number>
-       </property>
-       <property name="singleStep">
-        <number>50</number>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="0">
-      <widget class="QLabel" name="label_8">
-       <property name="text">
-        <string>Tick Rate 2 (ms)</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="1">
-      <widget class="QSpinBox" name="ui_tick_rate_ms_2">
-       <property name="minimum">
-        <number>50</number>
-       </property>
-       <property name="maximum">
-        <number>2000</number>
-       </property>
-       <property name="singleStep">
-        <number>50</number>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="0">
-      <widget class="QLabel" name="label_7">
-       <property name="text">
-        <string>Tick Rate 3 (ms)</string>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="1">
-      <widget class="QSpinBox" name="ui_tick_rate_ms_3">
-       <property name="minimum">
-        <number>50</number>
-       </property>
-       <property name="maximum">
-        <number>2000</number>
-       </property>
-       <property name="singleStep">
-        <number>50</number>
-       </property>
-      </widget>
-     </item>
-     <item row="5" column="0">
-      <widget class="QLabel" name="label_6">
-       <property name="text">
-        <string>Tick Rate 4 (ms)</string>
-       </property>
-      </widget>
-     </item>
-     <item row="5" column="1">
-      <widget class="QSpinBox" name="ui_tick_rate_ms_4">
-       <property name="minimum">
-        <number>50</number>
-       </property>
-       <property name="maximum">
-        <number>2000</number>
-       </property>
-       <property name="singleStep">
-        <number>50</number>
-       </property>
-      </widget>
-     </item>
-     <item row="6" column="0">
-      <widget class="QLabel" name="label_4">
-       <property name="text">
-        <string>Tick Rate 5 (ms)</string>
-       </property>
-      </widget>
-     </item>
-     <item row="6" column="1">
-      <widget class="QSpinBox" name="ui_tick_rate_ms_5">
-       <property name="minimum">
-        <number>50</number>
-       </property>
-       <property name="maximum">
-        <number>2000</number>
-       </property>
-       <property name="singleStep">
-        <number>50</number>
-       </property>
-      </widget>
-     </item>
-     <item row="7" column="0">
-      <widget class="QLabel" name="label_5">
-       <property name="text">
-        <string>Tick Rate 6 (ms)</string>
-       </property>
-      </widget>
-     </item>
-     <item row="7" column="1">
-      <widget class="QSpinBox" name="ui_tick_rate_ms_6">
-       <property name="minimum">
-        <number>50</number>
-       </property>
-       <property name="maximum">
-        <number>2000</number>
-       </property>
-       <property name="singleStep">
-        <number>50</number>
-       </property>
-      </widget>
-     </item>
-     <item row="8" column="0">
-      <widget class="QLabel" name="label_10">
-       <property name="text">
-        <string>Tick Rate 7 (ms)</string>
-       </property>
-      </widget>
-     </item>
-     <item row="8" column="1">
-      <widget class="QSpinBox" name="ui_tick_rate_ms_7">
-       <property name="minimum">
-        <number>50</number>
-       </property>
-       <property name="maximum">
-        <number>2000</number>
-       </property>
-       <property name="singleStep">
-        <number>50</number>
-       </property>
-      </widget>
-     </item>
-     <item row="9" column="0">
-      <widget class="QLabel" name="label_11">
-       <property name="text">
-        <string>Tick Rate 8 (ms)</string>
-       </property>
-      </widget>
-     </item>
-     <item row="9" column="1">
-      <widget class="QSpinBox" name="ui_tick_rate_ms_8">
-       <property name="minimum">
-        <number>50</number>
-       </property>
-       <property name="maximum">
-        <number>2000</number>
-       </property>
-       <property name="singleStep">
-        <number>50</number>
        </property>
       </widget>
      </item>
