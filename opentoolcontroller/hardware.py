@@ -56,7 +56,7 @@ class HalReaderGroup():
         for i, period_ms in enumerate(self._hal_reader_periods_ms):
             n = i+1
             period_ns_string_list.append('period%i=%i' % (n, 1e6*period_ms))
-            name_string_list.append('name%i=gui_%i ' % (n, n))
+            name_string_list.append('name%i=gui_%i' % (n, n))
 
 
         print(period_ns_string_list)
