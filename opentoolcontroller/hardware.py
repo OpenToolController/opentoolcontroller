@@ -70,7 +70,7 @@ class HalReaderGroup():
         self._tool_model = value
 
         for reader in self._hal_readers:
-            reader.setModel(self.tool_model)
+            reader.setModel(self._tool_model)
     
     def model(self):
         return self._tool_model
