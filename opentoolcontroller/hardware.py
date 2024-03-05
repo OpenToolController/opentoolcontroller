@@ -23,6 +23,8 @@ class HalReaderGroup():
         self._hal_config_file = '/hal/hal_config.hal'
         self._hal_exists = False
         self._hal_readers = []
+        self._running = False
+
 
         try:
             self.setupHal()
@@ -81,6 +83,7 @@ class HalReaderGroup():
                 reader.start()
             
             subprocess.call(['halcmd', 'start'])
+        self._running = True
     
     def stop(self):
         if self.halExists():
@@ -89,6 +92,7 @@ class HalReaderGroup():
             
             subprocess.check_output(['halcmd', 'stop']) #wait until cmd finishes
             subprocess.check_output(['halcmd', 'unload', 'all']) #wait until cmd finishes
+        self._running = False
 
     def loadHalMeter(self):
         if self.running():
