@@ -59,6 +59,8 @@ class HalReaderGroup():
             name_string_list.append('name%i=gui_%i ' % (n, n))
 
 
+        print(period_ns_string_list)
+        print(name_string_list)
         #period_ns = 'period1=%i' % (1e6*period_ms)
         subprocess.call(['halcmd', 'loadrt', 'threads', *name_string_list, *period_ns_string_list])
 
