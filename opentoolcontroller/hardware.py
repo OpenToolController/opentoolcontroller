@@ -60,7 +60,7 @@ class HalReaderGroup():
 
 
         #period_ns = 'period1=%i' % (1e6*period_ms)
-        subprocess.call(['halcmd', 'loadrt', 'threads', name_string_list, period_ns_string_list])
+        subprocess.call(['halcmd', 'loadrt', 'threads', *name_string_list, *period_ns_string_list])
 
         config_full_path = defaults.TOOL_DIR + self._hal_config_file
         if os.path.isfile(config_full_path):
