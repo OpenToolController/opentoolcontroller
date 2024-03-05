@@ -50,17 +50,17 @@ class HalReaderGroup():
         time.sleep(1) #Give time for hal to unload everything
         
 
-        period_ns_string_list = ['name1=ethercat']
-        name_string_list = ['period1=1000000']
+        name_string_list = ['name1=ethercat']
+        period_ns_string_list = ['peirod1=1000000']
 
         for i, period_ms in enumerate(self._hal_reader_periods_ms):
             n = i+1
-            period_ns_string_list.append('period%i=%i' % (n+1, 1e6*period_ms))
             name_string_list.append('name%i=gui_%i' % (n+1, n))
+            period_ns_string_list.append('period%i=%i' % (n+1, 1e6*period_ms))
 
 
-        print(period_ns_string_list)
         print(name_string_list)
+        print(period_ns_string_list)
         combo = name_string_list + period_ns_string_list
         #period_ns = 'period1=%i' % (1e6*period_ms)
         subprocess.call(['halcmd', 'loadrt', 'threads', *combo])
