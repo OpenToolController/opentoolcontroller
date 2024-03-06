@@ -67,16 +67,13 @@ class Window(QtWidgets.QMainWindow):
         self.tool_model.loadBehaviors()
 
 
-        tool_index = self.tool_model.index(0, 0, QtCore.QModelIndex())
-        #tick_rate_ms = self.tool_model.data(tool_index.siblingAtColumn(col.TICK_RATE_MS), QtCore.Qt.DisplayRole)
-
-
-        reader_periods = [100, 250]
-        self.reader_group = HalReaderGroup(reader_periods)
+        realtime_period = self.tool_model.realtimePeriod()
+        tick_periods = self.tool_model.tickPeriods()
+        self.reader_group = HalReaderGroup(realtime_period, tick_periods)
 
         self.behavior_runners = []
 
-        for i, period_ms in enumerate(reader_periods):
+        for i, period_ms in enumerate(tick_periods):
             self.behavior_runners.append(BehaviorRunner(period_ms, i+1))
         self.tool_model.setBehaviorRunners(self.behavior_runners)
 

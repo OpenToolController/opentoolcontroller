@@ -168,40 +168,50 @@ class ToolEditor(tool_base, tool_form):
         self.setupUi(self)
         self.mapper = QtWidgets.QDataWidgetMapper()
 
-        self.ui_number_of_hal_readers.valueChanged.connect(self.updateTickRateBoxDisplay)
-        self._tick_rate_boxes = []
-        self._tick_rate_labels = []
+        self.ui_number_of_hal_readers.valueChanged.connect(self.updatePeriodBoxDisplay)
+        self._period_boxes = []
+        self._period_labels = []
+
+        spin_box = QtWidgets.QSpinBox()
+        spin_box.setRange(1, 200)
+        spin_box.setSingleStep(1)
+        spin_box.valueChanged.connect(self.updatePeriodBoxRange)
+
+        label = QtWidgets.QLabel("Realtime Period (ms)")
+        self.ui_form_layout.addRow(label, spin_box)
+        self._period_labels.append(label)
+        self._period_boxes.append(spin_box)
 
         for i in range(defaults.MAX_HAL_READERS):
             spin_box = QtWidgets.QSpinBox()
             spin_box.setRange(50, 2000)
             spin_box.setSingleStep(50)
-            spin_box.valueChanged.connect(self.updateTickRateBoxRange)
+            spin_box.valueChanged.connect(self.updatePeriodBoxRange)
 
             n = i + 1
-            label = QtWidgets.QLabel("Tick Rate %i (ms)" % n)
+            label = QtWidgets.QLabel("GUI Period %i (ms)" % n)
 
             self.ui_form_layout.addRow(label, spin_box)
-            self._tick_rate_labels.append(label)
-            self._tick_rate_boxes.append(spin_box)
+            self._period_labels.append(label)
+            self._period_boxes.append(spin_box)
 
 
-    def updateTickRateBoxDisplay(self):
+    def updatePeriodBoxDisplay(self):
         number_of_readers = self.ui_number_of_hal_readers.value()
 
-        for i, box in enumerate(self._tick_rate_boxes):
-            if i < number_of_readers:
-                self._tick_rate_boxes[i].show()
-                self._tick_rate_labels[i].show()
+        for i, box in enumerate(self._period_boxes):
+            if i < number_of_readers+1:
+                self._period_boxes[i].show()
+                self._period_labels[i].show()
             else:
-                self._tick_rate_boxes[i].hide()
-                self._tick_rate_labels[i].hide()
+                self._period_boxes[i].hide()
+                self._period_labels[i].hide()
 
     
-    def updateTickRateBoxRange(self):
-        current_min = 50
+    def updatePeriodBoxRange(self):
+        current_min = 1 
 
-        for i, box in enumerate(self._tick_rate_boxes):
+        for i, box in enumerate(self._period_boxes):
             if box.value() >= current_min:
                 current_min = box.value()
             else:
@@ -214,17 +224,16 @@ class ToolEditor(tool_base, tool_form):
 
         self.mapper.setModel(model)
         self.mapper.addMapping(self.ui_number_of_hal_readers, col.NUMBER_OF_HAL_READERS)
+        self.mapper.addMapping(self._period_boxes[0], col.REALTIME_PERIOD_MS)
         
-        for i, box in enumerate(self._tick_rate_boxes):
-            self.mapper.addMapping(box, col.TICK_RATE_MS_GROUP[i])
+        for i, current_col in enumerate(col.GUI_PERIOD_MS_GROUP):
+            self.mapper.addMapping(self._period_boxes[i+1], current_col)
 
 
     def setSelection(self, current):
         parent = current.parent()
         self.mapper.setRootIndex(parent)
         self.mapper.setCurrentModelIndex(current)
-
-
 
 
 class SystemEditor(system_base, system_form):

@@ -16,6 +16,18 @@ class ToolModel(QtCore.QAbstractItemModel):
 
         self._behavior_runners = []
 
+    def realtimePeriod(self):
+        return self.data(self._tool_index.siblingAtColumn(col.REALTIME_PERIOD_MS), QtCore.Qt.DisplayRole)
+
+    def tickPeriods(self):
+        tick_periods = []
+        number_of_readers = self._tool_node.numberOfHalReaders
+
+        for i, current_col in enumerate(col.GUI_PERIOD_MS_GROUP):
+            if i < number_of_readers:
+                tick_periods.append(self.data(self._tool_index.siblingAtColumn(current_col), QtCore.Qt.DisplayRole))
+
+        return tick_periods
 
     def behaviorRunners(self):
         return self._behavior_runner

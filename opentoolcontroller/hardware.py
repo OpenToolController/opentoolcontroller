@@ -17,20 +17,15 @@ import ctypes
 
 
 class HalReaderGroup():
-    def __init__(self, reader_periods_ms=[100]):
+    def __init__(self, realtime_period_ms=50, reader_periods_ms=[100]):
         super().__init__()
+        self._realtime_period_ms = realtime_period_ms
         self._hal_reader_periods_ms = reader_periods_ms
         self._hal_config_file = '/hal/hal_config.hal'
         self._hal_exists = False
         self._hal_readers = []
         self._running = False
 
-
-        '''
-        Enforce reader_period_ms is increasing:w
-
-
-        '''
         try:
             self.setupHal()
             self.findPins()
@@ -49,9 +44,9 @@ class HalReaderGroup():
         subprocess.check_output(['halcmd', 'unload', 'all']) #wait until cmd finishes
         time.sleep(1) #Give time for hal to unload everything
         
-
+        realtime_period_ns = self._realtime_period_ms * 1e6
         name_string_list = ['name1=ethercat']
-        period_ns_string_list = ['period1=5000000']
+        period_ns_string_list = ['period1=%i'%realtime_period_ns]
 
         for i, period_ms in enumerate(self._hal_reader_periods_ms):
             n = i+1
@@ -59,12 +54,8 @@ class HalReaderGroup():
             period_ns_string_list.append('period%i=%i' % (n+1, 1e6*period_ms))
 
 
-        print(name_string_list)
-        print(period_ns_string_list)
         combo = name_string_list + period_ns_string_list
-        #period_ns = 'period1=%i' % (1e6*period_ms)
         subprocess.call(['halcmd', 'loadrt', 'threads', *combo])
-        #subprocess.call(['halcmd', 'loadrt', 'threads', *name_string_list, *period_ns_string_list])
 
         config_full_path = defaults.TOOL_DIR + self._hal_config_file
         if os.path.isfile(config_full_path):
