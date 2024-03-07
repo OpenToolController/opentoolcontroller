@@ -28,11 +28,10 @@ class HalReaderGroup():
         self._running = False
 
         try:
-            subprocess.call(['halcmd'])
+            subprocess.run(['halcmd'], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             self._hal_exists = True
-        except OSError as e:
+        except subprocess.CalledProcessError:
             self._hal_exists = False
-
 
     def setPeriods(self, realtime_period_ms=50, reader_periods_ms=[100]):
         self._realtime_period_ms = realtime_period_ms

@@ -56,7 +56,7 @@ class Window(QtWidgets.QMainWindow):
         self._action_log_view.setWindowTitle('Action Log')
 
 
-        self.reader_group = HalReaderGroup()
+        self.reader_group = HalReaderGroup() #Must be first to have the hal pins
         self.tool_model = ToolModel()
 
         if json_data is not None:
@@ -74,7 +74,7 @@ class Window(QtWidgets.QMainWindow):
 
         self.behavior_runners = []
 
-        for i, period_ms in enumerate(tick_periods):
+        for i, period_ms in enumerate(gui_periods):
             self.behavior_runners.append(BehaviorRunner(period_ms, i+1))
         self.tool_model.setBehaviorRunners(self.behavior_runners)
 
