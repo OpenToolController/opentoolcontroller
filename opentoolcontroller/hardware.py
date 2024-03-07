@@ -92,13 +92,13 @@ class HalReaderGroup():
            
 
         cfg = ','.join(self._sampler_cfgs)
-        cfg = f"cfg={joined_string}"
+        cfg = f"cfg={cfg}"
 
         subprocess.call(['halcmd', 'loadrt', 'sampler', 'depth=100', cfg])
         print(f"Sampler Config:  {cfg}")
 
         cfg = ','.join(self._streamer_cfgs)
-        cfg = f"cfg={joined_string}"
+        cfg = f"cfg={cfg}"
 
         subprocess.call(['halcmd', 'loadrt', 'sampler', 'depth=100', cfg])
         print(f"Streamer Config:  {cfg}")
