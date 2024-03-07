@@ -56,25 +56,27 @@ class Window(QtWidgets.QMainWindow):
         self._action_log_view.setWindowTitle('Action Log')
 
 
-        self.reader_group = HalReaderGroup() #Must be first to have the hal pins
-        print(HalNode.hal_pins)
         self.tool_model = ToolModel()
-
         if json_data is not None:
             self.tool_model.loadJSON(json_data)
+        
+        self.reader_group = HalReaderGroup() #Must be first to have the hal pins
+        realtime_period = self.tool_model.realtimePeriod()
+        gui_periods = self.tool_model.guiPeriods()
+        self.reader_group.setPeriods(realtime_period, gui_periods)
+        self.reader_group.setModel(self.tool_model)
+
+        #Second load now that we found the hal pins
+        if json_data is not None:
+            self.tool_model.loadJSON(json_data)
+        
         self.tool_model.setAlertCallback(self._alert_model.addAlert)
         self.tool_model.setActionLogCallback(self._action_log_model.addAction)
         self.tool_model.setLaunchValues()
         self.tool_model.loadBehaviors()
 
 
-        realtime_period = self.tool_model.realtimePeriod()
-        gui_periods = self.tool_model.guiPeriods()
-        self.reader_group.setPeriods(realtime_period, gui_periods)
-        self.reader_group.setModel(self.tool_model)
-
         self.behavior_runners = []
-
         for i, period_ms in enumerate(gui_periods):
             self.behavior_runners.append(BehaviorRunner(period_ms, i+1))
         self.tool_model.setBehaviorRunners(self.behavior_runners)

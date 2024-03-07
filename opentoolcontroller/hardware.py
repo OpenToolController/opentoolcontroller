@@ -167,8 +167,6 @@ class HalReaderGroup():
                 pass
 
 
-        #print(HalNode.hal_pins)
-
 
 
 #Only setData on HAL nodes here since this is the closest to the hardware
