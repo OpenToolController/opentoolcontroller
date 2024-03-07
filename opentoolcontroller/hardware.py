@@ -166,6 +166,7 @@ class HalReaderGroup():
             except:
                 pass
 
+        print("pins: ", pin)
 
 
 
