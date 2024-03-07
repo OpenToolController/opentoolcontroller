@@ -19,6 +19,7 @@ import ctypes
 class HalReaderGroup():
     def __init__(self, realtime_period_ms=50, reader_periods_ms=[100]):
         super().__init__()
+        self._tool_model = None
         self._realtime_period_ms = realtime_period_ms
         self._hal_reader_periods_ms = reader_periods_ms
         self._hal_config_file = '/hal/hal_config.hal'
@@ -178,11 +179,13 @@ class HalReader():
         self._running = False
 
         self._sampler_cfg = ''
-        self._connected_sampler_pins = self.connectedPins(HalNode.hal_pins, self.samplerIndexes())
-        self._connected_streamer_pins = self.connectedPins(HalNode.hal_pins, self.streamerIndexes())
+        self._connected_sampler_pins = ''
+        self._connected_streamer_pins = '' 
 
     def setModel(self, value):
         self._tool_model = value
+        self._connected_sampler_pins = self.connectedPins(HalNode.hal_pins, self.samplerIndexes())
+        self._connected_streamer_pins = self.connectedPins(HalNode.hal_pins, self.streamerIndexes())
 
     def model(self):
         return self._tool_model
@@ -195,11 +198,6 @@ class HalReader():
 
     def streamerCFG(self):
         return self.cfgFromPins(self._connected_streamer_pins)
-
-
-
-
-
 
     def start(self):
         if len(self._connected_streamer_pins) > 0:
