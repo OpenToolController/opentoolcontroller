@@ -638,6 +638,7 @@ class HalNode(Node):
 
         self._name = 'HAL_Node'
         self._hal_pin = ''
+        self._saved_hal_pin = ''
         self._hal_pin_type = None
         self._queue_max_size = 10
         self._hal_queue = deque([], maxlen=self._queue_max_size)
@@ -645,6 +646,9 @@ class HalNode(Node):
 
     def typeInfo(self):
         raise NotImplementedError("Nodes that inherit HalNode must implement typeInfo")
+
+    def savedHalPin(self):
+        return self._saved_hal_pin
 
     def data(self, c):
         r = super().data(c)
@@ -690,16 +694,11 @@ class HalNode(Node):
         def fget(self): return self._hal_pin
         def fset(self, value):
             try:
-                print("HM: ", value)
+                self._saved_hal_pin = value
                 pin = [item for item in HalNode.hal_pins if item[0] == value]
-                print(pin)
                 self._hal_pin = pin[0][0]
-                print("test2")
                 self._hal_pin_type = pin[0][1]
-                print("test3")
             except Exception as e:
-                print("nuuuu")
-                print(e)
                 self._hal_pin = ""
                 self._hal_pin_type = None
         return locals()

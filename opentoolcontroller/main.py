@@ -64,17 +64,18 @@ class Window(QtWidgets.QMainWindow):
         realtime_period = self.tool_model.realtimePeriod()
         gui_periods = self.tool_model.guiPeriods()
         self.reader_group.setPeriods(realtime_period, gui_periods)
-        self.reader_group.setModel(self.tool_model)
 
-        #Second load now that we found the hal pins
-        if json_data is not None:
-            self.tool_model.loadJSON(json_data)
+        #Reload the hal pins after we found them
+        self.tool_model.reloadHalPins()
         
         self.tool_model.setAlertCallback(self._alert_model.addAlert)
         self.tool_model.setActionLogCallback(self._action_log_model.addAction)
         self.tool_model.setLaunchValues()
         self.tool_model.loadBehaviors()
 
+
+        self.reader_group.buildReaders()
+        self.reader_group.setModel(self.tool_model)
 
         self.behavior_runners = []
         for i, period_ms in enumerate(gui_periods):

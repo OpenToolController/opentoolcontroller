@@ -16,6 +16,12 @@ class ToolModel(QtCore.QAbstractItemModel):
 
         self._behavior_runners = []
 
+
+    def reloadHalPins(self):
+        for index in self.model().indexesOfTypes([typ.D_IN_NODE, typ.D_OUT_NODE, typ.A_IN_NODE, typ.A_OUT_NODE]):
+            node = index.internalPointer()
+            node.halPin = node.savedHalPin()
+
     def realtimePeriod(self):
         return self.data(self._tool_index.siblingAtColumn(col.REALTIME_PERIOD_MS), QtCore.Qt.DisplayRole)
 
