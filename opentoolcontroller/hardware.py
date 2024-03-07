@@ -287,7 +287,7 @@ class HalReader():
 
         #node.setSamplerPins(node_sampler_pins) # This is a list of indexes
         subprocess.call(['halcmd', 'setp', 'streamer.'+str(streamer_number)+'.enable', 'True'])
-        subprocess.call(['halcmd', 'addf', 'streamer.'+str(streamer_number), 'gui_'+str(sampler_number+1)])
+        subprocess.call(['halcmd', 'addf', 'streamer.'+str(streamer_number), 'gui_'+str(streamer_number+1)])
 
         # Streamer userspace component, stdbuf fixes bufering issue
         self.p_streamer = subprocess.Popen(['halcmd', 'loadusr', 'halstreamer', '-c', str(streamer_number)], 
