@@ -19,7 +19,7 @@ class ToolModel(QtCore.QAbstractItemModel):
     def realtimePeriod(self):
         return self.data(self._tool_index.siblingAtColumn(col.REALTIME_PERIOD_MS), QtCore.Qt.DisplayRole)
 
-    def tickPeriods(self):
+    def guiPeriods(self):
         tick_periods = []
         number_of_readers = self._tool_node.numberOfHalReaders
 

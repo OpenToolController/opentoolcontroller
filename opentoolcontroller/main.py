@@ -56,8 +56,8 @@ class Window(QtWidgets.QMainWindow):
         self._action_log_view.setWindowTitle('Action Log')
 
 
+        self.reader_group = HalReaderGroup()
         self.tool_model = ToolModel()
-
 
         if json_data is not None:
             self.tool_model.loadJSON(json_data)
@@ -68,8 +68,8 @@ class Window(QtWidgets.QMainWindow):
 
 
         realtime_period = self.tool_model.realtimePeriod()
-        tick_periods = self.tool_model.tickPeriods()
-        self.reader_group = HalReaderGroup(realtime_period, tick_periods)
+        gui_periods = self.tool_model.guiPeriods()
+        self.reader_group.setPeriods(realtime_period, gui_periods)
         self.reader_group.setModel(self.tool_model)
 
         self.behavior_runners = []

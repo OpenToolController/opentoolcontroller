@@ -17,26 +17,33 @@ import ctypes
 
 
 class HalReaderGroup():
-    def __init__(self, realtime_period_ms=50, reader_periods_ms=[100]):
+    def __init__(self):
         super().__init__()
         self._tool_model = None
-        self._realtime_period_ms = realtime_period_ms
-        self._hal_reader_periods_ms = reader_periods_ms
+        self._realtime_period_ms = None
+        self._hal_reader_periods_ms = []
         self._hal_config_file = '/hal/hal_config.hal'
         self._hal_exists = False
         self._hal_readers = []
         self._running = False
 
         try:
+            subprocess.call(['halcmd'])
+            self._hal_exists = True
+        except OSError as e:
+            self._hal_exists = False
+
+
+    def setPeriods(self, realtime_period_ms=50, reader_periods_ms=[100]):
+        self._realtime_period_ms = realtime_period_ms
+        self._hal_reader_periods_ms = reader_periods_ms
+
+        if self._hal_exists:
             self.setupHal()
             self.findPins()
-            self._hal_exists = True
             
             for i, period_ms in enumerate(reader_periods_ms):
                 self._hal_readers.append(HalReader(period_ms, i))
-
-        except OSError as e:
-            self._hal_exists = False
 
 
 
