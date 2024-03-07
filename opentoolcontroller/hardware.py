@@ -167,7 +167,7 @@ class HalReaderGroup():
                 pass
 
 
-        print(HalNode.hal_pins)
+        #print(HalNode.hal_pins)
 
 
 
