@@ -421,8 +421,8 @@ class HalReader():
     def writeStreamer(self):
         new_stream = self._previous_stream[:] # Make a copy so it can be compared to the previous one
 
-        for i, pin in enumerate(self.connected_streamer_pins):
-            index = self.connected_streamer_pins[pin][0] #outputs only have 1 index per signal
+        for i, pin in enumerate(self._connected_streamer_pins):
+            index = self._connected_streamer_pins[pin][0] #outputs only have 1 index per signal
             node = index.internalPointer()
 
             new_val = node.halQueueGet()
