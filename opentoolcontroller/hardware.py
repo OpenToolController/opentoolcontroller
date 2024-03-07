@@ -244,7 +244,7 @@ class HalReader():
     
     def connectSamplerSignals(self):
         connected_pins = self._connected_sampler_pins
-        sampler_number = self._reader_number + 1
+        sampler_number = self._reader_number - 1
 
         for i, pin_name in enumerate(connected_pins):
             index = connected_pins[pin_name][0]
@@ -273,7 +273,7 @@ class HalReader():
 
     def connectStreamerSignals(self):
         connected_pins = self._connected_streamer_pins
-        streamer_number = self._reader_number + 1
+        streamer_number = self._reader_number - 1
 
         for i, pin_name in enumerate(connected_pins):
             index = connected_pins[pin_name][0]
