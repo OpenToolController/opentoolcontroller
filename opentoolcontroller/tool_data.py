@@ -692,8 +692,11 @@ class HalNode(Node):
             try:
                 print("HM: ", value)
                 pin = [item for item in HalNode.hal_pins if item[0] == value]
+                print("test1")
                 self._hal_pin = pin[0][0]
+                print("test2")
                 self._hal_pin_type = pin[0][1]
+                print("test3")
             except Exception as e:
                 print("nuuuu")
                 print(e)
