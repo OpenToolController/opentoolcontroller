@@ -42,7 +42,7 @@ class HalReaderGroup():
             self.findPins()
             
     def buildReaders(self):
-        for i, period_ms in enumerate(self._reader_periods_ms):
+        for i, period_ms in enumerate(self._hal_reader_periods_ms):
             self._hal_readers.append(HalReader(period_ms, i))
 
 
