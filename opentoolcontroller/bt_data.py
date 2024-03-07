@@ -265,7 +265,6 @@ class SelectorNode(Node):
 class RootSequenceNode(SequenceNode):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self._tick_rate_ms = 1000
         self._name = "Behavior Name"
         self._file = "" 
         self._manual_button_new_line = False
@@ -296,7 +295,6 @@ class RootSequenceNode(SequenceNode):
     def data(self, column):
         r = super().data(column)
         if   column is col.NAME                 : return self._name
-        elif column is col.TICK_RATE_MS         : return self._tick_rate_ms
         elif column is col.MAN_BTN_NEW_LINE     : return self.manualButtonNewLine
         elif column is col.MAN_BTN_SPAN_COL_END : return self.manualButtonSpanColEnd
         return r
@@ -304,16 +302,8 @@ class RootSequenceNode(SequenceNode):
     def setData(self, column, value):
         super().setData(column, value)
         if   column is col.NAME                 : self._name = str(value)
-        elif column is col.TICK_RATE_MS         : self._tick_rate_ms = int(value)
         elif column is col.MAN_BTN_NEW_LINE     : self.manualButtonNewLine = value
         elif column is col.MAN_BTN_SPAN_COL_END : self.manualButtonSpanColEnd = value
-
-
-    def tick_rate_ms():
-        def fget(self): return self._tick_rate_ms
-        def fset(self, value): self._tick_rate_ms = int(value)
-        return locals()
-    tick_rate_ms = property(**tick_rate_ms())
 
     def name():
         def fget(self): return self._name
