@@ -70,6 +70,7 @@ class Window(QtWidgets.QMainWindow):
         realtime_period = self.tool_model.realtimePeriod()
         tick_periods = self.tool_model.tickPeriods()
         self.reader_group = HalReaderGroup(realtime_period, tick_periods)
+        self.reader_group.setModel(self.tool_model)
 
         self.behavior_runners = []
 
@@ -133,7 +134,7 @@ class Window(QtWidgets.QMainWindow):
         self.setDockNestingEnabled(True) #needed for left/right arranging
 
 
-        self.reader_group.setModel(self.tool_model)
+        #self.reader_group.setModel(self.tool_model)
         #Start the behavior tree
         #self.tool_model.runBehaviorTrees()
 
