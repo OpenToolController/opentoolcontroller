@@ -599,15 +599,6 @@ class RootSequenceNodeGraphicsItem(NodeGraphicsItem):
         self._ui_name.textChanged.connect(self._mapper.submit)
         self._grid.addWidget(self._ui_name, ui_row, 1)
 
-        #Tick Rate
-        ui_row += 1
-        self._grid.addWidget(QtWidgets.QLabel('Tick Rate (ms)', self._wid), ui_row, 0)
-        self._ui_tick_rate = QtWidgets.QSpinBox(self._wid)
-        self._ui_tick_rate.setMinimum(100)
-        self._ui_tick_rate.setMaximum(10000)
-        self._ui_tick_rate.setSingleStep(100)
-        self._ui_tick_rate.valueChanged.connect(self._mapper.submit)
-        self._grid.addWidget(self._ui_tick_rate, ui_row, 1)
 
         #Manual Button New Line
         ui_row += 1
@@ -648,7 +639,6 @@ class RootSequenceNodeGraphicsItem(NodeGraphicsItem):
         if hasattr(model, 'sourceModel'):model = model.sourceModel()
         self._mapper.setModel(model)
         self._mapper.addMapping(self._ui_name, col.NAME)
-        self._mapper.addMapping(self._ui_tick_rate, col.TICK_RATE_MS)
         self._mapper.addMapping(self._ui_man_btn_new_line, col.MAN_BTN_NEW_LINE)
         self._mapper.addMapping(self._ui_man_btn_span_col_end, col.MAN_BTN_SPAN_COL_END)
         self._mapper.setCurrentModelIndex(index)
