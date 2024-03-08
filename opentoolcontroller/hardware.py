@@ -113,6 +113,8 @@ class HalReaderGroup():
         print(f"Streamer Config:  {cfg}")
 
 
+        subprocess.call(['halcmd', 'show'])
+
         #Connect the signals and start
         for reader in self._hal_readers:
             reader.connectSamplerSignals()
