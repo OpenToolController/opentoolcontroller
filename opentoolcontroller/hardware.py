@@ -108,7 +108,6 @@ class HalReaderGroup():
 
         depth = ','.join(depth)
         depth = f"depth={depth}"
-        print('depth: ', depth)
 
         subprocess.call(['halcmd', 'loadrt', 'sampler', depth, cfg])
         print(f"Sampler Config:  {cfg}")
@@ -116,7 +115,7 @@ class HalReaderGroup():
         cfg = ','.join(self._streamer_cfgs)
         cfg = f"cfg={cfg}"
 
-        subprocess.call(['halcmd', 'loadrt', 'streamer', 'depth=100', cfg])
+        subprocess.call(['halcmd', 'loadrt', 'streamer', depth, cfg])
         print(f"Streamer Config:  {cfg}")
 
 
