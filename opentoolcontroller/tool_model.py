@@ -46,6 +46,8 @@ class ToolModel(QtCore.QAbstractItemModel):
             behavior_node = behavior_index.internalPointer()
 
             n = behavior_node.halReaderNumber
+            print("number: ", n)
+            print(len(runners))
             if n is not None:
                 behavior_node.setBehaviorRunner(self._behavior_runners[n-1]) #TODO add this into the model for when the number gets changed?
 
