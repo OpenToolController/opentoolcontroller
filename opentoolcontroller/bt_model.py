@@ -168,8 +168,6 @@ class BTModel(QtCore.QAbstractItemModel):
         self._tool_model = None
         self._tool_index = None
 
-        self._behavior_runner = None
-
 
     '''The tool needs a single timer that all the behaviors use, or maybe per System?
         if we run the behavior then we need to add ourselvs to our timers tick loop?
@@ -194,10 +192,10 @@ class BTModel(QtCore.QAbstractItemModel):
         return self._tool_index
 
     def behaviorRunner(self):
-        return self._behavior_runner
+        return self._tool_index.internalPointer().behaviorRunner()
     
-    def setBehaviorRunner(self, runner):
-        self._behavior_runner = runner
+    #def setBehaviorRunner(self, runner):
+    #    self._behavior_runner = runner
 
     def syncMessageIndex(self, index):
         message_node = index.internalPointer()
@@ -895,6 +893,7 @@ class BTModel(QtCore.QAbstractItemModel):
     def runAbortOthers(self):
         #BTModel.behaviorRunner.runAbortSiblings(self)
         self.behaviorRunner().runAbortSiblings(self)
+
 
     def abort(self):
         #BTModel.behaviorRunner.stopBehavior(self)

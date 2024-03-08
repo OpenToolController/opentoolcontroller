@@ -41,6 +41,16 @@ class ToolModel(QtCore.QAbstractItemModel):
     def setBehaviorRunners(self, runners):
         self._behavior_runner = runners
 
+        indexes = self.indexesOfTypes([typ.TOOL_NODE, typ.SYSTEM_NODE, typ.DEVICE_NODE])
+        for behavior_index in indexes
+            behavior_node = behavior_index.internalPointer()
+
+            n = behavior_node.halReaderNumber
+            if n is not None:
+                behavior_node.setBehaviorRunner(self._behavior_runners[n]) #TODO add this into the model for when the number gets changed?
+
+
+
     def alertCallback(self):
         return self._alert_callback
 
@@ -95,7 +105,7 @@ class ToolModel(QtCore.QAbstractItemModel):
             bt_model.setToolModel(self)
             bt_model.setToolIndex(index)
             bt_model.syncToTool()
-            bt_model.setBehaviorRunner(index.internalPointer().behaviorRunner())
+            #bt_model.setBehaviorRunner(index.internalPointer().behaviorRunner())
             
         return bt_model
 

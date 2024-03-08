@@ -200,9 +200,7 @@ class BehaviorNode(Node):
         elif c is col.RUNNING_BEHAVIOR_NAME : self._running_behavior_name = value
         elif c is col.RUNNING_BEHAVIOR      : self._running_behavior = value
         elif c is col.BEHAVIOR_INFO_TEXT    : self._behavior_info_text = value
-        elif c is col.HAL_READER_NUMBER     : 
-            print("HMMM")
-            self.halReaderNumber = value
+        elif c is col.HAL_READER_NUMBER     : self.halReaderNumber = value
 
     def state(self):
         return self._state
@@ -223,7 +221,6 @@ class BehaviorNode(Node):
     
     def setBehaviorRunner(self, runner):
         self._behavior_runner = runnner
-    
 
     def behaviorFiles():
         def fget(self):
