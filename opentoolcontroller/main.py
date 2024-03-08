@@ -79,7 +79,7 @@ class Window(QtWidgets.QMainWindow):
 
         self.behavior_runners = []
         for i, period_ms in enumerate(gui_periods):
-            self.behavior_runners.append(BehaviorRunner(period_ms, i+1))
+            self.behavior_runners.append(BehaviorRunner(period_ms, i))
         self.tool_model.setBehaviorRunners(self.behavior_runners)
 
             
