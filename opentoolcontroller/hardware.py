@@ -63,6 +63,7 @@ class HalReaderGroup():
 
 
         combo = name_string_list + period_ns_string_list
+        print(combo)
         subprocess.call(['halcmd', 'loadrt', 'threads', *combo])
 
         config_full_path = defaults.TOOL_DIR + self._hal_config_file
