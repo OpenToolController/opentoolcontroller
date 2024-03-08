@@ -220,7 +220,7 @@ class BehaviorNode(Node):
         return self._behavior_runner
     
     def setBehaviorRunner(self, runner):
-        self._behavior_runner = runnner
+        self._behavior_runner = runner
 
     def behaviorFiles():
         def fget(self):
