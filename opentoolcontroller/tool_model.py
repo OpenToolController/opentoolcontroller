@@ -42,7 +42,7 @@ class ToolModel(QtCore.QAbstractItemModel):
         self._behavior_runner = runners
 
         indexes = self.indexesOfTypes([typ.TOOL_NODE, typ.SYSTEM_NODE, typ.DEVICE_NODE])
-        for behavior_index in indexes
+        for behavior_index in indexes:
             behavior_node = behavior_index.internalPointer()
 
             n = behavior_node.halReaderNumber
