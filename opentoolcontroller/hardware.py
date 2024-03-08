@@ -119,7 +119,7 @@ class HalReaderGroup():
         print(f"Streamer Config:  {cfg}")
 
 
-        subprocess.call(['halcmd', 'show'])
+        #subprocess.call(['halcmd', 'show']) #TODO add switch for verborse
 
         #Connect the signals and start
         for reader in self._hal_readers:
@@ -193,6 +193,7 @@ class HalReader():
         self._running = False
 
         self._sampler_cfg = ''
+        self._streamer_cfg = ''
         self._connected_sampler_pins = ''
         self._connected_streamer_pins = '' 
 
@@ -208,10 +209,12 @@ class HalReader():
         return self._running
 
     def samplerCFG(self):
-        return self.cfgFromPins(self._connected_sampler_pins)
+        self._sampler_cfg = self.cfgFromPins(self._connected_sampler_pins)
+        return self._sampler_cfg
 
     def streamerCFG(self):
-        return self.cfgFromPins(self._connected_streamer_pins)
+        self._streamer_cfg = self.cfgFromPins(self._connected_streamer_pins)
+        return self._streamer_cfg
 
     def start(self):
         if len(self._connected_streamer_pins) > 0:
