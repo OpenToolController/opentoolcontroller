@@ -63,7 +63,7 @@ class HalReaderGroup():
 
 
         combo = name_string_list + period_ns_string_list
-        print(combo)
+        #print(combo)
         subprocess.call(['halcmd', 'loadrt', 'threads', *combo])
 
         config_full_path = defaults.TOOL_DIR + self._hal_config_file
@@ -93,10 +93,12 @@ class HalReaderGroup():
         #Build the cfgs
         self._sampler_cfgs = []
         self._streamer_cfgs = []
+        depth = []
 
         for reader in self._hal_readers:
             self._sampler_cfgs.append(reader.samplerCFG())
             self._streamer_cfgs.append(reader.streamerCFG())
+            depth.append('100')
             print("\n sampler:", reader.samplerCFG())
             print("\n streamer:", reader.streamerCFG())
            
@@ -104,7 +106,11 @@ class HalReaderGroup():
         cfg = ','.join(self._sampler_cfgs)
         cfg = f"cfg={cfg}"
 
-        subprocess.call(['halcmd', 'loadrt', 'sampler', 'depth=100', cfg])
+        depth = ','.join(depth)
+        depth = f"depth={depth}"
+        print('depth: ', depth)
+
+        subprocess.call(['halcmd', 'loadrt', 'sampler', depth, cfg])
         print(f"Sampler Config:  {cfg}")
 
         cfg = ','.join(self._streamer_cfgs)
