@@ -863,24 +863,35 @@ class SetNode(Node):
             for child in self.children():
                 type_info = child.setIndex().internalPointer().typeInfo()
                 tool_model = self.toolModel()
-                child_name, value = None, None
+                child_name = child.setName
+                value = None
 
                 if child.setType == bt.VAL:
-                    child_name = child.setName
                     value = child.value
 
+                elif child.setType == bt.VAR:
+                    value = child.varIndex().internalPointer().value() 
+
+
+                if value is not None:
                     if type_info in [typ.BOOL_VAR_NODE, typ.FLOAT_VAR_NODE]:
                         tool_model.setData(child.setIndex().siblingAtColumn(col.VALUE), value)
 
                     elif type_info in [typ.D_OUT_NODE, typ.A_OUT_NODE]:
                         child.setIndex().internalPointer().halQueuePut(value)
 
-                elif child.setType == bt.VAR:
-                    child_name = child.setName
 
-                    if type_info in [typ.BOOL_VAR_NODE, typ.FLOAT_VAR_NODE, typ.D_OUT_NODE, typ.A_OUT_NODE]:
-                        value = child.varIndex().internalPointer().value() 
-                        tool_model.setData(child.setIndex().siblingAtColumn(col.VALUE), value)#child.varIndex().internalPointer().value())
+
+
+
+
+                #elif child.setType == bt.VAR:
+                #    child_name = child.setName
+                #    value = child.varIndex().internalPointer().value() 
+
+                #    if type_info in [typ.BOOL_VAR_NODE, typ.FLOAT_VAR_NODE, typ.D_OUT_NODE, typ.A_OUT_NODE]:
+                #        value = child.varIndex().internalPointer().value() 
+                #        tool_model.setData(child.setIndex().siblingAtColumn(col.VALUE), value)#child.varIndex().internalPointer().value())
 
                 #not using since set nodes don't wait
                 #if child_name:

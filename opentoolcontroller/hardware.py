@@ -30,7 +30,7 @@ class HalReaderGroup():
         try:
             subprocess.run(['halcmd'], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             self._hal_exists = True
-        except subprocess.CalledProcessError:
+        except OSError as e:
             self._hal_exists = False
 
     def setPeriods(self, realtime_period_ms=50, reader_periods_ms=[100]):
@@ -48,6 +48,9 @@ class HalReaderGroup():
 
 
     def setupHal(self):
+        if not self._hal_exists:
+            return
+
         subprocess.call(['halcmd', 'stop'])
         subprocess.check_output(['halcmd', 'unload', 'all']) #wait until cmd finishes
         time.sleep(1) #Give time for hal to unload everything
@@ -87,7 +90,7 @@ class HalReaderGroup():
         return self._tool_model
     
     def start(self):
-        if not self.halExists():
+        if not self._hal_exists:
             return
 
         #Build the cfgs
@@ -134,12 +137,14 @@ class HalReaderGroup():
 
     
     def stop(self):
-        if self.halExists():
-            for reader in self._hal_readers:
-                reader.stop()
-            
-            subprocess.check_output(['halcmd', 'stop']) #wait until cmd finishes
-            subprocess.check_output(['halcmd', 'unload', 'all']) #wait until cmd finishes
+        if not self.halExists():
+            return
+        
+        for reader in self._hal_readers:
+            reader.stop()
+        
+        subprocess.check_output(['halcmd', 'stop']) #wait until cmd finishes
+        subprocess.check_output(['halcmd', 'unload', 'all']) #wait until cmd finishes
         self._running = False
 
     def loadHalMeter(self):
@@ -157,6 +162,9 @@ class HalReaderGroup():
                 pass
 
     def findPins(self):
+        if not self.halExists():
+            return
+
         pins = subprocess.check_output(['halcmd', 'show', 'pin']).splitlines()
         pins.pop(0) # "Component Pins:""
 

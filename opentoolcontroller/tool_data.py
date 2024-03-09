@@ -247,9 +247,7 @@ class BehaviorNode(Node):
     
     def halReaderNumber():
         def fget(self): return self._hal_reader_number
-        def fset(self,value): 
-            print("halReaderNumber Set ", value)
-            self._hal_reader_number = int(value)
+        def fset(self,value): self._hal_reader_number = int(value)
         return locals()
     halReaderNumber = property(**halReaderNumber())
 

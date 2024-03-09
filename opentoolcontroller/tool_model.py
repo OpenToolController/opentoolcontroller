@@ -36,18 +36,21 @@ class ToolModel(QtCore.QAbstractItemModel):
         return tick_periods
 
     def behaviorRunners(self):
-        return self._behavior_runner
+        return self._behavior_runners
 
     def setBehaviorRunners(self, runners):
-        self._behavior_runner = runners
+        self._behavior_runners = runners
 
         indexes = self.indexesOfTypes([typ.TOOL_NODE, typ.SYSTEM_NODE, typ.DEVICE_NODE])
         for behavior_index in indexes:
             behavior_node = behavior_index.internalPointer()
 
             n = behavior_node.halReaderNumber-1
-            if n is not None:
-                behavior_node.setBehaviorRunner(self._behavior_runner[n]) #TODO add this into the model for when the number gets changed?
+
+            try:
+                behavior_node.setBehaviorRunner(self._behavior_runners[n]) #TODO add this into the model for when the number gets changed?
+            except IndexError:
+                print("Bad hal reader number on ", behavior_node.name)
 
 
 
