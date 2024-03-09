@@ -390,7 +390,7 @@ class RepeatNumberNode(Node):
         self._number_repeats = 0
         self._number_repeats_remaining = 0
         self._ignore_failure = False
-        self._current_child = 0
+        self._current_child_index = 0
         self._current_child_result = None
 
     def typeInfo(self):
@@ -401,7 +401,7 @@ class RepeatNumberNode(Node):
 
     def reset(self):
         super().reset()
-        self._current_child = 0
+        self._current_child_index = 0
         self._current_child_result = None
         self._number_repeats_remaining = self._number_repeats 
 
@@ -430,22 +430,24 @@ class RepeatNumberNode(Node):
             self._status = bt.RUNNING
             
             #Reset first in order to display status of children
-            if self._current_child == len(self._children)-1 and self._current_child_result is bt.SUCCESS:
-                self._current_child = 0
+            if self._current_child_index >= len(self._children)-1 and self._current_child_result is bt.SUCCESS:
+                self._current_child_index = 0
                 for child in self.children():
                     child.reset()
 
             if self._current_child_result is bt.FAILURE and self._ignore_failure:
-                self._current_child = 0
+                self._current_child_index = 0
                 for child in self.children():
                     child.reset()
 
 
-            for i, child in enumerate(self._children[self._current_child:]):
+            for child in self._children[self._current_child_index:]:
                 self._current_child_result = child.tick()
-                self._current_child = i
+                
+                if self._current_child_result is bt.SUCCESS:
+                    self._current_child_index += 1
 
-                if self._current_child_result is bt.RUNNING:
+                elif self._current_child_result is bt.RUNNING:
                     self._status = bt.RUNNING
                     return self._status
 
@@ -459,10 +461,10 @@ class RepeatNumberNode(Node):
 
             self._number_repeats_remaining -= 1
 
-            if self._current_child == len(self._children)-1 and self._number_repeats_remaining == 0 and self._current_child_result == bt.SUCCESS:
+            if self._current_child_index >= len(self._children)-1 and self._number_repeats_remaining <= 0 and self._current_child_result == bt.SUCCESS:
                 self._status = bt.SUCCESS
             
-            if self._number_repeats_remaining == 0 and self._current_child_result == bt.FAILURE:
+            if self._number_repeats_remaining <= 0 and self._current_child_result == bt.FAILURE:
                 self._status = bt.FAILURE
 
             return self._status
