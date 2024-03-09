@@ -360,16 +360,18 @@ class RepeatNode(Node):
             self._status = bt.RUNNING
             
             #Reset first in order to display status of children
-            if self._current_child_index == len(self._children)-1 and self._current_child_result is bt.SUCCESS:
+            if self._current_child_index >= len(self._children)-1 and self._current_child_result is bt.SUCCESS:
                 self._current_child_index = 0
                 for child in self.children():
                     child.reset()
 
-            for i, child in enumerate(self._children[self._current_child_index:]):
+            for child in self._children[self._current_child_index:]:
                 self._current_child_result = child.tick()
-                self._current_child_index = i
+                
+                if self._current_child_result is bt.SUCCESS:
+                    self._current_child_index += 1
 
-                if self._current_child_result is bt.RUNNING:
+                elif self._current_child_result is bt.RUNNING:
                     self._status = bt.RUNNING
                     return self._status
 
