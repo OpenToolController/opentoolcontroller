@@ -451,13 +451,14 @@ class DeviceIconNode(Node):
 
         self._has_text = False
         self._text = ''
+        self._default_text = ''
         self._text_x = 0
         self._text_y = 0
 
-        self._font_size = 12
+        self._font_size = 16
         self._min_font_size = 6
         self._max_font_size = 72
-        self._font_color = QtGui.QColor(0xFFFFFF) 
+        self._font_color = QtGui.QColor(0xFCF9E5) 
 
         self._svg_relative_path = defaults.DEVICE_ICON
 
@@ -494,6 +495,7 @@ class DeviceIconNode(Node):
 
         elif c is col.HAS_TEXT      : r = self.hasText
         elif c is col.TEXT          : r = self._text
+        elif c is col.DEFAULT_TEXT  : r = self.defaultText
         elif c is col.TEXT_X        : r = self.textX
         elif c is col.TEXT_Y        : r = self.textY
         elif c is col.FONT_SIZE     : r = self.fontSize
@@ -516,6 +518,7 @@ class DeviceIconNode(Node):
 
         elif c is col.HAS_TEXT      : self.hasText        = value
         elif c is col.TEXT          : self._text          = str(value)
+        elif c is col.DEFAULT_TEXT  : self.defaultText    = str(value)
         elif c is col.TEXT_X        : self.textX          = value
         elif c is col.TEXT_Y        : self.textY          = value
         elif c is col.FONT_SIZE     : self.fontSize       = value
@@ -592,6 +595,14 @@ class DeviceIconNode(Node):
         def fset(self,value): self._has_text = bool(value)
         return locals()
     hasText = property(**hasText())
+    
+    def defaultText():
+        def fget(self): return self._default_text
+        def fset(self,value):
+            self._default_text = str(value)
+            self._text = self._default_text
+        return locals()
+    defaultText = property(**defaultText())
 
     def textX():
         def fget(self): return self._text_x

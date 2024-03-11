@@ -303,6 +303,9 @@ class ToolModel(QtCore.QAbstractItemModel):
             if index.column() == col.POS and node.typeInfo() == typ.DEVICE_ICON_NODE:
                 self.dataChanged.emit(index.siblingAtColumn(col.X), index.siblingAtColumn(col.X))
                 self.dataChanged.emit(index.siblingAtColumn(col.Y), index.siblingAtColumn(col.Y))
+            
+            if index.column() == col.DEFAULT_TEXT and node.typeInfo() == typ.DEVICE_ICON_NODE:
+                self.dataChanged.emit(index.siblingAtColumn(col.TEXT), index.siblingAtColumn(col.TEXT))
 
             if index.column() == col.BEHAVIORS and node.typeInfo() in [typ.DEVICE_NODE, typ.SYSTEM_NODE, typ. TOOL_NODE]:
                 for i, item in enumerate(value): 

@@ -2158,7 +2158,7 @@ class MappedDualStateTextSet(MappedBase):
 
         except (ValueError, IndexError, KeyError) as error:
             print(error) #TODO log and make sure we're catching everything we shoulld
-            self._preview_box.setText('error')
+            self._preview_box.setText("error: {variable:.1f}")
 
 
     def setVars(self, value):

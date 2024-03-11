@@ -609,10 +609,11 @@ class DeviceIconEditor(device_icon_base, device_icon_form):
         #probably causing a loop due to the submit on state change w/ the others
         self.mapper2.addMapping(self.ui_default_layer , col.DEFAULT_LAYER, b'currentText') #this goes crazy on a shared mapper
 
-        self.mapper.addMapping(self.ui_has_text , col.HAS_TEXT)
-        self.mapper.addMapping(self.ui_text     , col.TEXT)
-        self.mapper.addMapping(self.ui_text_x   , col.TEXT_X)
-        self.mapper.addMapping(self.ui_text_y   , col.TEXT_Y)
+        self.mapper.addMapping(self.ui_has_text    , col.HAS_TEXT)
+        self.mapper.addMapping(self.ui_text        , col.TEXT)
+        self.mapper.addMapping(self.ui_default_text, col.DEFAULT_TEXT)
+        self.mapper.addMapping(self.ui_text_x      , col.TEXT_X)
+        self.mapper.addMapping(self.ui_text_y      , col.TEXT_Y)
         self.mapper.addMapping(self, col.FONT_COLOR, bytes('fontColorZ', 'ascii'))
 
         

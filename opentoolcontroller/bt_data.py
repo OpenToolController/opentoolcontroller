@@ -1360,7 +1360,7 @@ class SetIconNode(Node):
             for child in self.children():
                 value = None
 
-                if child.name == 'TEXT': 
+                if child.name == 'TEXT' and child.setType == bt.VAL: 
                     try:
                         text = str(child.value)
                         evaled_dict = {}
