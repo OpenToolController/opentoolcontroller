@@ -556,8 +556,11 @@ class DeviceIconNode(Node):
 
                 svg = xml.getroot()
                 for child in svg:
-                    self._layers.append(child.attrib['id'])
-            except:
+                    if child.tag == '{http://www.w3.org/2000/svg}g':
+                        self._layers.append(child.attrib['id'])
+            except Exception as e:
+                print("Failed to parse svg layers")
+                print(e)
                 self._layers = []
 
         return locals()
