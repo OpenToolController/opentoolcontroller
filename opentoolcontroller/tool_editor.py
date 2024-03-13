@@ -614,6 +614,7 @@ class DeviceIconEditor(device_icon_base, device_icon_form):
         self.mapper.addMapping(self.ui_default_text, col.DEFAULT_TEXT)
         self.mapper.addMapping(self.ui_text_x      , col.TEXT_X)
         self.mapper.addMapping(self.ui_text_y      , col.TEXT_Y)
+        self.mapper.addMapping(self.ui_font_size   , col.FONT_SIZE)
         self.mapper.addMapping(self, col.FONT_COLOR, bytes('fontColorZ', 'ascii'))
 
         

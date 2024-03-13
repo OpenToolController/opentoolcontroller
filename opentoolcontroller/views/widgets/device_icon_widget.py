@@ -16,6 +16,7 @@ class DeviceIconWidget(QtSvg.QGraphicsSvgItem):
 
         self._hovering = False
         self._selected = False
+        self._movable = False
 
     def setCallback(self, value):
         self._callback = value
@@ -26,7 +27,12 @@ class DeviceIconWidget(QtSvg.QGraphicsSvgItem):
     def setIndex(self, value):
         self._index = value
 
+    def movable(self):
+        return self._movable
+
     def setMovable(self, value):
+        self._movable = bool(value)
+
         if value:
             self.setFlag(QtWidgets.QGraphicsItem.ItemIsMovable, True)
         else:
@@ -52,7 +58,8 @@ class DeviceIconWidget(QtSvg.QGraphicsSvgItem):
 
     def mouseReleaseEvent(self, event):
         super().mouseReleaseEvent(event)
-        self._pos_callback(self._index, self.scenePos())
+        if self.movable():
+            self._pos_callback(self._index, self.scenePos())
         event.accept()
 
     def setSelected(self):
