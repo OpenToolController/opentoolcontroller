@@ -301,7 +301,6 @@ class ToolModel(QtCore.QAbstractItemModel):
 
 
             if index.column() == col.POS and node.typeInfo() == typ.DEVICE_ICON_NODE:
-                print("pos: ", value)
                 self.dataChanged.emit(index.siblingAtColumn(col.X), index.siblingAtColumn(col.X))
                 self.dataChanged.emit(index.siblingAtColumn(col.Y), index.siblingAtColumn(col.Y))
             

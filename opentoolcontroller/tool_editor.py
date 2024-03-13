@@ -619,8 +619,8 @@ class DeviceIconEditor(device_icon_base, device_icon_form):
 
         
         #self.mapper.setSubmitPolicy(QtWidgets.QDataWidgetMapper.ManualSubmit)
-        self.ui_x.valueChanged.connect(self.mapper.submit)
-        self.ui_y.valueChanged.connect(self.mapper.submit)
+        #self.ui_x.valueChanged.connect(self.mapper.submit) #These mess up the movable icon
+        #self.ui_y.valueChanged.connect(self.mapper.submit)
         self.ui_scale.valueChanged.connect(self.mapper.submit)
         self.ui_rotation.valueChanged.connect(self.mapper.submit)
         self.ui_has_text.stateChanged.connect(self.mapper.submit)
