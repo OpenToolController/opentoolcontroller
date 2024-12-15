@@ -86,22 +86,11 @@ class Window(QtWidgets.QMainWindow):
         '''FIXME '''
         #BTModel.behaviorRunner = self.behavior_runner
 
-        self.updateWindowTitle()
         self.resize(800,600)
         # Connect login changes to window title updates
         self._login_model.addLoginChangedCallback(self.updateWindowTitle, self._login_model.RUN_BEHAVIORS)  # Using RUN_BEHAVIORS as a dummy privilege since we just need any callback
+        self.updateWindowTitle()
         
-    def updateWindowTitle(self, _=None):
-        """Update window title with app name and current user"""
-        app_name = 'Open Tool Controller'
-        current_user = self._login_model.currentUser()
-        
-        if current_user:
-            # Create title with right-aligned username using spaces
-            self.setWindowTitle(f'{app_name}        [{current_user}]')
-        else:
-            self.setWindowTitle(app_name)
-
         self._control_view = ToolControlView(self.tool_model)
         self._control_view.setWindowTitle('Control')
         self._login_model.addLoginChangedCallback(self._control_view.enableRunDeviceBehaviors, self._login_model.RUN_BEHAVIORS)
@@ -212,6 +201,19 @@ class Window(QtWidgets.QMainWindow):
         self.restoreState(state)
 
         self._login_model.runLoginChangedCallbacks()
+
+
+    def updateWindowTitle(self, _=None):
+        """Update window title with app name and current user"""
+        app_name = 'Open Tool Controller'
+        current_user = self._login_model.currentUser()
+        
+        if current_user:
+            # Create title with right-aligned username using spaces
+            self.setWindowTitle(f'{app_name}                                        {current_user}')
+        else:
+            self.setWindowTitle(app_name)
+
 
     def saveTool(self):
         data = self.tool_model.asJSON()

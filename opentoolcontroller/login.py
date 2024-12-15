@@ -70,8 +70,7 @@ class LoginView(login_base, login_form):
         # Setup session timeout timer
         self._activity_timer = QtCore.QTimer(self)
         self._activity_timer.timeout.connect(self.check_session_timeout)
-        #self._activity_timer.start(60000)  # Check every minute
-        self._activity_timer.start(10000)  # Check every minute
+        self._activity_timer.start(60000)  # Check every minute
         
         self.setPasswordEditButtons()
         
@@ -441,8 +440,7 @@ class LoginModel(QtCore.QAbstractTableModel):
         if self._current_user is not None:
             # Update activity on mouse or keyboard events
             if event.type() in (QtCore.QEvent.MouseButtonPress, 
-                              QtCore.QEvent.KeyPress,
-                              QtCore.QEvent.MouseMove):
+                              QtCore.QEvent.KeyPress):
                 self._session.update_activity()
         return False
 
