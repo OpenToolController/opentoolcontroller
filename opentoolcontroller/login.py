@@ -195,7 +195,7 @@ class LoginModel(QtCore.QAbstractTableModel):
     PRIVILEGES = [RUN_BEHAVIORS, EDIT_BEHAVIOR, EDIT_TOOL, CLEAR_ALERTS, EDIT_USERS]
     EDITABLE_COLUMNS = PRIVILEGES + [TIMEOUT]
     
-    def __init__(self, config_path="opentoolcontroller/config/auth_config.json"):
+    def __init__(self, config_path=None):
         super().__init__()
         self._login_changed_callbacks: List[Tuple[Callable, int]] = []
         self._config_path = config_path
