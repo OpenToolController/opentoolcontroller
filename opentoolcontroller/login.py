@@ -59,7 +59,8 @@ class LoginView(login_base, login_form):
 
         self._login_model = login_model
         self.ui_login_table.setModel(self._login_model)
-        self.ui_current_user.setText(self._login_model.currentUser())
+        self.ui_current_user.setText('none')
+        self.ui_current_user.setStyleSheet("font: italic")
         
         # Setup UI connections
         self.ui_login.clicked.connect(self.login)
