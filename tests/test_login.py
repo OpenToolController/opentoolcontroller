@@ -207,10 +207,8 @@ class TestLoginModel:
         
         # Simulate concurrent login attempts
         assert model.login("admin", "admin")
-        assert not model.login("user", "user")  # Should fail while admin is logged in
+        assert model.login("user", "user")  # If a second login happens the first gets loged out
         
-        model.logout()
-        assert model.login("user", "user")  # Should succeed after logout
 
 class TestLoginView:
     def test_init(self, login_view):

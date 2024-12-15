@@ -95,9 +95,8 @@ class LoginView(login_base, login_form):
         password = self.ui_password.text()
         self.ui_password.setText('')
         success = self._login_model.login(username, password)
-        if success:
-            self.setCurrentUserText()
-            self.setPasswordEditButtons()
+        self.setCurrentUserText()
+        self.setPasswordEditButtons()
         return success
 
 
@@ -411,7 +410,6 @@ class LoginModel(QtCore.QAbstractTableModel):
         """
         # Always logout current user first
         self.logout()
-            
         hashed_password = self.hashPassword(password)
 
         for row in self._data:
@@ -423,10 +421,6 @@ class LoginModel(QtCore.QAbstractTableModel):
                 self.runLoginChangedCallbacks()
                 return True
 
-        self._current_user = None
-        self._current_user_privileges = None
-        self._session.end_session()
-        self.runLoginChangedCallbacks()
         return False
         
     def eventFilter(self, obj, event) -> bool:

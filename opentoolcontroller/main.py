@@ -40,6 +40,7 @@ class Window(QtWidgets.QMainWindow):
             except:
                 pass
             
+            #TODO decide what to do if there's no auth_config file, like on a new build
             tool_auth_file = tool_dir + '/auth_config.json'
 
         '''Add something to select where to save if we start a new one '''
