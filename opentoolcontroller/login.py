@@ -9,6 +9,7 @@ from enum import IntEnum
 from typing import Optional, List, Tuple, Callable, Dict
 import hashlib
 import re
+import os
 from .config import auth_config
 
 login_base, login_form = uic.loadUiType("opentoolcontroller/views/Login.ui")
@@ -306,7 +307,35 @@ class LoginModel(QtCore.QAbstractTableModel):
         return False
 
     def setPasswordByRow(self, row, new_password):
-        self._data[row][self.PASSWORD] = self.hashPassword(new_password)
+        """Update password hash in both model and config file"""
+        password_hash = self.hashPassword(new_password)
+        username = self._data[row][self.USERNAME]
+        
+        # Update model
+        self._data[row][self.PASSWORD] = password_hash
+        
+        # Update config file
+        config_path = os.path.join(os.path.dirname(__file__), 'config/auth_config.py')
+        with open(config_path, 'r') as f:
+            content = f.read()
+            
+        # Find user's section and update password hash
+        user_pattern = f'"{username}": {{'
+        start_idx = content.find(user_pattern)
+        if start_idx != -1:
+            # Find password hash line within user section
+            hash_pattern = '"password_hash": "'
+            hash_start = content.find(hash_pattern, start_idx)
+            if hash_start != -1:
+                hash_end = content.find('",', hash_start)
+                if hash_end != -1:
+                    new_content = (
+                        content[:hash_start + len(hash_pattern)] +
+                        password_hash +
+                        content[hash_end:]
+                    )
+                    with open(config_path, 'w') as f:
+                        f.write(new_content)
 
 
     def validate_password(self, password: str) -> Tuple[bool, str]:
