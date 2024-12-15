@@ -4,7 +4,7 @@ from typing import Dict, List
 # Default user password: "user"
 DEFAULT_USERS: Dict[str, List] = {
     "admin": {
-        "password_hash": "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918",
+        "password_hash": "dc937b59892604f5a86ac96936cd7ff09e25f18ae6b758e8014a24c7fa039e91",
         "run_behaviors": True,
         "edit_behavior": True,
         "edit_tool": True,
