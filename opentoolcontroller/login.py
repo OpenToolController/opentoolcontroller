@@ -239,22 +239,95 @@ class LoginModel(QtCore.QAbstractTableModel):
         return None
 
 
+    def _update_config_privileges(self, username: str, privileges: dict, timeout: int) -> None:
+        """Update user privileges in auth_config.py"""
+        config_path = os.path.join(os.path.dirname(__file__), 'config/auth_config.py')
+        with open(config_path, 'r') as f:
+            content = f.read()
+            
+        # Find user's section
+        user_pattern = f'"{username}": {{'
+        start_idx = content.find(user_pattern)
+        if start_idx != -1:
+            # Find privileges section
+            priv_pattern = '"privileges": {'
+            priv_start = content.find(priv_pattern, start_idx)
+            if priv_start != -1:
+                # Find end of privileges section
+                priv_end = content.find('}', priv_start)
+                if priv_end != -1:
+                    # Create new privileges section
+                    new_privileges = (
+                        f'"privileges": {{\n'
+                        f'            "run_behaviors": {str(privileges["run_behaviors"])},\n'
+                        f'            "edit_behavior": {str(privileges["edit_behavior"])},\n'
+                        f'            "edit_tool": {str(privileges["edit_tool"])},\n'
+                        f'            "clear_alerts": {str(privileges["clear_alerts"])},\n'
+                        f'            "edit_users": {str(privileges["edit_users"])}\n'
+                        f'        }}'
+                    )
+                    
+                    # Replace privileges section
+                    new_content = (
+                        content[:priv_start] +
+                        new_privileges +
+                        content[priv_end + 1:]
+                    )
+                    
+                    # Update timeout if needed
+                    timeout_pattern = '"timeout_minutes": '
+                    timeout_start = content.find(timeout_pattern, start_idx)
+                    if timeout_start != -1:
+                        timeout_end = content.find(',', timeout_start)
+                        if timeout_end != -1:
+                            new_content = (
+                                new_content[:timeout_start + len(timeout_pattern)] +
+                                str(timeout) +
+                                new_content[timeout_end:]
+                            )
+                    
+                    with open(config_path, 'w') as f:
+                        f.write(new_content)
+
     def setData(self, index, value, role=QtCore.Qt.EditRole):
         if type(value) == type(QtCore.QVariant()):
             value = value.toPyObject()
-        
 
         if self.canEditUsers():
+            row = index.row()
+            username = self._data[row][self.USERNAME]
+            
             if index.column() in self.PRIVILEGES:
-                self._data[index.row()][index.column()] = bool(value)
+                self._data[row][index.column()] = bool(value)
+                
+                # Update config file with new privileges
+                privileges = {
+                    "run_behaviors": self._data[row][self.RUN_BEHAVIORS],
+                    "edit_behavior": self._data[row][self.EDIT_BEHAVIOR],
+                    "edit_tool": self._data[row][self.EDIT_TOOL],
+                    "clear_alerts": self._data[row][self.CLEAR_ALERTS],
+                    "edit_users": self._data[row][self.EDIT_USERS]
+                }
+                self._update_config_privileges(username, privileges, self._data[row][self.TIMEOUT])
                 return True
+                
             elif index.column() == self.TIMEOUT:
                 try:
                     timeout = int(value)
                     if timeout > 0:
-                        self._data[index.row()][index.column()] = timeout
-                        if self._current_user == self._data[index.row()][self.USERNAME]:
+                        self._data[row][index.column()] = timeout
+                        if self._current_user == username:
                             self._session.timeout_minutes = timeout
+                            
+                        # Update config file with new timeout
+                        privileges = {
+                            "run_behaviors": self._data[row][self.RUN_BEHAVIORS],
+                            "edit_behavior": self._data[row][self.EDIT_BEHAVIOR],
+                            "edit_tool": self._data[row][self.EDIT_TOOL],
+                            "clear_alerts": self._data[row][self.CLEAR_ALERTS],
+                            "edit_users": self._data[row][self.EDIT_USERS]
+                        }
+                        self._update_config_privileges(username, privileges, timeout)
                         return True
                 except (ValueError, TypeError):
                     pass
