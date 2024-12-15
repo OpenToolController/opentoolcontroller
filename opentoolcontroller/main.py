@@ -39,9 +39,11 @@ class Window(QtWidgets.QMainWindow):
                     json_data = json.load(f)
             except:
                 pass
+            
+            tool_auth_file = tool_dir + '/auth_config.json'
 
         '''Add something to select where to save if we start a new one '''
-        self._login_model = LoginModel("config/auth_config.json")
+        self._login_model = LoginModel(tool_auth_file)
         self._login_view = LoginView(self._login_model)
         self._login_view.setWindowTitle('Login')
 
