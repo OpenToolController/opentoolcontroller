@@ -278,12 +278,19 @@ class LoginModel(QtCore.QAbstractTableModel):
                     timeout_pattern = '"timeout_minutes": '
                     timeout_start = content.find(timeout_pattern, start_idx)
                     if timeout_start != -1:
-                        timeout_end = content.find(',', timeout_start)
+                        timeout_end = content.find('\n', timeout_start)
+                        if timeout_end == -1:  # Handle last line case
+                            timeout_end = content.find('}', timeout_start)
                         if timeout_end != -1:
+                            # Find where the actual number ends
+                            number_end = min(
+                                content.find(',', timeout_start) if content.find(',', timeout_start) != -1 else float('inf'),
+                                content.find('}', timeout_start) if content.find('}', timeout_start) != -1 else float('inf')
+                            )
                             new_content = (
                                 new_content[:timeout_start + len(timeout_pattern)] +
                                 str(timeout) +
-                                new_content[timeout_end:]
+                                new_content[number_end:]
                             )
                     
                     with open(config_path, 'w') as f:
