@@ -309,6 +309,7 @@ if __name__ == '__main__':
 
 
     app = QtWidgets.QApplication(sys.argv)
+    app.setWindowIcon(QtGui.QIcon(os.path.join(os.path.dirname(__file__), 'resources/app_icon.svg')))
     w = Window(tool_dir)
     if args.Start:
         w.startHalReader()
