@@ -420,9 +420,8 @@ class LoginModel(QtCore.QAbstractTableModel):
         Returns:
             bool: True if login successful
         """
-        # Prevent concurrent logins
-        if self._current_user is not None:
-            return False
+        # Always logout current user first
+        self.logout()
             
         hashed_password = self.hashPassword(password)
 
