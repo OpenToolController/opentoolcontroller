@@ -15,8 +15,9 @@ def login_model(qtbot, mock_config_file):
     return LoginModel(config_path=str(mock_config_file))
 
 @pytest.fixture
-def login_view(qtbot, login_model):
-    view = LoginView(login_model)
+def login_view(qtbot, mock_config_file):
+    model = LoginModel(config_path=str(mock_config_file))
+    view = LoginView(model)
     qtbot.addWidget(view)
     return view
 
