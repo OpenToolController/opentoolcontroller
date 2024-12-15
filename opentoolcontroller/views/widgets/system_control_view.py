@@ -206,12 +206,15 @@ class SystemControlView(QtWidgets.QAbstractItemView):
             renderer = QtSvg.QSvgRenderer(self)
             renderer.load(icon_node.svgFullPath())
 
+
             wid = DeviceIconWidget(renderer)
             wid.setCallback(self.setSelection)
             wid.setPosCallback(self.setIconPosition)
             wid.setIndex(icon_index)
             wid.setElementId(icon_node.layer())
             wid.setMovable(movable)
+            
+            
 
             #wid.setPos(float(icon_node.x) , float(icon_node.y))
             wid.setPos(icon_node.pos())

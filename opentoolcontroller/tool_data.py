@@ -456,8 +456,8 @@ class DeviceIconNode(Node):
         self._text_y = 0
 
         self._font_size = 16
-        self._min_font_size = 6
-        self._max_font_size = 72
+        self._min_font_size = 1
+        self._max_font_size = 999
         self._font_color = QtGui.QColor(0xFCF9E5) 
 
         self._svg_relative_path = defaults.DEVICE_ICON

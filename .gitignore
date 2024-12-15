@@ -6,3 +6,5 @@ __pycache__
 .Trashes
 *.pyc
 OpenToolController.egg-info
+.aider*
+.env

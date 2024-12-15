@@ -49,6 +49,7 @@ class DeviceIconWidget(QtSvg.QGraphicsSvgItem):
         if self._selected:
             painter.setPen(QtGui.QPen(QtGui.QBrush(QtCore.Qt.cyan), 4, QtCore.Qt.SolidLine))
             painter.drawRect(self.boundingRect())
+            
 
 
     def mousePressEvent(self, event):
@@ -79,3 +80,4 @@ class DeviceIconWidget(QtSvg.QGraphicsSvgItem):
         self._hovering = False
         self.update()
         event.accept()
+
