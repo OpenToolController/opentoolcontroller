@@ -87,39 +87,39 @@ class TestSessionManager:
             assert not session.is_session_valid()
 
 class TestLoginModel:
-    def test_init(self):
-        model = LoginModel()
+    def test_init(self, mock_config_file):
+        model = LoginModel(config_path=str(mock_config_file))
         assert model.rowCount() > 0
         assert model.columnCount() == 8  # All columns present
         assert model._current_user is None
         assert model._current_user_privileges is None
 
-    def test_login_success(self):
-        model = LoginModel()
+    def test_login_success(self, mock_config_file):
+        model = LoginModel(config_path=str(mock_config_file))
         assert model.login("admin", "admin")
         assert model.currentUser() == "admin"
         assert model._session.active
 
-    def test_login_failure(self):
-        model = LoginModel()
+    def test_login_failure(self, mock_config_file):
+        model = LoginModel(config_path=str(mock_config_file))
         assert not model.login("admin", "wrong_password")
         assert model.currentUser() is None
         assert not model._session.active
 
-    def test_login_nonexistent_user(self):
-        model = LoginModel()
+    def test_login_nonexistent_user(self, mock_config_file):
+        model = LoginModel(config_path=str(mock_config_file))
         assert not model.login("nonexistent", "password")
         assert model.currentUser() is None
 
-    def test_logout(self):
-        model = LoginModel()
+    def test_logout(self, mock_config_file):
+        model = LoginModel(config_path=str(mock_config_file))
         model.login("admin", "admin")
         model.logout()
         assert model.currentUser() is None
         assert not model._session.active
 
-    def test_password_validation(self):
-        model = LoginModel()
+    def test_password_validation(self, mock_config_file):
+        model = LoginModel(config_path=str(mock_config_file))
         # Test minimum length
         valid, msg = model.validate_password("short")
         assert not valid
@@ -140,14 +140,14 @@ class TestLoginModel:
         assert valid
         assert msg == ""
 
-    def test_password_hash(self):
-        model = LoginModel()
+    def test_password_hash(self, mock_config_file):
+        model = LoginModel(config_path=str(mock_config_file))
         password = "testpass123!"
         expected_hash = hashlib.sha256(bytes(password, encoding='utf8')).hexdigest()
         assert model.hashPassword(password) == expected_hash
 
-    def test_privilege_checks(self):
-        model = LoginModel()
+    def test_privilege_checks(self, mock_config_file):
+        model = LoginModel(config_path=str(mock_config_file))
         # Test before login
         assert not model.canEditUsers()
         assert not model.canClearAlerts()
@@ -162,8 +162,8 @@ class TestLoginModel:
         assert not model.canEditUsers()
         assert model.canClearAlerts()
 
-    def test_session_timeout(self):
-        model = LoginModel()
+    def test_session_timeout(self, mock_config_file):
+        model = LoginModel(config_path=str(mock_config_file))
         model.login("admin", "admin")
         assert not model.is_session_expired()
         
@@ -171,8 +171,8 @@ class TestLoginModel:
         model._session.timeout_minutes = 0
         assert model.is_session_expired()
 
-    def test_callback_registration(self):
-        model = LoginModel()
+    def test_callback_registration(self, mock_config_file):
+        model = LoginModel(config_path=str(mock_config_file))
         callback_called = False
         callback_value = None
         
@@ -186,8 +186,8 @@ class TestLoginModel:
         assert callback_called
         assert callback_value is True
 
-    def test_event_filter(self):
-        model = LoginModel()
+    def test_event_filter(self, mock_config_file):
+        model = LoginModel(config_path=str(mock_config_file))
         model.login("admin", "admin")
         
         # Create mock event
@@ -198,8 +198,8 @@ class TestLoginModel:
         model.eventFilter(None, mock_event)
         assert model._session.last_activity is not None
 
-    def test_concurrent_access(self):
-        model = LoginModel()
+    def test_concurrent_access(self, mock_config_file):
+        model = LoginModel(config_path=str(mock_config_file))
         
         # Simulate concurrent login attempts
         assert model.login("admin", "admin")
