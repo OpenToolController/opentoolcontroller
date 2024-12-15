@@ -41,7 +41,7 @@ class Window(QtWidgets.QMainWindow):
                 pass
 
         '''Add something to select where to save if we start a new one '''
-        self._login_model = LoginModel()
+        self._login_model = LoginModel("config/auth_config.py")
         self._login_view = LoginView(self._login_model)
         self._login_view.setWindowTitle('Login')
 

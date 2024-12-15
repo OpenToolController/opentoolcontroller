@@ -196,7 +196,7 @@ class LoginModel(QtCore.QAbstractTableModel):
     PRIVILEGES = [RUN_BEHAVIORS, EDIT_BEHAVIOR, EDIT_TOOL, CLEAR_ALERTS, EDIT_USERS]
     EDITABLE_COLUMNS = PRIVILEGES + [TIMEOUT]
     
-    def __init__(self, config_path="opentoolcontroller/config/auth_config.py"):
+    def __init__(self, config_path=None):#"opentoolcontroller/config/auth_config.py"):
         super().__init__()
         self._login_changed_callbacks: List[Tuple[Callable, int]] = []
         self._config_path = config_path
@@ -236,7 +236,7 @@ class LoginModel(QtCore.QAbstractTableModel):
                 info['edit_tool'],
                 info['clear_alerts'],
                 info['edit_users'],
-                info.get('timeout_minutes', auth_config.SESSION_TIMEOUT_MINUTES)
+                info.get('timeout_minutes', self.auth_config.SESSION_TIMEOUT_MINUTES)
             ])
         return data
 
@@ -250,7 +250,7 @@ class LoginModel(QtCore.QAbstractTableModel):
 
     def _update_config_privileges(self, username: str, privileges: dict, timeout: int) -> None:
         """Update user privileges in auth_config.py"""
-        config_path = os.path.join(os.path.dirname(__file__), 'config/auth_config.py')
+        config_path = os.path.join(os.path.dirname(__file__), self._config_path)
         with open(config_path, 'r') as f:
             content = f.read()
             
@@ -379,7 +379,7 @@ class LoginModel(QtCore.QAbstractTableModel):
         self._data[row][self.PASSWORD] = password_hash
         
         # Update config file
-        config_path = os.path.join(os.path.dirname(__file__), 'config/auth_config.py')
+        config_path = os.path.join(os.path.dirname(__file__), self._config_path)
         with open(config_path, 'r') as f:
             content = f.read()
             
