@@ -427,6 +427,7 @@ class LoginModel(QtCore.QAbstractTableModel):
             if row[self.USERNAME] == user and hashed_password == row[self.PASSWORD]:
                 self._current_user = user
                 self._current_user_privileges = row
+                self._session.timeout_minutes = row[self.TIMEOUT]  # Set timeout from user data
                 self._session.start_session()
                 self.runLoginChangedCallbacks()
                 return True
