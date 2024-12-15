@@ -78,11 +78,6 @@ class LoginView(login_base, login_form):
         """Check if session has timed out and logout if needed"""
         if self._login_model.is_session_expired():
             self.logout()
-            QtWidgets.QMessageBox.warning(
-                self, 
-                "Session Expired",
-                "Your session has expired due to inactivity. Please login again."
-            )
 
     def setPasswordClicked(self, row):
         username = self._login_model.usernameByRow(row)
