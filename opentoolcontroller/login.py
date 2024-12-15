@@ -209,8 +209,10 @@ class LoginModel(QtCore.QAbstractTableModel):
         self._current_user = None
         self._current_user_privileges = None
 
-        # Install event filter to track user activity
-        QtWidgets.QApplication.instance().installEventFilter(self)
+        # Install event filter to track user activity if QApplication exists
+        app = QtWidgets.QApplication.instance()
+        if app is not None:
+            app.installEventFilter(self)
         
     def _load_user_data(self) -> List[List]:
         """Convert config data to model format"""

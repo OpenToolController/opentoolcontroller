@@ -11,7 +11,7 @@ def app(qtbot):
     return QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
 
 @pytest.fixture
-def login_model(app):
+def login_model(qtbot):
     return LoginModel()
 
 @pytest.fixture
