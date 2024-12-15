@@ -250,8 +250,12 @@ class LoginModel(QtCore.QAbstractTableModel):
         """Update user privileges in auth_config.json"""
         config_path = os.path.join(os.path.dirname(__file__), self._config_path)
         
-        # Update the user data in our loaded config
-        self.auth_config['users'][username].update({
+        # Read current config
+        with open(config_path, 'r') as f:
+            config = json.load(f)
+        
+        # Update the user data
+        config['users'][username].update({
             "password_hash": next((row[self.PASSWORD] for row in self._data if row[self.USERNAME] == username), ""),
             "run_behaviors": privileges["run_behaviors"],
             "edit_behavior": privileges["edit_behavior"],
@@ -263,7 +267,10 @@ class LoginModel(QtCore.QAbstractTableModel):
         
         # Write the updated config back to file
         with open(config_path, 'w') as f:
-            json.dump(self.auth_config, f, indent=4)
+            json.dump(config, f, indent=4)
+            
+        # Update our in-memory config to match
+        self.auth_config = config
 
     def setData(self, index, value, role=QtCore.Qt.EditRole):
         if type(value) == type(QtCore.QVariant()):
