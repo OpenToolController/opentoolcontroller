@@ -1,26 +1,87 @@
 # -*- coding: utf-8 -*-
+"""
+Login system module for OpenToolController.
+Handles user authentication, session management and access control.
+"""
 from PyQt5 import QtWidgets, QtCore, QtGui, uic
-from datetime import datetime
-
+from datetime import datetime, timedelta
+from enum import IntEnum
+from typing import Optional, List, Tuple, Callable, Dict
 import hashlib
+import re
+from .config import auth_config
+
 login_base, login_form = uic.loadUiType("opentoolcontroller/views/Login.ui")
 
+class UserPrivilege(IntEnum):
+    """Enumeration of user privilege types"""
+    RUN_BEHAVIORS = 0
+    EDIT_BEHAVIOR = 1
+    EDIT_TOOL = 2
+    CLEAR_ALERTS = 3
+    EDIT_USERS = 4
+
+class SessionManager:
+    """Handles user session management including timeouts"""
+    def __init__(self, timeout_minutes: int = auth_config.SESSION_TIMEOUT_MINUTES):
+        self.timeout_minutes = timeout_minutes
+        self.last_activity: Optional[datetime] = None
+        self.active = False
+    
+    def start_session(self) -> None:
+        """Start a new user session"""
+        self.last_activity = datetime.now()
+        self.active = True
+    
+    def end_session(self) -> None:
+        """End the current session"""
+        self.last_activity = None
+        self.active = False
+    
+    def update_activity(self) -> None:
+        """Update the last activity timestamp"""
+        self.last_activity = datetime.now()
+    
+    def is_session_valid(self) -> bool:
+        """Check if the current session is still valid"""
+        if not self.active or not self.last_activity:
+            return False
+        
+        time_elapsed = datetime.now() - self.last_activity
+        return time_elapsed < timedelta(minutes=self.timeout_minutes)
+
 class LoginView(login_base, login_form):
+    """Main login interface view"""
     def __init__(self, login_model):
         super(login_base, self).__init__()
-
         self.setupUi(self)
 
         self._login_model = login_model
-        #self._login_model = LoginModel()
-        #self.ui_login_table.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.ui_login_table.setModel(self._login_model)
         self.ui_current_user.setText(self._login_model.currentUser())
+        
+        # Setup UI connections
         self.ui_login.clicked.connect(self.login)
         self.ui_logout.clicked.connect(self.logout)
         self.ui_password.returnPressed.connect(self.login)
-
+        self.ui_password.setMaxLength(50)
+        
+        # Setup session timeout timer
+        self._activity_timer = QtCore.QTimer(self)
+        self._activity_timer.timeout.connect(self.check_session_timeout)
+        self._activity_timer.start(60000)  # Check every minute
+        
         self.setPasswordEditButtons()
+        
+    def check_session_timeout(self):
+        """Check if session has timed out and logout if needed"""
+        if self._login_model.is_session_expired():
+            self.logout()
+            QtWidgets.QMessageBox.warning(
+                self, 
+                "Session Expired",
+                "Your session has expired due to inactivity. Please login again."
+            )
 
     def setPasswordClicked(self, row):
         username = self._login_model.usernameByRow(row)
@@ -120,29 +181,51 @@ class SetPasswordDialog(QtWidgets.QDialog):
 
 
 class LoginModel(QtCore.QAbstractTableModel):
+    """Model for handling user authentication and privileges"""
+    
+    # Column definitions
+    USERNAME = 0
+    PASSWORD = 1
+    RUN_BEHAVIORS = 2
+    EDIT_BEHAVIOR = 3
+    EDIT_TOOL = 4
+    CLEAR_ALERTS = 5
+    EDIT_USERS = 6
+
+    PRIVILEGES = [RUN_BEHAVIORS, EDIT_BEHAVIOR, EDIT_TOOL, CLEAR_ALERTS, EDIT_USERS]
+    
     def __init__(self):
         super().__init__()
-        self._login_changed_callbacks = [] #list of callbacks to update stuff when login/out
-
-        pw_admin = "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918"
-        pw_user = "04f8996da763b7a969b1028ee3007569eaf3a635486ddab211d512c85b9df8fb"
-
-        self._data = [['admin', pw_admin, True, True, True, True, True], ['user', pw_user, True, False, False, True, False]]
-        self._horizontal_header_labels = ['User','pw','Run Behaviors', 'Edit Behavior', 'Edit Tool', 'Clear Alerts','Edit Users']
-
+        self._login_changed_callbacks: List[Tuple[Callable, int]] = []
+        
+        # Initialize session management
+        self._session = SessionManager()
+        
+        # Load user data from config
+        self._data = self._load_user_data()
+        self._horizontal_header_labels = [
+            'User', 'Password', 'Run Behaviors', 'Edit Behavior',
+            'Edit Tool', 'Clear Alerts', 'Edit Users'
+        ]
+        
         self._current_user = None
         self._current_user_privileges = None
-
-        #column names
-        self.USERNAME       = 0
-        self.PASSWORD       = 1
-        self.RUN_BEHAVIORS  = 2 
-        self.EDIT_BEHAVIOR  = 3 
-        self.EDIT_TOOL      = 4 
-        self.CLEAR_ALERTS   = 5 
-        self.EDIT_USERS     = 6 
-
-        self.PRIVILEGES = [self.RUN_BEHAVIORS, self.EDIT_BEHAVIOR, self.EDIT_TOOL, self.CLEAR_ALERTS, self.EDIT_USERS]
+        
+    def _load_user_data(self) -> List[List]:
+        """Convert config data to model format"""
+        data = []
+        for username, info in auth_config.DEFAULT_USERS.items():
+            privileges = info['privileges']
+            data.append([
+                username,
+                info['password_hash'],
+                privileges['run_behaviors'],
+                privileges['edit_behavior'],
+                privileges['edit_tool'],
+                privileges['clear_alerts'],
+                privileges['edit_users']
+            ])
+        return data
 
 
     def data(self, index, role):
@@ -214,26 +297,55 @@ class LoginModel(QtCore.QAbstractTableModel):
         self._data[row][self.PASSWORD] = self.hashPassword(new_password)
 
 
-    def hashPassword(self, password):
+    def validate_password(self, password: str) -> Tuple[bool, str]:
+        """Validate password meets requirements
+        
+        Returns:
+            Tuple[bool, str]: (is_valid, error_message)
+        """
+        if len(password) < auth_config.MIN_PASSWORD_LENGTH:
+            return False, f"Password must be at least {auth_config.MIN_PASSWORD_LENGTH} characters"
+            
+        if auth_config.REQUIRE_SPECIAL_CHARS and not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
+            return False, "Password must contain at least one special character"
+            
+        if auth_config.REQUIRE_NUMBERS and not re.search(r'\d', password):
+            return False, "Password must contain at least one number"
+            
+        return True, ""
+
+    def hashPassword(self, password: str) -> str:
+        """Hash password using SHA-256"""
         password = str(password)
         return hashlib.sha256(bytes(password, encoding='utf8')).hexdigest()
 
-    def login(self, user, password):
+    def login(self, user: str, password: str) -> bool:
+        """Attempt to log in a user
+        
+        Returns:
+            bool: True if login successful
+        """
         hashed_password = self.hashPassword(password)
 
         for row in self._data:
-            if row[self.USERNAME] == user:
-                if hashed_password == row[self.PASSWORD]:
-                    self._current_user = user
-                    self._current_user_privileges = row
-                    self.runLoginChangedCallbacks()
-                    return True
-
+            if row[self.USERNAME] == user and hashed_password == row[self.PASSWORD]:
+                self._current_user = user
+                self._current_user_privileges = row
+                self._session.start_session()
+                self.runLoginChangedCallbacks()
+                return True
 
         self._current_user = None
         self._current_user_privileges = None
+        self._session.end_session()
         self.runLoginChangedCallbacks()
         return False
+        
+    def is_session_expired(self) -> bool:
+        """Check if current session has expired"""
+        if self._current_user is None:
+            return False
+        return not self._session.is_session_valid()
 
     def logout(self):
         self._current_user = None
