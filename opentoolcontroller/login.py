@@ -30,20 +30,17 @@ class SessionManager:
         self.active = False
     
     def start_session(self) -> None:
-        print("start_session")
         """Start a new user session"""
         self.last_activity = datetime.now()
         self.active = True
     
     def end_session(self) -> None:
-        print("end_session")
         """End the current session"""
         self.last_activity = None
         self.active = False
     
     def update_activity(self) -> None:
         """Update the last activity timestamp"""
-        print('update_activity')
         self.last_activity = datetime.now()
     
     def is_session_valid(self) -> bool:
@@ -51,9 +48,7 @@ class SessionManager:
         if not self.active or not self.last_activity:
             return False
         
-        print("is_session_valid")
         time_elapsed = datetime.now() - self.last_activity
-        print(time_elapsed, self.timeout_minutes)
         return time_elapsed < timedelta(minutes=self.timeout_minutes)
 
 class LoginView(login_base, login_form):
@@ -256,7 +251,7 @@ class LoginModel(QtCore.QAbstractTableModel):
                 # Create new user data block
                 new_block = (
                     '{\n'
-                    f'        "password_hash": "{self._data[self.USERNAME].get(username, "")}",\n'
+                    f'        "password_hash": "{next((row[self.PASSWORD] for row in self._data if row[self.USERNAME] == username), "")}",\n'     
                     f'        "run_behaviors": {str(privileges["run_behaviors"])},\n'
                     f'        "edit_behavior": {str(privileges["edit_behavior"])},\n'
                     f'        "edit_tool": {str(privileges["edit_tool"])},\n'
