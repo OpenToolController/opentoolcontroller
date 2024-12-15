@@ -23,7 +23,7 @@ class UserPrivilege(IntEnum):
 
 class SessionManager:
     """Handles user session management including timeouts"""
-    def __init__(self, timeout_minutes: int = auth_config.SESSION_TIMEOUT_MINUTES):
+    def __init__(self, timeout_minutes: int = 30):
         self.timeout_minutes = timeout_minutes
         self.last_activity: Optional[datetime] = None
         self.active = False
@@ -191,8 +191,10 @@ class LoginModel(QtCore.QAbstractTableModel):
     EDIT_TOOL = 4
     CLEAR_ALERTS = 5
     EDIT_USERS = 6
+    TIMEOUT = 7
 
     PRIVILEGES = [RUN_BEHAVIORS, EDIT_BEHAVIOR, EDIT_TOOL, CLEAR_ALERTS, EDIT_USERS]
+    EDITABLE_COLUMNS = PRIVILEGES + [TIMEOUT]
     
     def __init__(self):
         super().__init__()
@@ -205,7 +207,7 @@ class LoginModel(QtCore.QAbstractTableModel):
         self._data = self._load_user_data()
         self._horizontal_header_labels = [
             'User', 'Password', 'Run Behaviors', 'Edit Behavior',
-            'Edit Tool', 'Clear Alerts', 'Edit Users'
+            'Edit Tool', 'Clear Alerts', 'Edit Users', 'Timeout (min)'
         ]
         
         self._current_user = None
@@ -223,7 +225,8 @@ class LoginModel(QtCore.QAbstractTableModel):
                 privileges['edit_behavior'],
                 privileges['edit_tool'],
                 privileges['clear_alerts'],
-                privileges['edit_users']
+                privileges['edit_users'],
+                info.get('timeout_minutes', 30)
             ])
         return data
 
@@ -243,8 +246,17 @@ class LoginModel(QtCore.QAbstractTableModel):
         if self.canEditUsers():
             if index.column() in self.PRIVILEGES:
                 self._data[index.row()][index.column()] = bool(value)
-                print(self._data[index.row()][index.column()])
                 return True
+            elif index.column() == self.TIMEOUT:
+                try:
+                    timeout = int(value)
+                    if timeout > 0:
+                        self._data[index.row()][index.column()] = timeout
+                        if self._current_user == self._data[index.row()][self.USERNAME]:
+                            self._session.timeout_minutes = timeout
+                        return True
+                except (ValueError, TypeError):
+                    pass
 
 
         return False
@@ -256,7 +268,7 @@ class LoginModel(QtCore.QAbstractTableModel):
 
     def flags(self, index):
         if self.canEditUsers():
-            if index.column() in self.PRIVILEGES: 
+            if index.column() in self.EDITABLE_COLUMNS:
                 return QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled
 
         return QtCore.Qt.ItemIsEnabled

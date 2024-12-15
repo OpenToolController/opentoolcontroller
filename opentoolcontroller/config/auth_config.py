@@ -11,7 +11,8 @@ DEFAULT_USERS: Dict[str, List] = {
             "edit_tool": True,
             "clear_alerts": True,
             "edit_users": True
-        }
+        },
+        "timeout_minutes": 30
     },
     "user": {
         "password_hash": "04f8996da763b7a969b1028ee3007569eaf3a635486ddab211d512c85b9df8fb", 
@@ -21,7 +22,8 @@ DEFAULT_USERS: Dict[str, List] = {
             "edit_tool": False,
             "clear_alerts": True,
             "edit_users": False
-        }
+        },
+        "timeout_minutes": 30
     }
 }
 
