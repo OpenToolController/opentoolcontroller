@@ -209,6 +209,9 @@ class LoginModel(QtCore.QAbstractTableModel):
         
         self._current_user = None
         self._current_user_privileges = None
+
+        # Install event filter to track user activity
+        QtWidgets.QApplication.instance().installEventFilter(self)
         
     def _load_user_data(self) -> List[List]:
         """Convert config data to model format"""
@@ -433,6 +436,16 @@ class LoginModel(QtCore.QAbstractTableModel):
         self.runLoginChangedCallbacks()
         return False
         
+    def eventFilter(self, obj, event) -> bool:
+        """Filter application events to track user activity"""
+        if self._current_user is not None:
+            # Update activity on mouse or keyboard events
+            if event.type() in (QtCore.QEvent.MouseButtonPress, 
+                              QtCore.QEvent.KeyPress,
+                              QtCore.QEvent.MouseMove):
+                self._session.update_activity()
+        return False
+
     def is_session_expired(self) -> bool:
         """Check if current session has expired"""
         if self._current_user is None:
