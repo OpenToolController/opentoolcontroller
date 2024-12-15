@@ -94,9 +94,9 @@ class LoginView(login_base, login_form):
         username = self.ui_username.text()
         password = self.ui_password.text()
         self.ui_password.setText('')
-        self._login_model.login(username, password)
-        self.setCurrentUserText()
-        self.setPasswordEditButtons()
+        if self._login_model.login(username, password):
+            self.setCurrentUserText()
+            self.setPasswordEditButtons()
 
 
     def logout(self):
