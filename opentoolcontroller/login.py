@@ -10,8 +10,7 @@ from typing import Optional, List, Tuple, Callable, Dict
 import hashlib
 import re
 import os
-import importlib.util
-import sys
+import json
 
 login_base, login_form = uic.loadUiType("opentoolcontroller/views/Login.ui")
 
@@ -196,18 +195,17 @@ class LoginModel(QtCore.QAbstractTableModel):
     PRIVILEGES = [RUN_BEHAVIORS, EDIT_BEHAVIOR, EDIT_TOOL, CLEAR_ALERTS, EDIT_USERS]
     EDITABLE_COLUMNS = PRIVILEGES + [TIMEOUT]
     
-    def __init__(self, config_path=None):#"opentoolcontroller/config/auth_config.py"):
+    def __init__(self, config_path="opentoolcontroller/config/auth_config.json"):
         super().__init__()
         self._login_changed_callbacks: List[Tuple[Callable, int]] = []
         self._config_path = config_path
         
-        # Load the config module dynamically
-        spec = importlib.util.spec_from_file_location("auth_config", config_path)
-        self.auth_config = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(self.auth_config)
+        # Load the config from JSON
+        with open(self._config_path, 'r') as f:
+            self.auth_config = json.load(f)
         
-        # Initialize session management
-        self._session = SessionManager()
+        # Initialize session management with default timeout
+        self._session = SessionManager(self.auth_config['password_policy']['session_timeout_minutes'])
         
         # Load user data from config
         self._data = self._load_user_data()
@@ -227,7 +225,7 @@ class LoginModel(QtCore.QAbstractTableModel):
     def _load_user_data(self) -> List[List]:
         """Convert config data to model format"""
         data = []
-        for username, info in self.auth_config.DEFAULT_USERS.items():
+        for username, info in self.auth_config['users'].items():
             data.append([
                 username,
                 info['password_hash'],
@@ -236,7 +234,7 @@ class LoginModel(QtCore.QAbstractTableModel):
                 info['edit_tool'],
                 info['clear_alerts'],
                 info['edit_users'],
-                info.get('timeout_minutes', self.auth_config.SESSION_TIMEOUT_MINUTES)
+                info.get('timeout_minutes', self.auth_config['password_policy']['session_timeout_minutes'])
             ])
         return data
 
@@ -249,36 +247,23 @@ class LoginModel(QtCore.QAbstractTableModel):
 
 
     def _update_config_privileges(self, username: str, privileges: dict, timeout: int) -> None:
-        """Update user privileges in auth_config.py"""
+        """Update user privileges in auth_config.json"""
         config_path = os.path.join(os.path.dirname(__file__), self._config_path)
-        with open(config_path, 'r') as f:
-            content = f.read()
-            
-        # Find user's section
-        user_pattern = f'"{username}": {{'
-        start_idx = content.find(user_pattern)
-        if start_idx != -1:
-            # Find the start of the user's data block
-            block_start = content.find('{', start_idx)
-            block_end = content.find('}', block_start)
-            if block_start != -1 and block_end != -1:
-                # Create new user data block
-                new_block = (
-                    '{\n'
-                    f'        "password_hash": "{next((row[self.PASSWORD] for row in self._data if row[self.USERNAME] == username), "")}",\n'     
-                    f'        "run_behaviors": {str(privileges["run_behaviors"])},\n'
-                    f'        "edit_behavior": {str(privileges["edit_behavior"])},\n'
-                    f'        "edit_tool": {str(privileges["edit_tool"])},\n'
-                    f'        "clear_alerts": {str(privileges["clear_alerts"])},\n'
-                    f'        "edit_users": {str(privileges["edit_users"])},\n'
-                    f'        "timeout_minutes": {timeout}}}' 
-                )
-                
-                # Replace the entire user block
-                new_content = content[:block_start] + new_block + content[block_end + 1:]
-                
-                with open(config_path, 'w') as f:
-                    f.write(new_content)
+        
+        # Update the user data in our loaded config
+        self.auth_config['users'][username].update({
+            "password_hash": next((row[self.PASSWORD] for row in self._data if row[self.USERNAME] == username), ""),
+            "run_behaviors": privileges["run_behaviors"],
+            "edit_behavior": privileges["edit_behavior"],
+            "edit_tool": privileges["edit_tool"],
+            "clear_alerts": privileges["clear_alerts"],
+            "edit_users": privileges["edit_users"],
+            "timeout_minutes": timeout
+        })
+        
+        # Write the updated config back to file
+        with open(config_path, 'w') as f:
+            json.dump(self.auth_config, f, indent=4)
 
     def setData(self, index, value, role=QtCore.Qt.EditRole):
         if type(value) == type(QtCore.QVariant()):
@@ -380,26 +365,13 @@ class LoginModel(QtCore.QAbstractTableModel):
         
         # Update config file
         config_path = os.path.join(os.path.dirname(__file__), self._config_path)
-        with open(config_path, 'r') as f:
-            content = f.read()
-            
-        # Find user's section and update password hash
-        user_pattern = f'"{username}": {{'
-        start_idx = content.find(user_pattern)
-        if start_idx != -1:
-            # Find password hash line within user section
-            hash_pattern = '"password_hash": "'
-            hash_start = content.find(hash_pattern, start_idx)
-            if hash_start != -1:
-                hash_end = content.find('",', hash_start)
-                if hash_end != -1:
-                    new_content = (
-                        content[:hash_start + len(hash_pattern)] +
-                        password_hash +
-                        content[hash_end:]
-                    )
-                    with open(config_path, 'w') as f:
-                        f.write(new_content)
+        
+        # Update the password hash in our loaded config
+        self.auth_config['users'][username]['password_hash'] = password_hash
+        
+        # Write the updated config back to file
+        with open(config_path, 'w') as f:
+            json.dump(self.auth_config, f, indent=4)
 
 
     def validate_password(self, password: str) -> Tuple[bool, str]:
@@ -408,13 +380,13 @@ class LoginModel(QtCore.QAbstractTableModel):
         Returns:
             Tuple[bool, str]: (is_valid, error_message)
         """
-        if len(password) < self.auth_config.MIN_PASSWORD_LENGTH:
-            return False, f"Password length must be at least {self.auth_config.MIN_PASSWORD_LENGTH} characters"
+        if len(password) < self.auth_config['password_policy']['min_length']:
+            return False, f"Password length must be at least {self.auth_config['password_policy']['min_length']} characters"
             
-        if self.auth_config.REQUIRE_SPECIAL_CHARS and not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
+        if self.auth_config['password_policy']['require_special_chars'] and not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
             return False, "Password must contain at least one special character"
             
-        if self.auth_config.REQUIRE_NUMBERS and not re.search(r'\d', password):
+        if self.auth_config['password_policy']['require_numbers'] and not re.search(r'\d', password):
             return False, "Password must contain at least one number"
             
         return True, ""
