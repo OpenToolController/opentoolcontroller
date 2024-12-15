@@ -399,7 +399,7 @@ class LoginModel(QtCore.QAbstractTableModel):
             Tuple[bool, str]: (is_valid, error_message)
         """
         if len(password) < auth_config.MIN_PASSWORD_LENGTH:
-            return False, f"Password must be at least {auth_config.MIN_PASSWORD_LENGTH} characters"
+            return False, f"Password length must be at least {auth_config.MIN_PASSWORD_LENGTH} characters"
             
         if auth_config.REQUIRE_SPECIAL_CHARS and not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
             return False, "Password must contain at least one special character"
@@ -420,6 +420,10 @@ class LoginModel(QtCore.QAbstractTableModel):
         Returns:
             bool: True if login successful
         """
+        # Prevent concurrent logins
+        if self._current_user is not None:
+            return False
+            
         hashed_password = self.hashPassword(password)
 
         for row in self._data:
@@ -455,6 +459,7 @@ class LoginModel(QtCore.QAbstractTableModel):
     def logout(self):
         self._current_user = None
         self._current_user_privileges = None
+        self._session.end_session()
         self.runLoginChangedCallbacks()
 
     
