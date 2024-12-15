@@ -223,11 +223,11 @@ class LoginModel(QtCore.QAbstractTableModel):
                 username,
                 info['password_hash'],
                 info['run_behaviors'],
-                info['edit_behavior'],
+                info['edit_behavior'], 
                 info['edit_tool'],
                 info['clear_alerts'],
                 info['edit_users'],
-                info.get('timeout_minutes', 30)
+                info.get('timeout_minutes', auth_config.SESSION_TIMEOUT_MINUTES)
             ])
         return data
 
@@ -249,52 +249,27 @@ class LoginModel(QtCore.QAbstractTableModel):
         user_pattern = f'"{username}": {{'
         start_idx = content.find(user_pattern)
         if start_idx != -1:
-            # Find privileges section
-            priv_pattern = '"privileges": {'
-            priv_start = content.find(priv_pattern, start_idx)
-            if priv_start != -1:
-                # Find end of privileges section
-                priv_end = content.find('}', priv_start)
-                if priv_end != -1:
-                    # Create new privileges section
-                    new_privileges = (
-                        f'"privileges": {{\n'
-                        f'            "run_behaviors": {str(privileges["run_behaviors"])},\n'
-                        f'            "edit_behavior": {str(privileges["edit_behavior"])},\n'
-                        f'            "edit_tool": {str(privileges["edit_tool"])},\n'
-                        f'            "clear_alerts": {str(privileges["clear_alerts"])},\n'
-                        f'            "edit_users": {str(privileges["edit_users"])}\n'
-                        f'        }}'
-                    )
-                    
-                    # Replace privileges section
-                    new_content = (
-                        content[:priv_start] +
-                        new_privileges +
-                        content[priv_end + 1:]
-                    )
-                    
-                    # Update timeout if needed
-                    timeout_pattern = '"timeout_minutes": '
-                    timeout_start = content.find(timeout_pattern, start_idx)
-                    if timeout_start != -1:
-                        timeout_end = content.find('\n', timeout_start)
-                        if timeout_end == -1:  # Handle last line case
-                            timeout_end = content.find('}', timeout_start)
-                        if timeout_end != -1:
-                            # Find where the actual number ends
-                            number_end = min(
-                                content.find(',', timeout_start) if content.find(',', timeout_start) != -1 else float('inf'),
-                                content.find('}', timeout_start) if content.find('}', timeout_start) != -1 else float('inf')
-                            )
-                            new_content = (
-                                new_content[:timeout_start + len(timeout_pattern)] +
-                                str(timeout) +
-                                new_content[number_end:]
-                            )
-                    
-                    with open(config_path, 'w') as f:
-                        f.write(new_content)
+            # Find the start of the user's data block
+            block_start = content.find('{', start_idx)
+            block_end = content.find('}', block_start)
+            if block_start != -1 and block_end != -1:
+                # Create new user data block
+                new_block = (
+                    '{\n'
+                    f'        "password_hash": "{self._data[self.USERNAME].get(username, "")}",\n'
+                    f'        "run_behaviors": {str(privileges["run_behaviors"])},\n'
+                    f'        "edit_behavior": {str(privileges["edit_behavior"])},\n'
+                    f'        "edit_tool": {str(privileges["edit_tool"])},\n'
+                    f'        "clear_alerts": {str(privileges["clear_alerts"])},\n'
+                    f'        "edit_users": {str(privileges["edit_users"])},\n'
+                    f'        "timeout_minutes": {timeout}}}' 
+                )
+                
+                # Replace the entire user block
+                new_content = content[:block_start] + new_block + content[block_end + 1:]
+                
+                with open(config_path, 'w') as f:
+                    f.write(new_content)
 
     def setData(self, index, value, role=QtCore.Qt.EditRole):
         if type(value) == type(QtCore.QVariant()):
