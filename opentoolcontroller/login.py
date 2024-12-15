@@ -30,17 +30,20 @@ class SessionManager:
         self.active = False
     
     def start_session(self) -> None:
+        print("start_session")
         """Start a new user session"""
         self.last_activity = datetime.now()
         self.active = True
     
     def end_session(self) -> None:
+        print("end_session")
         """End the current session"""
         self.last_activity = None
         self.active = False
     
     def update_activity(self) -> None:
         """Update the last activity timestamp"""
+        print('update_activity')
         self.last_activity = datetime.now()
     
     def is_session_valid(self) -> bool:
@@ -48,7 +51,9 @@ class SessionManager:
         if not self.active or not self.last_activity:
             return False
         
+        print("is_session_valid")
         time_elapsed = datetime.now() - self.last_activity
+        print(time_elapsed, self.timeout_minutes)
         return time_elapsed < timedelta(minutes=self.timeout_minutes)
 
 class LoginView(login_base, login_form):
@@ -70,7 +75,8 @@ class LoginView(login_base, login_form):
         # Setup session timeout timer
         self._activity_timer = QtCore.QTimer(self)
         self._activity_timer.timeout.connect(self.check_session_timeout)
-        self._activity_timer.start(60000)  # Check every minute
+        #self._activity_timer.start(60000)  # Check every minute
+        self._activity_timer.start(10000)  # Check every minute
         
         self.setPasswordEditButtons()
         
@@ -213,15 +219,14 @@ class LoginModel(QtCore.QAbstractTableModel):
         """Convert config data to model format"""
         data = []
         for username, info in auth_config.DEFAULT_USERS.items():
-            privileges = info['privileges']
             data.append([
                 username,
                 info['password_hash'],
-                privileges['run_behaviors'],
-                privileges['edit_behavior'],
-                privileges['edit_tool'],
-                privileges['clear_alerts'],
-                privileges['edit_users'],
+                info['run_behaviors'],
+                info['edit_behavior'],
+                info['edit_tool'],
+                info['clear_alerts'],
+                info['edit_users'],
                 info.get('timeout_minutes', 30)
             ])
         return data
