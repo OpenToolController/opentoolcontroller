@@ -863,8 +863,8 @@ class RecipeVariableTable(QtWidgets.QMainWindow):
         self.setCentralWidget(central_widget)
         layout = QtWidgets.QVBoxLayout(central_widget)
         
-        # Create validator for integer fields
-        self.int_validator = QtGui.QIntValidator()
+        ## Create validator for integer fields
+        #self.int_validator = QtGui.QIntValidator()
         
         # Create table
         self.table = QtWidgets.QTableWidget()
@@ -918,40 +918,53 @@ class RecipeVariableTable(QtWidgets.QMainWindow):
             # Set white background for enabled cells
             min_item.setBackground(QtGui.QColor(255, 255, 255))
             max_item.setBackground(QtGui.QColor(255, 255, 255))
-            
-            # Set validators based on type
-            if var_type == "Integer":
-                validator = QtGui.QIntValidator()
-            else:  # Float
-                validator = QtGui.QDoubleValidator()
-            
-            # Create new delegates with appropriate validators
-            delegate = QtWidgets.QStyledItemDelegate()
-            delegate.createEditor = lambda parent, option, index: QtWidgets.QSpinBox(parent) if isinstance(validator, QtGui.QIntValidator) else QtWidgets.QDoubleSpinBox(parent)
-            delegate.setEditorData = lambda editor, index: editor.setValue(float(index.data()) if index.data() and index.data().strip() else 0)
-            delegate.setModelData = lambda editor, model, index: model.setData(index, str(editor.value()), Qt.EditRole)
-            
-            self.table.setItemDelegateForColumn(2, delegate)
-            self.table.setItemDelegateForColumn(3, delegate)
+       
+
+
+            # Set up a delegate with specific numeric editors
+            numeric_delegate = QtWidgets.QStyledItemDelegate()
+
+            def create_editor(parent, option, index, is_float):
+                """Create the appropriate numeric editor."""
+                if is_float:
+                    editor = QtWidgets.QDoubleSpinBox(parent)
+                    editor.setDecimals(2)  # Optional: Adjust decimals for float
+                    editor.setRange(-1e9, 1e9)  # Optional: Adjust range
+                else:
+                    editor = QtWidgets.QSpinBox(parent)
+                    editor.setRange(-1e9, 1e9)  # Optional: Adjust range
+                return editor
+
+            if var_type == "Float":
+                numeric_delegate.createEditor = lambda parent, option, index: create_editor(parent, option, index, is_float=True)
+            elif var_type == "Integer":
+                numeric_delegate.createEditor = lambda parent, option, index: create_editor(parent, option, index, is_float=False)
+
+            # Correctly set and retrieve data for the editor
+            def set_editor_data(editor, index):
+                value = index.data(Qt.EditRole)
+                if value:
+                    try:
+                        editor.setValue(float(value))  # Use float for compatibility
+                    except ValueError:
+                        editor.setValue(0)
+
+            def set_model_data(editor, model, index):
+                if isinstance(editor, QtWidgets.QDoubleSpinBox):
+                    model.setData(index, str(editor.value()), Qt.EditRole)
+                elif isinstance(editor, QtWidgets.QSpinBox):
+                    model.setData(index, str(editor.value()), Qt.EditRole)
+
+            numeric_delegate.setEditorData = set_editor_data
+            numeric_delegate.setModelData = set_model_data
+
+            # Assign the delegate to columns 2 and 3
+            self.table.setItemDelegateForColumn(2, numeric_delegate)
+            self.table.setItemDelegateForColumn(3, numeric_delegate)
+
+
+
     
-    def validateAndSetData(self, editor, model, index, validator):
-        """Validate and set data for min/max fields"""
-        value = editor.text()
-        pos = 0
-        
-        # For integer fields, try to convert float input to int
-        if isinstance(validator, QtGui.QIntValidator):
-            try:                                                                                                                                                                           
-                float_val = float(value)                                                                                                                                                   
-                value = str(round(float_val))  # Round to nearest integer                                                                                                                  
-            except ValueError:                                                                                                                                                             
-                pass       
-        
-        if validator.validate(value, pos)[0] == QtGui.QValidator.Acceptable:
-            model.setData(index, value, Qt.EditRole)
-        else:
-            # Reset to previous value on invalid input
-            editor.setText(index.data())
 
     def addVariable(self):
         row = self.table.rowCount()
@@ -990,7 +1003,8 @@ class TypeComboDelegate(QtWidgets.QStyledItemDelegate):
 
     def setEditorData(self, editor, index):
         value = index.model().data(index, Qt.EditRole)
-        editor.setCurrentText(value)
+        if value:
+            editor.setCurrentText(value)
 
     def setModelData(self, editor, model, index):
         value = editor.currentText()
