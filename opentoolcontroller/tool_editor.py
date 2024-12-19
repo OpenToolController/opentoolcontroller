@@ -433,7 +433,7 @@ class BehaviorStateEditor(QtWidgets.QWidget):
 
                 behavior = self._behaviors[i]
                 ui_name.setText(behavior.name())
-                ui_file.setText(behavior.file())
+                ui_file_name.setText(behavior.file())
         except:
             pass
 
