@@ -852,30 +852,40 @@ class RecipeVariableEditor(recipe_var_base, recipe_var_form):
         self._variable_table.show()
 
 
-class RecipeVariableTable(QtWidgets.QWidget):
+class RecipeVariableTable(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Recipe Variables")
+        self.resize(600, 400)  # Set a reasonable default size
         
-        # Create layout
-        layout = QtWidgets.QVBoxLayout()
-        self.setLayout(layout)
+        # Create central widget and layout
+        central_widget = QtWidgets.QWidget()
+        self.setCentralWidget(central_widget)
+        layout = QtWidgets.QVBoxLayout(central_widget)
         
         # Create table
         self.table = QtWidgets.QTableWidget()
         self.table.setColumnCount(4)
         self.table.setHorizontalHeaderLabels(["Variable Name", "Variable Type", "Min", "Max"])
+        self.table.horizontalHeader().setStretchLastSection(True)
+        self.table.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Interactive)
         layout.addWidget(self.table)
         
+        # Create button widget and layout
+        button_widget = QtWidgets.QWidget()
+        button_layout = QtWidgets.QHBoxLayout(button_widget)
+        button_layout.setContentsMargins(0, 0, 0, 0)
+        
         # Add buttons
-        button_layout = QtWidgets.QHBoxLayout()
         add_btn = QtWidgets.QPushButton("Add Variable")
         remove_btn = QtWidgets.QPushButton("Remove Variable")
         add_btn.clicked.connect(self.addVariable)
         remove_btn.clicked.connect(self.removeVariable)
         button_layout.addWidget(add_btn)
         button_layout.addWidget(remove_btn)
-        layout.addLayout(button_layout)
+        button_layout.addStretch()  # Push buttons to the left
+        
+        layout.addWidget(button_widget)
         
         # Set up type combo delegate for Variable Type column
         type_delegate = TypeComboDelegate()
