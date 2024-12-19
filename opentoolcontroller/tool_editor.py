@@ -940,6 +940,15 @@ class RecipeVariableTable(QtWidgets.QMainWindow):
         """Validate and set data for min/max fields"""
         value = editor.text()
         pos = 0
+        
+        # For integer fields, try to convert float input to int
+        if isinstance(validator, QtGui.QIntValidator):
+            try:
+                float_val = float(value)
+                value = str(round(float_val))  # Round to nearest integer
+            except ValueError:
+                pass
+        
         if validator.validate(value, pos)[0] == QtGui.QValidator.Acceptable:
             model.setData(index, value, Qt.EditRole)
         else:
