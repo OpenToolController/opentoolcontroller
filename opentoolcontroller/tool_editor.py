@@ -863,6 +863,9 @@ class RecipeVariableTable(QtWidgets.QMainWindow):
         self.setCentralWidget(central_widget)
         layout = QtWidgets.QVBoxLayout(central_widget)
         
+        # Create validator for integer fields
+        self.int_validator = QtGui.QIntValidator()
+        
         # Create table
         self.table = QtWidgets.QTableWidget()
         self.table.setColumnCount(4)
@@ -888,8 +891,54 @@ class RecipeVariableTable(QtWidgets.QMainWindow):
         layout.addWidget(button_widget)
         
         # Set up type combo delegate for Variable Type column
-        type_delegate = TypeComboDelegate()
+        type_delegate = TypeComboDelegate(self.table)
         self.table.setItemDelegateForColumn(1, type_delegate)
+        
+    def handleTypeChange(self, var_type, row):
+        """Handle changes to variable type by updating min/max fields"""
+        min_item = self.table.item(row, 2)
+        max_item = self.table.item(row, 3)
+        
+        if not min_item or not max_item:
+            return
+            
+        if var_type == "Boolean":
+            # Disable and clear min/max for boolean
+            min_item.setFlags(min_item.flags() & ~Qt.ItemIsEnabled)
+            max_item.setFlags(max_item.flags() & ~Qt.ItemIsEnabled)
+            min_item.setText("")
+            max_item.setText("")
+        else:
+            # Enable min/max for numeric types
+            min_item.setFlags(min_item.flags() | Qt.ItemIsEnabled | Qt.ItemIsEditable)
+            max_item.setFlags(max_item.flags() | Qt.ItemIsEnabled | Qt.ItemIsEditable)
+            
+            # Set validators based on type
+            if var_type == "Integer":
+                validator = QtGui.QIntValidator()
+            else:  # Float
+                validator = QtGui.QDoubleValidator()
+            
+            # Create new delegates with appropriate validators
+            delegate = QtWidgets.QStyledItemDelegate()
+            delegate.createEditor = lambda parent, option, index: QtWidgets.QLineEdit(parent)
+            delegate.setEditorData = lambda editor, index: editor.setText(index.data())
+            delegate.setModelData = lambda editor, model, index: self.validateAndSetData(
+                editor, model, index, validator
+            )
+            
+            self.table.setItemDelegateForColumn(2, delegate)
+            self.table.setItemDelegateForColumn(3, delegate)
+    
+    def validateAndSetData(self, editor, model, index, validator):
+        """Validate and set data for min/max fields"""
+        value = editor.text()
+        pos = 0
+        if validator.validate(value, pos)[0] == QtGui.QValidator.Acceptable:
+            model.setData(index, value, Qt.EditRole)
+        else:
+            # Reset to previous value on invalid input
+            editor.setText(index.data())
 
     def addVariable(self):
         row = self.table.rowCount()
@@ -898,7 +947,17 @@ class RecipeVariableTable(QtWidgets.QMainWindow):
         # Add type combo box
         type_combo = QtWidgets.QComboBox()
         type_combo.addItems(["Float", "Integer", "Boolean"])
+        type_combo.currentTextChanged.connect(lambda text, r=row: self.handleTypeChange(text, r))
         self.table.setCellWidget(row, 1, type_combo)
+        
+        # Add min/max cells
+        min_item = QtWidgets.QTableWidgetItem()
+        max_item = QtWidgets.QTableWidgetItem()
+        self.table.setItem(row, 2, min_item)
+        self.table.setItem(row, 3, max_item)
+        
+        # Initialize as Boolean (disabled min/max)
+        type_combo.setCurrentText("Boolean")
 
     def removeVariable(self):
         current_row = self.table.currentRow()
@@ -910,6 +969,10 @@ class TypeComboDelegate(QtWidgets.QStyledItemDelegate):
     def createEditor(self, parent, option, index):
         editor = QtWidgets.QComboBox(parent)
         editor.addItems(["Float", "Integer", "Boolean"])
+        # Connect to parent table's handler
+        editor.currentTextChanged.connect(
+            lambda text: self.parent().handleTypeChange(text, index.row())
+        )
         return editor
 
     def setEditorData(self, editor, index):
@@ -919,6 +982,8 @@ class TypeComboDelegate(QtWidgets.QStyledItemDelegate):
     def setModelData(self, editor, model, index):
         value = editor.currentText()
         model.setData(index, value, Qt.EditRole)
+        # Ensure min/max fields are updated when type changes via delegate
+        self.parent().handleTypeChange(value, index.row())
 
     def updateEditorGeometry(self, editor, option, index):
         editor.setGeometry(option.rect)
