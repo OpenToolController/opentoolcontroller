@@ -908,6 +908,9 @@ class RecipeVariableTable(QtWidgets.QMainWindow):
             max_item.setFlags(max_item.flags() & ~Qt.ItemIsEnabled)
             min_item.setText("")
             max_item.setText("")
+            # Set light gray background for disabled cells
+            min_item.setBackground(QtGui.QColor(240, 240, 240))
+            max_item.setBackground(QtGui.QColor(240, 240, 240))
         else:
             # Enable min/max for numeric types
             min_item.setFlags(min_item.flags() | Qt.ItemIsEnabled | Qt.ItemIsEditable)
