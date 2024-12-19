@@ -6,6 +6,7 @@ from opentoolcontroller.views.widgets.tool_tree_view import ToolTreeView
 from opentoolcontroller.tool_model import LeafFilterProxyModel
 from opentoolcontroller.views.widgets.behavior_editor_view import BTEditorWindow, BTEditor
 from opentoolcontroller.strings import col, typ, defaults
+from PyQt5.QtCore import Qt
 
 
 d_in_base,  d_in_form  = uic.loadUiType("opentoolcontroller/views/DigitalInputEditor.ui")
@@ -13,6 +14,7 @@ d_out_base, d_out_form = uic.loadUiType("opentoolcontroller/views/DigitalOutputE
 a_in_base,  a_in_form  = uic.loadUiType("opentoolcontroller/views/AnalogInputEditor.ui")
 a_out_base, a_out_form = uic.loadUiType("opentoolcontroller/views/AnalogOutputEditor.ui")
 
+recipe_var_base, recipe_var_form = uic.loadUiType("opentoolcontroller/views/RecipeVariableEditor.ui")
 bool_var_base,  bool_var_form  = uic.loadUiType("opentoolcontroller/views/BoolVarEditor.ui")
 int_var_base, int_var_form = uic.loadUiType("opentoolcontroller/views/IntVarEditor.ui")
 float_var_base, float_var_form = uic.loadUiType("opentoolcontroller/views/FloatVarEditor.ui")
@@ -34,6 +36,7 @@ class CommonEditor(common_editor_base, common_editor_form):
         #The node editor is common for every node in a tool
         self._node_editor = NodeEditor(self)
         self._behavior_state_editor = BehaviorStateEditor(self)
+        self._recipe_variable_editor = RecipeVariableEditor(self)
         self.ui_common_box.addWidget(self._node_editor)
 
         #Only one of these is shown at a time
@@ -53,6 +56,7 @@ class CommonEditor(common_editor_base, common_editor_form):
             self.ui_specific_box.addWidget(editor)
 
         self.ui_specific_box.addWidget(self._behavior_state_editor)
+        self.ui_specific_box.addWidget(self._recipe_variable_editor)
         self.hideEditors()
 
 
@@ -95,6 +99,8 @@ class CommonEditor(common_editor_base, common_editor_form):
             if typeInfo in [typ.TOOL_NODE, typ.SYSTEM_NODE, typ.DEVICE_NODE]:
                 self._behavior_state_editor.setSelection(current_index)
                 self._behavior_state_editor.setVisible(True)
+                self._recipe_variable_editor.setSelection(current_index)
+                self._recipe_variable_editor.setVisible(True)
 
 
     def setModel(self, model):
@@ -814,6 +820,94 @@ class AnalogOutputEditor(a_out_base, a_out_form):
         index = self.ui_hal_pin.findText(current.internalPointer().halPin, QtCore.Qt.MatchFixedString)
         if index >= 0:
             self.ui_hal_pin.setCurrentIndex(index)
+
+
+class RecipeVariableEditor(recipe_var_base, recipe_var_form):
+    def __init__(self, parent=None):
+        super(recipe_var_base, self).__init__(parent)
+        self.setupUi(self)
+        self.mapper = QtWidgets.QDataWidgetMapper()
+        
+        self.ui_edit_variables.clicked.connect(self.openVariableTable)
+        self._variable_table = None
+
+    def setModel(self, model):
+        if hasattr(model, 'sourceModel'):
+            model = model.sourceModel()
+        self.mapper.setModel(model)
+
+    def setSelection(self, current):
+        parent = current.parent()
+        self.mapper.setRootIndex(parent)
+        self.mapper.setCurrentModelIndex(current)
+        self._current_node = current.internalPointer()
+
+    def openVariableTable(self):
+        if not self._variable_table:
+            self._variable_table = RecipeVariableTable(self)
+        self._variable_table.show()
+
+
+class RecipeVariableTable(QtWidgets.QWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Recipe Variables")
+        
+        # Create layout
+        layout = QtWidgets.QVBoxLayout()
+        self.setLayout(layout)
+        
+        # Create table
+        self.table = QtWidgets.QTableWidget()
+        self.table.setColumnCount(4)
+        self.table.setHorizontalHeaderLabels(["Variable Name", "Variable Type", "Min", "Max"])
+        layout.addWidget(self.table)
+        
+        # Add buttons
+        button_layout = QtWidgets.QHBoxLayout()
+        add_btn = QtWidgets.QPushButton("Add Variable")
+        remove_btn = QtWidgets.QPushButton("Remove Variable")
+        add_btn.clicked.connect(self.addVariable)
+        remove_btn.clicked.connect(self.removeVariable)
+        button_layout.addWidget(add_btn)
+        button_layout.addWidget(remove_btn)
+        layout.addLayout(button_layout)
+        
+        # Set up type combo delegate for Variable Type column
+        type_delegate = TypeComboDelegate()
+        self.table.setItemDelegateForColumn(1, type_delegate)
+
+    def addVariable(self):
+        row = self.table.rowCount()
+        self.table.insertRow(row)
+        
+        # Add type combo box
+        type_combo = QtWidgets.QComboBox()
+        type_combo.addItems(["Float", "Integer", "Boolean"])
+        self.table.setCellWidget(row, 1, type_combo)
+
+    def removeVariable(self):
+        current_row = self.table.currentRow()
+        if current_row >= 0:
+            self.table.removeRow(current_row)
+
+
+class TypeComboDelegate(QtWidgets.QStyledItemDelegate):
+    def createEditor(self, parent, option, index):
+        editor = QtWidgets.QComboBox(parent)
+        editor.addItems(["Float", "Integer", "Boolean"])
+        return editor
+
+    def setEditorData(self, editor, index):
+        value = index.model().data(index, Qt.EditRole)
+        editor.setCurrentText(value)
+
+    def setModelData(self, editor, model, index):
+        value = editor.currentText()
+        model.setData(index, value, Qt.EditRole)
+
+    def updateEditorGeometry(self, editor, option, index):
+        editor.setGeometry(option.rect)
 
 
 class BoolVarEditor(bool_var_base, bool_var_form):
