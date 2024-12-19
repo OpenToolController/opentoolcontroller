@@ -927,11 +927,9 @@ class RecipeVariableTable(QtWidgets.QMainWindow):
             
             # Create new delegates with appropriate validators
             delegate = QtWidgets.QStyledItemDelegate()
-            delegate.createEditor = lambda parent, option, index: QtWidgets.QLineEdit(parent)
-            delegate.setEditorData = lambda editor, index: editor.setText(index.data())
-            delegate.setModelData = lambda editor, model, index: self.validateAndSetData(
-                editor, model, index, validator
-            )
+            delegate.createEditor = lambda parent, option, index: QtWidgets.QSpinBox(parent) if isinstance(validator, QtGui.QIntValidator) else QtWidgets.QDoubleSpinBox(parent)
+            delegate.setEditorData = lambda editor, index: editor.setValue(float(index.data()) if index.data() else 0)
+            delegate.setModelData = lambda editor, model, index: model.setData(index, str(editor.value()), Qt.EditRole)
             
             self.table.setItemDelegateForColumn(2, delegate)
             self.table.setItemDelegateForColumn(3, delegate)
