@@ -915,6 +915,9 @@ class RecipeVariableTable(QtWidgets.QMainWindow):
             # Enable min/max for numeric types
             min_item.setFlags(min_item.flags() | Qt.ItemIsEnabled | Qt.ItemIsEditable)
             max_item.setFlags(max_item.flags() | Qt.ItemIsEnabled | Qt.ItemIsEditable)
+            # Set white background for enabled cells
+            min_item.setBackground(QtGui.QColor(255, 255, 255))
+            max_item.setBackground(QtGui.QColor(255, 255, 255))
             
             # Set validators based on type
             if var_type == "Integer":
