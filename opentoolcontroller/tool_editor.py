@@ -99,8 +99,12 @@ class CommonEditor(common_editor_base, common_editor_form):
             if typeInfo in [typ.TOOL_NODE, typ.SYSTEM_NODE, typ.DEVICE_NODE]:
                 self._behavior_state_editor.setSelection(current_index)
                 self._behavior_state_editor.setVisible(True)
+                
+            if typeInfo in [typ.TOOL_NODE, typ.SYSTEM_NODE]:
                 self._recipe_variable_editor.setSelection(current_index)
                 self._recipe_variable_editor.setVisible(True)
+            else:
+                self._recipe_variable_editor.setVisible(False)
 
 
     def setModel(self, model):
