@@ -14,8 +14,8 @@ class RecipeVariableTable(QtWidgets.QMainWindow):
         
         # Create table
         self.table = QtWidgets.QTableWidget()
-        self.table.setColumnCount(4)
-        self.table.setHorizontalHeaderLabels(["Variable Name", "Variable Type", "Min", "Max"])
+        self.table.setColumnCount(5)
+        self.table.setHorizontalHeaderLabels(["Variable Name", "Variable Type", "Min", "Max", "Basic"])
         self.table.horizontalHeader().setStretchLastSection(True)
         self.table.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Interactive)
         layout.addWidget(self.table)
@@ -111,6 +111,12 @@ class RecipeVariableTable(QtWidgets.QMainWindow):
         max_item = QtWidgets.QTableWidgetItem()
         self.table.setItem(row, 2, min_item)
         self.table.setItem(row, 3, max_item)
+        
+        # Add Basic checkbox
+        basic_item = QtWidgets.QTableWidgetItem()
+        basic_item.setFlags(basic_item.flags() | Qt.ItemIsUserCheckable)
+        basic_item.setCheckState(Qt.Unchecked)
+        self.table.setItem(row, 4, basic_item)
         
         # Initialize as Boolean (disabled min/max)
         type_combo.setCurrentText("Boolean")

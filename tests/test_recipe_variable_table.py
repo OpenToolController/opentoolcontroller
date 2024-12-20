@@ -15,10 +15,10 @@ def table(app):
 
 def test_initial_state(table):
     """Test initial state of the table"""
-    assert table.table.columnCount() == 4
+    assert table.table.columnCount() == 5
     assert table.table.rowCount() == 0
-    headers = [table.table.horizontalHeaderItem(i).text() for i in range(4)]
-    assert headers == ["Variable Name", "Variable Type", "Min", "Max"]
+    headers = [table.table.horizontalHeaderItem(i).text() for i in range(5)]
+    assert headers == ["Variable Name", "Variable Type", "Min", "Max", "Basic"]
 
 def test_add_variable(table):
     """Test adding a new variable"""
