@@ -179,6 +179,7 @@ class BehaviorNode(Node):
         self._behavior_info_text = ''
         self._hal_reader_number = 1
         self._behavior_runner = None
+        self._recipe_variables = []  # List of dictionaries containing variable definitions
 
 
     def data(self, c):
@@ -190,6 +191,7 @@ class BehaviorNode(Node):
         elif c is col.RUNNING_BEHAVIOR      : r = self._running_behavior
         elif c is col.BEHAVIOR_INFO_TEXT    : r = self._behavior_info_text
         elif c is col.HAL_READER_NUMBER     : r = self.halReaderNumber
+        elif c is col.RECIPE_VARIABLES      : r = self._recipe_variables
         return r
 
     def setData(self, c, value):
@@ -201,6 +203,7 @@ class BehaviorNode(Node):
         elif c is col.RUNNING_BEHAVIOR      : self._running_behavior = value
         elif c is col.BEHAVIOR_INFO_TEXT    : self._behavior_info_text = value
         elif c is col.HAL_READER_NUMBER     : self.halReaderNumber = value
+        elif c is col.RECIPE_VARIABLES      : self._recipe_variables = value
 
     def state(self):
         return self._state
@@ -250,6 +253,12 @@ class BehaviorNode(Node):
         def fset(self,value): self._hal_reader_number = int(value)
         return locals()
     halReaderNumber = property(**halReaderNumber())
+
+    def recipeVariables():
+        def fget(self): return self._recipe_variables
+        def fset(self, value): self._recipe_variables = value
+        return locals()
+    recipeVariables = property(**recipeVariables())
 
 
 class ToolNode(BehaviorNode):
