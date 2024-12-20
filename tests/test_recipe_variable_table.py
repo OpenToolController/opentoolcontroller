@@ -100,3 +100,41 @@ def test_type_change_preserves_min_max_values(table):
     # Values should still be there
     assert min_item.text() == "1.5"
     assert max_item.text() == "10.5"
+
+def test_basic_checkbox_initial_state(table):
+    """Test that Basic checkbox is initially unchecked"""
+    table.addVariable()
+    row = 0
+    
+    basic_item = table.table.item(row, 4)
+    assert basic_item.checkState() == Qt.Unchecked
+
+def test_basic_checkbox_toggle(table):
+    """Test that Basic checkbox can be toggled"""
+    table.addVariable()
+    row = 0
+    
+    basic_item = table.table.item(row, 4)
+    # Simulate checking the box
+    basic_item.setCheckState(Qt.Checked)
+    assert basic_item.checkState() == Qt.Checked
+    
+    # Simulate unchecking the box
+    basic_item.setCheckState(Qt.Unchecked)
+    assert basic_item.checkState() == Qt.Unchecked
+
+def test_basic_checkbox_persists_on_type_change(table):
+    """Test that Basic checkbox state persists when changing variable type"""
+    table.addVariable()
+    row = 0
+    
+    # Set checkbox to checked
+    basic_item = table.table.item(row, 4)
+    basic_item.setCheckState(Qt.Checked)
+    
+    # Change variable type
+    type_combo = table.table.cellWidget(row, 1)
+    type_combo.setCurrentText("Float")
+    
+    # Check that checkbox is still checked
+    assert basic_item.checkState() == Qt.Checked
