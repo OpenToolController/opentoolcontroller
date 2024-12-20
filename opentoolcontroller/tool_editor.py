@@ -849,6 +849,8 @@ class RecipeVariableEditor(recipe_var_base, recipe_var_form):
     def openVariableTable(self):
         if not self._variable_table:
             self._variable_table = RecipeVariableTable(self)
+        # Pass both model and current node
+        self._variable_table.setModel(self.mapper.model(), self._current_node)
         self._variable_table.show()
 
 

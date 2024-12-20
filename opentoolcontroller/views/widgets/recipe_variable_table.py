@@ -7,6 +7,10 @@ class RecipeVariableTable(QtWidgets.QMainWindow):
         self.setWindowTitle("Recipe Variables")
         self.resize(600, 400)  # Set a reasonable default size
         
+        # Add model reference
+        self._model = None
+        self._current_node = None
+        
         # Create central widget and layout
         central_widget = QtWidgets.QWidget()
         self.setCentralWidget(central_widget)
@@ -125,6 +129,57 @@ class RecipeVariableTable(QtWidgets.QMainWindow):
         current_row = self.table.currentRow()
         if current_row >= 0:
             self.table.removeRow(current_row)
+            self.saveVariables()
+
+    def setModel(self, model, node):
+        """Set the model and current node for the table"""
+        self._model = model
+        self._current_node = node
+        # Load existing variables if any
+        self.loadVariables()
+        
+    def loadVariables(self):
+        """Load variables from the model"""
+        if self._model and self._current_node:
+            index = self._model.createIndex(self._current_node.row(), col.RECIPE_VARIABLES, self._current_node)
+            variables = self._model.data(index)
+            if variables:
+                # Clear existing rows
+                self.table.setRowCount(0)
+                # Add each variable
+                for var in variables:
+                    row = self.table.rowCount()
+                    self.table.insertRow(row)
+                    self.table.setItem(row, 0, QtWidgets.QTableWidgetItem(var['name']))
+                    type_combo = QtWidgets.QComboBox()
+                    type_combo.addItems(["Float", "Integer", "Boolean"])
+                    type_combo.setCurrentText(var['type'])
+                    type_combo.currentTextChanged.connect(lambda text, r=row: self.handleTypeChange(text, r))
+                    self.table.setCellWidget(row, 1, type_combo)
+                    self.table.setItem(row, 2, QtWidgets.QTableWidgetItem(str(var.get('min', ''))))
+                    self.table.setItem(row, 3, QtWidgets.QTableWidgetItem(str(var.get('max', ''))))
+                    basic_item = QtWidgets.QTableWidgetItem()
+                    basic_item.setFlags(basic_item.flags() | Qt.ItemIsUserCheckable)
+                    basic_item.setCheckState(Qt.Checked if var.get('basic', False) else Qt.Unchecked)
+                    self.table.setItem(row, 4, basic_item)
+
+    def saveVariables(self):
+        """Save variables back to the model"""
+        if self._model and self._current_node:
+            variables = []
+            for row in range(self.table.rowCount()):
+                var = {
+                    'name': self.table.item(row, 0).text(),
+                    'type': self.table.cellWidget(row, 1).currentText(),
+                    'min': self.table.item(row, 2).text() if self.table.item(row, 2).text() else None,
+                    'max': self.table.item(row, 3).text() if self.table.item(row, 3).text() else None,
+                    'basic': self.table.item(row, 4).checkState() == Qt.Checked
+                }
+                variables.append(var)
+            
+            # Update the model with new variables
+            index = self._model.createIndex(self._current_node.row(), col.RECIPE_VARIABLES, self._current_node)
+            self._model.setData(index, variables)
 
 
 class TypeComboDelegate(QtWidgets.QStyledItemDelegate):

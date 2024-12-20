@@ -168,6 +168,9 @@ class col():
     GUI_PERIOD_MS_GROUP = [GUI_PERIOD_MS_1, GUI_PERIOD_MS_2, GUI_PERIOD_MS_3, GUI_PERIOD_MS_4,
                            GUI_PERIOD_MS_5, GUI_PERIOD_MS_6, GUI_PERIOD_MS_7, GUI_PERIOD_MS_8]
     DEFAULT_TEXT = 143
+    
+    # Recipe Variable columns
+    RECIPE_VARIABLES = 150
 
 class typ():
     TOOL_NODE = 'Tool_Node'
