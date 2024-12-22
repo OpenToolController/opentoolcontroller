@@ -186,7 +186,7 @@ class RecipeVariableTable(QtWidgets.QMainWindow):
                     self.table.insertRow(row)
                     self.table.setItem(row, 0, QtWidgets.QTableWidgetItem(var['name']))
                     type_combo = QtWidgets.QComboBox()
-                    type_combo.addItems(["Float", "Integer", "Boolean"])
+                    type_combo.addItems(["Float", "Integer", "Boolean", "List"])
                     type_combo.setCurrentText(var['type'])
                     type_combo.currentTextChanged.connect(lambda text, r=row: self.handleTypeChange(text, r))
                     self.table.setCellWidget(row, 1, type_combo)
@@ -273,7 +273,7 @@ class RecipeVariableTable(QtWidgets.QMainWindow):
 class TypeComboDelegate(QtWidgets.QStyledItemDelegate):
     def createEditor(self, parent, option, index):
         editor = QtWidgets.QComboBox(parent)
-        editor.addItems(["Float", "Integer", "Boolean"])
+        editor.addItems(["Float", "Integer", "Boolean", "List"])
         # Connect to parent table's handler
         editor.currentTextChanged.connect(
             lambda text: self.parent().handleTypeChange(text, index.row())
