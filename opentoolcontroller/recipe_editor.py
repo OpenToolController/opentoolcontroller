@@ -45,7 +45,11 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
         self._model = model
         self.ui_tree.setModel(self._model)
         self.ui_tree.selectionModel().currentChanged.connect(self.setSelection)
-        self.ui_tree.collapseAll()
+        
+        # Expand the root node
+        root_index = self._model.index(0, 0)
+        self.ui_tree.expand(root_index)
+        
         self.ui_tree.hideColumn(1)
 
         #self._node_editor.setModel(self._proxy_model)
