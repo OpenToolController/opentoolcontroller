@@ -11,6 +11,7 @@ from opentoolcontroller.tool_editor import CommonEditor
 from opentoolcontroller.tool_control_view import ToolControlView
 from opentoolcontroller.alert_view import AlertView, AlertTableModel, ActionLogView, ActionLogTableModel
 from opentoolcontroller.login import LoginView, LoginModel
+from opentoolcontroller.views.widgets.recipe_editor import RecipeEditor
 
 from opentoolcontroller.bt_model import BTModel, BehaviorRunner
 
@@ -125,11 +126,17 @@ class Window(QtWidgets.QMainWindow):
         dock5.setWidget(self._action_log_view)
         dock5.setContextMenuPolicy(QtCore.Qt.PreventContextMenu)
 
+        self._recipe_editor = RecipeEditor()
+        dock6 = QtWidgets.QDockWidget('Recipe Editor', self, objectName='recipe_editor')
+        dock6.setWidget(self._recipe_editor)
+        dock6.setContextMenuPolicy(QtCore.Qt.PreventContextMenu)
+
         dock1.setFeatures(QtWidgets.QDockWidget.DockWidgetFloatable | QtWidgets.QDockWidget.DockWidgetMovable)
         dock2.setFeatures(QtWidgets.QDockWidget.DockWidgetFloatable | QtWidgets.QDockWidget.DockWidgetMovable)
         dock3.setFeatures(QtWidgets.QDockWidget.DockWidgetFloatable | QtWidgets.QDockWidget.DockWidgetMovable)
         dock4.setFeatures(QtWidgets.QDockWidget.DockWidgetFloatable | QtWidgets.QDockWidget.DockWidgetMovable)
         dock5.setFeatures(QtWidgets.QDockWidget.DockWidgetFloatable | QtWidgets.QDockWidget.DockWidgetMovable)
+        dock6.setFeatures(QtWidgets.QDockWidget.DockWidgetFloatable | QtWidgets.QDockWidget.DockWidgetMovable)
 
         self.addDockWidget(QtCore.Qt.TopDockWidgetArea, dock1)
         self.addDockWidget(QtCore.Qt.TopDockWidgetArea, dock2)
@@ -140,6 +147,7 @@ class Window(QtWidgets.QMainWindow):
         self.tabifyDockWidget(dock2, dock3)
         self.tabifyDockWidget(dock3, dock4)
         self.tabifyDockWidget(dock4, dock5)
+        self.tabifyDockWidget(dock5, dock6)
         self.setDockNestingEnabled(True) #needed for left/right arranging
 
 
