@@ -210,6 +210,9 @@ class RecipeVariableTable(QtWidgets.QMainWindow):
                     time_varying_item.setFlags(time_varying_item.flags() | Qt.ItemIsUserCheckable)
                     time_varying_item.setCheckState(Qt.Checked if var.get('time_varying', False) else Qt.Unchecked)
                     self.table.setItem(row, 6, time_varying_item)
+                    
+                # After loading all variables, resize the name column
+                self.table.resizeColumnToContents(0)  # Column 0 is Variable Name
 
     def saveVariables(self):
         """Save variables back to the model"""
