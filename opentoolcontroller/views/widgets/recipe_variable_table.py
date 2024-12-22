@@ -346,7 +346,8 @@ class ListEditorDialog(QtWidgets.QDialog):
 
 class ListValueDelegate(QtWidgets.QStyledItemDelegate):
     def createEditor(self, parent, option, index):
-        return None  # We don't want a standard editor
+        editor = QtWidgets.QPushButton("Edit")
+        return editor
         
     def setEditorData(self, editor, index):
         pass
