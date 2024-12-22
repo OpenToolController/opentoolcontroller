@@ -240,16 +240,19 @@ class RecipeVariableTable(QtWidgets.QMainWindow):
                     except ValueError:
                         max_val = None
                     
+                    # Get list values
+                    list_item = self.table.item(row, 4)
+                    list_values = []
+                    if list_item and list_item.text():
+                        list_values = [x.strip() for x in list_item.text().split(',')]
+
                     # Get basic checkbox state (default to unchecked if cell is None)
-                    basic_item = self.table.item(row, 4)
+                    basic_item = self.table.item(row, 5)
                     basic = basic_item.checkState() == Qt.Checked if basic_item else False
                     
                     # Get time varying checkbox state
-                    time_varying_item = self.table.item(row, 5)
+                    time_varying_item = self.table.item(row, 6)
                     time_varying = time_varying_item.checkState() == Qt.Checked if time_varying_item else False
-                    
-                    # Get list values
-                    list_item = self.table.item(row, 4)
                     list_values = []
                     if list_item and list_item.text():
                         list_values = [x.strip() for x in list_item.text().split(',')]
