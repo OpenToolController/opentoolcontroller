@@ -43,6 +43,10 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
 
     def setModel(self, model):
         self._model = model
+        # Prevent expanding/collapsing of tree items
+        self.ui_tree.setExpandsOnDoubleClick(False)
+        self.ui_tree.mouseReleaseEvent = lambda event: None  # Disable mouse release events
+        
         self.ui_tree.setModel(self._model)
         self.ui_tree.selectionModel().currentChanged.connect(self.setSelection)
         
