@@ -172,14 +172,45 @@ class RecipeVariableTable(QtWidgets.QMainWindow):
         if self._model and self._current_node:
             variables = []
             for row in range(self.table.rowCount()):
-                var = {
-                    'name': self.table.item(row, 0).text() if self.table.item(row, 0).text() else "",
-                    'type': self.table.cellWidget(row, 1).currentText(),
-                    'min': float(self.table.item(row, 2).text()) if self.table.item(row, 2).text() else None,
-                    'max': float(self.table.item(row, 3).text()) if self.table.item(row, 3).text() else None,
-                    'basic': self.table.item(row, 4).checkState() == Qt.Checked
-                }
-                variables.append(var)
+                try:
+                    # Get name (default to empty string if cell is None)
+                    name_item = self.table.item(row, 0)
+                    name = name_item.text() if name_item else ""
+                    
+                    # Get type from combo box
+                    type_widget = self.table.cellWidget(row, 1)
+                    var_type = type_widget.currentText() if type_widget else "Float"
+                    
+                    # Get min/max values (handle empty or invalid cells)
+                    min_item = self.table.item(row, 2)
+                    max_item = self.table.item(row, 3)
+                    
+                    try:
+                        min_val = float(min_item.text()) if min_item and min_item.text() else None
+                    except ValueError:
+                        min_val = None
+                        
+                    try:
+                        max_val = float(max_item.text()) if max_item and max_item.text() else None
+                    except ValueError:
+                        max_val = None
+                    
+                    # Get basic checkbox state (default to unchecked if cell is None)
+                    basic_item = self.table.item(row, 4)
+                    basic = basic_item.checkState() == Qt.Checked if basic_item else False
+                    
+                    var = {
+                        'name': name,
+                        'type': var_type,
+                        'min': min_val,
+                        'max': max_val,
+                        'basic': basic
+                    }
+                    variables.append(var)
+                    
+                except Exception as e:
+                    print(f"Error saving row {row}: {str(e)}")
+                    continue
             
             # Update the model with new variables
             index = self._model.createIndex(self._current_node.row(), col.RECIPE_VARIABLES, self._current_node)
