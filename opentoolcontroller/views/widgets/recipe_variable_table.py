@@ -346,23 +346,27 @@ class ListEditorDialog(QtWidgets.QDialog):
 
 class ListValueDelegate(QtWidgets.QStyledItemDelegate):
     def createEditor(self, parent, option, index):
-        # Get current values
-        current_values = []
-        if index.data():
-            current_values = [x.strip() for x in index.data().split(',') if x.strip()]
-            
-        dialog = ListEditorDialog(current_values, parent)
-        if dialog.exec_() == QtWidgets.QDialog.Accepted:
-            new_values = dialog.getValues()
-            index.model().setData(index, ','.join(new_values))
-        
-        return None  # Return None to prevent default editing
+        return None  # We don't want a standard editor
         
     def setEditorData(self, editor, index):
-        pass  # Not needed since we're using a dialog
+        pass
         
     def setModelData(self, editor, model, index):
-        pass  # Not needed since we're handling it in createEditor
+        pass
+        
+    def editorEvent(self, event, model, option, index):
+        if isinstance(event, QtGui.QMouseEvent) and event.type() == QtCore.QEvent.MouseButtonDblClick:
+            # Get current values
+            current_values = []
+            if index.data():
+                current_values = [x.strip() for x in index.data().split(',') if x.strip()]
+                
+            dialog = ListEditorDialog(current_values, None)
+            if dialog.exec_() == QtWidgets.QDialog.Accepted:
+                new_values = dialog.getValues()
+                model.setData(index, ','.join(new_values))
+            return True
+        return False
 
 class TypeComboDelegate(QtWidgets.QStyledItemDelegate):
     def createEditor(self, parent, option, index):
