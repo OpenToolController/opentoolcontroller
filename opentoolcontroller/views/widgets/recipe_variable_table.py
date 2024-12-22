@@ -19,8 +19,8 @@ class RecipeVariableTable(QtWidgets.QMainWindow):
         
         # Create table
         self.table = QtWidgets.QTableWidget()
-        self.table.setColumnCount(6)
-        self.table.setHorizontalHeaderLabels(["Variable Name", "Variable Type", "Min", "Max", "Basic", "Time Varying"])
+        self.table.setColumnCount(7)
+        self.table.setHorizontalHeaderLabels(["Variable Name", "Variable Type", "Min", "Max", "List Values", "Basic", "Time Varying"])
         self.table.horizontalHeader().setStretchLastSection(True)
         self.table.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Interactive)
         layout.addWidget(self.table)
@@ -83,12 +83,13 @@ class RecipeVariableTable(QtWidgets.QMainWindow):
         """Handle changes to variable type by updating min/max fields"""
         min_item = self.table.item(row, 2)
         max_item = self.table.item(row, 3)
+        list_item = self.table.item(row, 4)
         
         if not min_item or not max_item:
             return
             
-        if var_type == "Boolean":
-            # Disable and clear min/max for boolean
+        if var_type in ["Boolean", "List"]:
+            # Disable and clear min/max for boolean and list types
             min_item.setFlags(min_item.flags() & ~Qt.ItemIsEnabled)
             max_item.setFlags(max_item.flags() & ~Qt.ItemIsEnabled)
             min_item.setText("")
@@ -96,6 +97,19 @@ class RecipeVariableTable(QtWidgets.QMainWindow):
             # Set light gray background for disabled cells
             min_item.setBackground(QtGui.QColor(240, 240, 240))
             max_item.setBackground(QtGui.QColor(240, 240, 240))
+            
+            # Enable/disable list values field
+            if var_type == "List":
+                if not list_item:
+                    list_item = QtWidgets.QTableWidgetItem("")
+                    self.table.setItem(row, 4, list_item)
+                list_item.setFlags(list_item.flags() | Qt.ItemIsEnabled | Qt.ItemIsEditable)
+                list_item.setBackground(QtGui.QColor(255, 255, 255))
+            else:
+                if list_item:
+                    list_item.setFlags(list_item.flags() & ~Qt.ItemIsEnabled)
+                    list_item.setText("")
+                    list_item.setBackground(QtGui.QColor(240, 240, 240))
         else:
             # Enable min/max for numeric types
             min_item.setFlags(min_item.flags() | Qt.ItemIsEnabled | Qt.ItemIsEditable)
@@ -103,6 +117,12 @@ class RecipeVariableTable(QtWidgets.QMainWindow):
             # Set white background for enabled cells
             min_item.setBackground(QtGui.QColor(255, 255, 255))
             max_item.setBackground(QtGui.QColor(255, 255, 255))
+            
+            # Disable list values field
+            if list_item:
+                list_item.setFlags(list_item.flags() & ~Qt.ItemIsEnabled)
+                list_item.setText("")
+                list_item.setBackground(QtGui.QColor(240, 240, 240))
 
     def addVariable(self):
         row = self.table.rowCount()
@@ -110,7 +130,7 @@ class RecipeVariableTable(QtWidgets.QMainWindow):
         
         # Add type combo box
         type_combo = QtWidgets.QComboBox()
-        type_combo.addItems(["Float", "Integer", "Boolean"])
+        type_combo.addItems(["Float", "Integer", "Boolean", "List"])
         type_combo.currentTextChanged.connect(lambda text, r=row: self.handleTypeChange(text, r))
         self.table.setCellWidget(row, 1, type_combo)
         
@@ -120,17 +140,21 @@ class RecipeVariableTable(QtWidgets.QMainWindow):
         self.table.setItem(row, 2, min_item)
         self.table.setItem(row, 3, max_item)
         
+        # Add List Values cell
+        list_values_item = QtWidgets.QTableWidgetItem()
+        self.table.setItem(row, 4, list_values_item)
+        
         # Add Basic checkbox
         basic_item = QtWidgets.QTableWidgetItem()
         basic_item.setFlags(basic_item.flags() | Qt.ItemIsUserCheckable)
         basic_item.setCheckState(Qt.Unchecked)
-        self.table.setItem(row, 4, basic_item)
+        self.table.setItem(row, 5, basic_item)
         
         # Add Time Varying checkbox
         time_varying_item = QtWidgets.QTableWidgetItem()
         time_varying_item.setFlags(time_varying_item.flags() | Qt.ItemIsUserCheckable)
         time_varying_item.setCheckState(Qt.Unchecked)
-        self.table.setItem(row, 5, time_varying_item)
+        self.table.setItem(row, 6, time_varying_item)
         
         # Initialize as Boolean (disabled min/max)
         type_combo.setCurrentText("Boolean")
@@ -171,12 +195,18 @@ class RecipeVariableTable(QtWidgets.QMainWindow):
                     basic_item = QtWidgets.QTableWidgetItem()
                     basic_item.setFlags(basic_item.flags() | Qt.ItemIsUserCheckable)
                     basic_item.setCheckState(Qt.Checked if var.get('basic', False) else Qt.Unchecked)
-                    self.table.setItem(row, 4, basic_item)
+                    self.table.setItem(row, 5, basic_item)
+                    
+                    # Add list values
+                    list_values = var.get('list_values', '')
+                    if isinstance(list_values, list):
+                        list_values = ','.join(list_values)
+                    self.table.setItem(row, 4, QtWidgets.QTableWidgetItem(str(list_values)))
                     
                     time_varying_item = QtWidgets.QTableWidgetItem()
                     time_varying_item.setFlags(time_varying_item.flags() | Qt.ItemIsUserCheckable)
                     time_varying_item.setCheckState(Qt.Checked if var.get('time_varying', False) else Qt.Unchecked)
-                    self.table.setItem(row, 5, time_varying_item)
+                    self.table.setItem(row, 6, time_varying_item)
 
     def saveVariables(self):
         """Save variables back to the model"""
@@ -214,11 +244,18 @@ class RecipeVariableTable(QtWidgets.QMainWindow):
                     time_varying_item = self.table.item(row, 5)
                     time_varying = time_varying_item.checkState() == Qt.Checked if time_varying_item else False
                     
+                    # Get list values
+                    list_item = self.table.item(row, 4)
+                    list_values = []
+                    if list_item and list_item.text():
+                        list_values = [x.strip() for x in list_item.text().split(',')]
+                    
                     var = {
                         'name': name,
                         'type': var_type,
                         'min': min_val,
                         'max': max_val,
+                        'list_values': list_values if var_type == "List" else [],
                         'basic': basic,
                         'time_varying': time_varying
                     }
