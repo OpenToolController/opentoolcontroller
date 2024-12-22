@@ -193,6 +193,7 @@ class RecipeVariableTable(QtWidgets.QMainWindow):
                     type_combo.addItems(["Float", "Integer", "Boolean", "List"])
                     type_combo.setCurrentText(var['type'])
                     type_combo.currentTextChanged.connect(lambda text, r=row: self.handleTypeChange(text, r))
+                    print("test")
                     self.table.setCellWidget(row, 1, type_combo)
                     self.table.setItem(row, 2, QtWidgets.QTableWidgetItem(str(var.get('min', ''))))
                     self.table.setItem(row, 3, QtWidgets.QTableWidgetItem(str(var.get('max', ''))))
@@ -202,15 +203,16 @@ class RecipeVariableTable(QtWidgets.QMainWindow):
                     self.table.setItem(row, 5, basic_item)
                     
                     # Add list values
-                    list_values = var.get('list_values', '')
-                    if isinstance(list_values, list):
-                        list_values = ','.join(list_values)
-                    self.table.setItem(row, 4, QtWidgets.QTableWidgetItem(str(list_values)))
+                    #list_values = var.get('list_values', '')
+                    #if isinstance(list_values, list):
+                    #    list_values = ','.join(list_values)
+                    #self.table.setItem(row, 4, QtWidgets.QTableWidgetItem(str(list_values)))
                     
                     time_varying_item = QtWidgets.QTableWidgetItem()
                     time_varying_item.setFlags(time_varying_item.flags() | Qt.ItemIsUserCheckable)
                     time_varying_item.setCheckState(Qt.Checked if var.get('time_varying', False) else Qt.Unchecked)
                     self.table.setItem(row, 6, time_varying_item)
+                print("~test")
 
     def saveVariables(self):
         """Save variables back to the model"""
