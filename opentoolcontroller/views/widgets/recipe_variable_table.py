@@ -19,8 +19,8 @@ class RecipeVariableTable(QtWidgets.QMainWindow):
         
         # Create table
         self.table = QtWidgets.QTableWidget()
-        self.table.setColumnCount(5)
-        self.table.setHorizontalHeaderLabels(["Variable Name", "Variable Type", "Min", "Max", "Basic"])
+        self.table.setColumnCount(6)
+        self.table.setHorizontalHeaderLabels(["Variable Name", "Variable Type", "Min", "Max", "Basic", "Time Varying"])
         self.table.horizontalHeader().setStretchLastSection(True)
         self.table.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Interactive)
         layout.addWidget(self.table)
@@ -126,6 +126,12 @@ class RecipeVariableTable(QtWidgets.QMainWindow):
         basic_item.setCheckState(Qt.Unchecked)
         self.table.setItem(row, 4, basic_item)
         
+        # Add Time Varying checkbox
+        time_varying_item = QtWidgets.QTableWidgetItem()
+        time_varying_item.setFlags(time_varying_item.flags() | Qt.ItemIsUserCheckable)
+        time_varying_item.setCheckState(Qt.Unchecked)
+        self.table.setItem(row, 5, time_varying_item)
+        
         # Initialize as Boolean (disabled min/max)
         type_combo.setCurrentText("Boolean")
 
@@ -166,6 +172,11 @@ class RecipeVariableTable(QtWidgets.QMainWindow):
                     basic_item.setFlags(basic_item.flags() | Qt.ItemIsUserCheckable)
                     basic_item.setCheckState(Qt.Checked if var.get('basic', False) else Qt.Unchecked)
                     self.table.setItem(row, 4, basic_item)
+                    
+                    time_varying_item = QtWidgets.QTableWidgetItem()
+                    time_varying_item.setFlags(time_varying_item.flags() | Qt.ItemIsUserCheckable)
+                    time_varying_item.setCheckState(Qt.Checked if var.get('time_varying', False) else Qt.Unchecked)
+                    self.table.setItem(row, 5, time_varying_item)
 
     def saveVariables(self):
         """Save variables back to the model"""
@@ -199,12 +210,17 @@ class RecipeVariableTable(QtWidgets.QMainWindow):
                     basic_item = self.table.item(row, 4)
                     basic = basic_item.checkState() == Qt.Checked if basic_item else False
                     
+                    # Get time varying checkbox state
+                    time_varying_item = self.table.item(row, 5)
+                    time_varying = time_varying_item.checkState() == Qt.Checked if time_varying_item else False
+                    
                     var = {
                         'name': name,
                         'type': var_type,
                         'min': min_val,
                         'max': max_val,
-                        'basic': basic
+                        'basic': basic,
+                        'time_varying': time_varying
                     }
                     variables.append(var)
                     
