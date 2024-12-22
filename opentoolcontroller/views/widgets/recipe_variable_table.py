@@ -78,6 +78,10 @@ class RecipeVariableTable(QtWidgets.QMainWindow):
         # Assign the delegate to columns 2 and 3
         self.table.setItemDelegateForColumn(2, numeric_delegate)
         self.table.setItemDelegateForColumn(3, numeric_delegate)
+        
+        # Add delegate for list values column
+        list_delegate = ListValueDelegate()
+        self.table.setItemDelegateForColumn(4, list_delegate)
 
     def handleTypeChange(self, var_type, row):
         """Handle changes to variable type by updating min/max fields"""
@@ -269,6 +273,91 @@ class RecipeVariableTable(QtWidgets.QMainWindow):
             index = self._model.createIndex(self._current_node.row(), col.RECIPE_VARIABLES, self._current_node)
             self._model.setData(index, variables)
 
+
+class ListEditorDialog(QtWidgets.QDialog):
+    def __init__(self, values=None, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Edit List Values")
+        self.resize(300, 400)
+        
+        # Create layout
+        layout = QtWidgets.QVBoxLayout(self)
+        
+        # Create table
+        self.table = QtWidgets.QTableWidget()
+        self.table.setColumnCount(1)
+        self.table.setHorizontalHeaderLabels(["Values"])
+        self.table.horizontalHeader().setStretchLastSection(True)
+        layout.addWidget(self.table)
+        
+        # Create button widget and layout
+        button_widget = QtWidgets.QWidget()
+        button_layout = QtWidgets.QHBoxLayout(button_widget)
+        
+        # Add buttons
+        add_btn = QtWidgets.QPushButton("Add Value")
+        remove_btn = QtWidgets.QPushButton("Remove Value")
+        ok_btn = QtWidgets.QPushButton("OK")
+        cancel_btn = QtWidgets.QPushButton("Cancel")
+        
+        add_btn.clicked.connect(self.addValue)
+        remove_btn.clicked.connect(self.removeValue)
+        ok_btn.clicked.connect(self.accept)
+        cancel_btn.clicked.connect(self.reject)
+        
+        button_layout.addWidget(add_btn)
+        button_layout.addWidget(remove_btn)
+        button_layout.addStretch()
+        button_layout.addWidget(ok_btn)
+        button_layout.addWidget(cancel_btn)
+        
+        layout.addWidget(button_widget)
+        
+        # Load initial values
+        if values:
+            for value in values:
+                self.addValue(value)
+                
+    def addValue(self, value=None):
+        row = self.table.rowCount()
+        self.table.insertRow(row)
+        if value:
+            self.table.setItem(row, 0, QtWidgets.QTableWidgetItem(str(value)))
+        else:
+            self.table.setItem(row, 0, QtWidgets.QTableWidgetItem(""))
+            
+    def removeValue(self):
+        current_row = self.table.currentRow()
+        if current_row >= 0:
+            self.table.removeRow(current_row)
+            
+    def getValues(self):
+        values = []
+        for row in range(self.table.rowCount()):
+            item = self.table.item(row, 0)
+            if item and item.text().strip():
+                values.append(item.text().strip())
+        return values
+
+class ListValueDelegate(QtWidgets.QStyledItemDelegate):
+    def createEditor(self, parent, option, index):
+        # Get current values
+        current_values = []
+        if index.data():
+            current_values = [x.strip() for x in index.data().split(',') if x.strip()]
+            
+        dialog = ListEditorDialog(current_values, parent)
+        if dialog.exec_() == QtWidgets.QDialog.Accepted:
+            new_values = dialog.getValues()
+            index.model().setData(index, ','.join(new_values))
+        
+        return None  # Return None to prevent default editing
+        
+    def setEditorData(self, editor, index):
+        pass  # Not needed since we're using a dialog
+        
+    def setModelData(self, editor, model, index):
+        pass  # Not needed since we're handling it in createEditor
 
 class TypeComboDelegate(QtWidgets.QStyledItemDelegate):
     def createEditor(self, parent, option, index):
