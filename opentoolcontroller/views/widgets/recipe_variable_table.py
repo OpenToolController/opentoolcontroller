@@ -6,7 +6,7 @@ class RecipeVariableTable(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Recipe Variables")
-        self.resize(800, 400)  # Increased width to show all columns
+        self.resize(1000, 400)  # Further increased width to show all columns including List Values
         
         # Add model reference
         self._model = None
