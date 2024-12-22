@@ -124,6 +124,7 @@ class CommonEditor(common_editor_base, common_editor_form):
 
         self._node_editor.setModel(self._proxy_model)
         self._behavior_state_editor.setModel(self._proxy_model) #TODO do we need to check for type?
+        self._recipe_variable_editor.setModel(self._proxy_model)
 
         for editor in self._specific_editors.values():
             editor.setModel(self._proxy_model)
@@ -833,7 +834,7 @@ class RecipeVariableEditor(recipe_var_base, recipe_var_form):
         self.mapper = QtWidgets.QDataWidgetMapper()
         
         self.ui_edit_variables.clicked.connect(self.openVariableTable)
-        self._variable_table = None
+        self._current_node = None
 
     def setModel(self, model):
         if hasattr(model, 'sourceModel'):
@@ -847,11 +848,10 @@ class RecipeVariableEditor(recipe_var_base, recipe_var_form):
         self._current_node = current.internalPointer()
 
     def openVariableTable(self):
-        if not self._variable_table:
-            self._variable_table = RecipeVariableTable(self)
-        # Pass both model and current node
-        self._variable_table.setModel(self.mapper.model(), self._current_node)
-        self._variable_table.show()
+        #Dont store a reference to the table so that if we select a different node we can make a separate one
+        variable_table = RecipeVariableTable(self)
+        variable_table.setModel(self.mapper.model(), self._current_node)
+        variable_table.show()
 
 
 class BoolVarEditor(bool_var_base, bool_var_form):

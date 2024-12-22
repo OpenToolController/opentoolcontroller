@@ -15,6 +15,9 @@ from opentoolcontroller.strings import defaults, col, typ
 from opentoolcontroller.message_box import MessageBox
 from opentoolcontroller.calibration_table_model import CalibrationTableModel
 
+#TODO update the Recipe table to match how the calibration table works
+#from opentoolcontroller.calibration_table_model import CalibrationTableModel
+
 
 def clamp(n, smallest, largest): return max(smallest, min(n, largest))
 
@@ -191,7 +194,7 @@ class BehaviorNode(Node):
         elif c is col.RUNNING_BEHAVIOR      : r = self._running_behavior
         elif c is col.BEHAVIOR_INFO_TEXT    : r = self._behavior_info_text
         elif c is col.HAL_READER_NUMBER     : r = self.halReaderNumber
-        elif c is col.RECIPE_VARIABLES      : r = self._recipe_variables
+        elif c is col.RECIPE_VARIABLES      : r = self.recipeVariables
         return r
 
     def setData(self, c, value):
@@ -203,7 +206,7 @@ class BehaviorNode(Node):
         elif c is col.RUNNING_BEHAVIOR      : self._running_behavior = value
         elif c is col.BEHAVIOR_INFO_TEXT    : self._behavior_info_text = value
         elif c is col.HAL_READER_NUMBER     : self.halReaderNumber = value
-        elif c is col.RECIPE_VARIABLES      : self._recipe_variables = value
+        elif c is col.RECIPE_VARIABLES      : self.recipeVariables = value
 
     def state(self):
         return self._state
@@ -259,6 +262,7 @@ class BehaviorNode(Node):
         def fset(self, value): self._recipe_variables = value
         return locals()
     recipeVariables = property(**recipeVariables())
+    
 
 
 class ToolNode(BehaviorNode):

@@ -79,9 +79,6 @@ class RecipeVariableTable(QtWidgets.QMainWindow):
         self.table.setItemDelegateForColumn(2, numeric_delegate)
         self.table.setItemDelegateForColumn(3, numeric_delegate)
         
-        # Add delegate for list values column
-        list_delegate = ListValueDelegate()
-        self.table.setItemDelegateForColumn(4, list_delegate)
 
     def handleTypeChange(self, var_type, row):
         """Handle changes to variable type by updating min/max fields"""
@@ -193,26 +190,26 @@ class RecipeVariableTable(QtWidgets.QMainWindow):
                     type_combo.addItems(["Float", "Integer", "Boolean", "List"])
                     type_combo.setCurrentText(var['type'])
                     type_combo.currentTextChanged.connect(lambda text, r=row: self.handleTypeChange(text, r))
-                    print("test")
                     self.table.setCellWidget(row, 1, type_combo)
                     self.table.setItem(row, 2, QtWidgets.QTableWidgetItem(str(var.get('min', ''))))
                     self.table.setItem(row, 3, QtWidgets.QTableWidgetItem(str(var.get('max', ''))))
+
+                    # Add list values
+                    list_values = var.get('list_values', '')
+                    if isinstance(list_values, list):
+                        list_values = ','.join(list_values)
+                    self.table.setItem(row, 4, QtWidgets.QTableWidgetItem(str(list_values)))
+                    
+
                     basic_item = QtWidgets.QTableWidgetItem()
                     basic_item.setFlags(basic_item.flags() | Qt.ItemIsUserCheckable)
                     basic_item.setCheckState(Qt.Checked if var.get('basic', False) else Qt.Unchecked)
                     self.table.setItem(row, 5, basic_item)
                     
-                    # Add list values
-                    #list_values = var.get('list_values', '')
-                    #if isinstance(list_values, list):
-                    #    list_values = ','.join(list_values)
-                    #self.table.setItem(row, 4, QtWidgets.QTableWidgetItem(str(list_values)))
-                    
                     time_varying_item = QtWidgets.QTableWidgetItem()
                     time_varying_item.setFlags(time_varying_item.flags() | Qt.ItemIsUserCheckable)
                     time_varying_item.setCheckState(Qt.Checked if var.get('time_varying', False) else Qt.Unchecked)
                     self.table.setItem(row, 6, time_varying_item)
-                print("~test")
 
     def saveVariables(self):
         """Save variables back to the model"""
@@ -276,100 +273,9 @@ class RecipeVariableTable(QtWidgets.QMainWindow):
             
             # Update the model with new variables
             index = self._model.createIndex(self._current_node.row(), col.RECIPE_VARIABLES, self._current_node)
+            print(variables)
             self._model.setData(index, variables)
 
-
-class ListEditorDialog(QtWidgets.QDialog):
-    def __init__(self, values=None, parent=None):
-        super().__init__(parent)
-        self.setWindowTitle("Edit List Values")
-        self.resize(300, 400)
-        
-        # Create layout
-        layout = QtWidgets.QVBoxLayout(self)
-        
-        # Create table
-        self.table = QtWidgets.QTableWidget()
-        self.table.setColumnCount(1)
-        self.table.setHorizontalHeaderLabels(["Values"])
-        self.table.horizontalHeader().setStretchLastSection(True)
-        layout.addWidget(self.table)
-        
-        # Create button widget and layout
-        button_widget = QtWidgets.QWidget()
-        button_layout = QtWidgets.QHBoxLayout(button_widget)
-        
-        # Add buttons
-        add_btn = QtWidgets.QPushButton("Add Value")
-        remove_btn = QtWidgets.QPushButton("Remove Value")
-        ok_btn = QtWidgets.QPushButton("OK")
-        cancel_btn = QtWidgets.QPushButton("Cancel")
-        
-        add_btn.clicked.connect(self.addValue)
-        remove_btn.clicked.connect(self.removeValue)
-        ok_btn.clicked.connect(self.accept)
-        cancel_btn.clicked.connect(self.reject)
-        
-        button_layout.addWidget(add_btn)
-        button_layout.addWidget(remove_btn)
-        button_layout.addStretch()
-        button_layout.addWidget(ok_btn)
-        button_layout.addWidget(cancel_btn)
-        
-        layout.addWidget(button_widget)
-        
-        # Load initial values
-        if values:
-            for value in values:
-                self.addValue(value)
-                
-    def addValue(self, value=None):
-        row = self.table.rowCount()
-        self.table.insertRow(row)
-        if value:
-            self.table.setItem(row, 0, QtWidgets.QTableWidgetItem(str(value)))
-        else:
-            self.table.setItem(row, 0, QtWidgets.QTableWidgetItem(""))
-            
-    def removeValue(self):
-        current_row = self.table.currentRow()
-        if current_row >= 0:
-            self.table.removeRow(current_row)
-            
-    def getValues(self):
-        values = []
-        for row in range(self.table.rowCount()):
-            item = self.table.item(row, 0)
-            if item and item.text().strip():
-                values.append(item.text().strip())
-        return values
-
-class ListValueDelegate(QtWidgets.QStyledItemDelegate):
-    def createEditor(self, parent, option, index):
-        editor = QtWidgets.QPushButton("Edit List...", parent)
-        editor.clicked.connect(lambda: self.showDialog(index))
-        return editor
-        
-    def setEditorData(self, editor, index):
-        # Nothing needed here since button text is static
-        pass
-        
-    def setModelData(self, editor, model, index):
-        # Data is set in showDialog
-        pass
-
-    def showDialog(self, index):
-        current_values = []
-        if index.data():
-            current_values = [x.strip() for x in index.data().split(',') if x.strip()]
-            
-        dialog = ListEditorDialog(current_values, None)
-        if dialog.exec_() == QtWidgets.QDialog.Accepted:
-            new_values = dialog.getValues()
-            index.model().setData(index, ','.join(new_values))
-
-    def updateEditorGeometry(self, editor, option, index):
-        editor.setGeometry(option.rect)
 
 class TypeComboDelegate(QtWidgets.QStyledItemDelegate):
     def createEditor(self, parent, option, index):
