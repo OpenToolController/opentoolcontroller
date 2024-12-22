@@ -1,5 +1,27 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<svg width="256" height="256" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
-  <circle cx="128" cy="128" r="120" fill="#2196f3"/>
-  <path d="M128 48v160M48 128h160" stroke="#ffffff" stroke-width="24"/>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 50 50">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: none;
+        stroke: #fbf8e6;
+        stroke-miterlimit: 10;
+        stroke-width: 3px;
+      }
+
+      .cls-2 {
+        fill: url(#radial-gradient);
+      }
+    </style>
+    <radialGradient id="radial-gradient" cx="25" cy="25" fx="25" fy="25" r="25" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2d4377"/>
+      <stop offset=".36" stop-color="#2c4174"/>
+      <stop offset=".57" stop-color="#283b6c"/>
+      <stop offset=".73" stop-color="#23315e"/>
+      <stop offset=".88" stop-color="#1b234a"/>
+      <stop offset="1" stop-color="#131334"/>
+    </radialGradient>
+  </defs>
+  <circle class="cls-2" cx="25" cy="25" r="25"/>
+  <polygon class="cls-1" points="25 12.5 14.17 18.75 14.17 31.25 25 37.5 35.83 31.25 35.83 18.75 25 12.5"/>
 </svg>
