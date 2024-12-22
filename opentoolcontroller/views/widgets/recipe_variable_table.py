@@ -346,28 +346,30 @@ class ListEditorDialog(QtWidgets.QDialog):
 
 class ListValueDelegate(QtWidgets.QStyledItemDelegate):
     def createEditor(self, parent, option, index):
-        editor = QtWidgets.QPushButton("Edit")
+        editor = QtWidgets.QPushButton("Edit List...", parent)
+        editor.clicked.connect(lambda: self.showDialog(index))
         return editor
         
     def setEditorData(self, editor, index):
+        # Nothing needed here since button text is static
         pass
         
     def setModelData(self, editor, model, index):
+        # Data is set in showDialog
         pass
-        
-    def editorEvent(self, event, model, option, index):
-        if isinstance(event, QtGui.QMouseEvent) and event.type() == QtCore.QEvent.MouseButtonDblClick:
-            # Get current values
-            current_values = []
-            if index.data():
-                current_values = [x.strip() for x in index.data().split(',') if x.strip()]
-                
-            dialog = ListEditorDialog(current_values, None)
-            if dialog.exec_() == QtWidgets.QDialog.Accepted:
-                new_values = dialog.getValues()
-                model.setData(index, ','.join(new_values))
-            return True
-        return False
+
+    def showDialog(self, index):
+        current_values = []
+        if index.data():
+            current_values = [x.strip() for x in index.data().split(',') if x.strip()]
+            
+        dialog = ListEditorDialog(current_values, None)
+        if dialog.exec_() == QtWidgets.QDialog.Accepted:
+            new_values = dialog.getValues()
+            index.model().setData(index, ','.join(new_values))
+
+    def updateEditorGeometry(self, editor, option, index):
+        editor.setGeometry(option.rect)
 
 class TypeComboDelegate(QtWidgets.QStyledItemDelegate):
     def createEditor(self, parent, option, index):
