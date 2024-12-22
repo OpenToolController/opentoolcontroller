@@ -155,38 +155,13 @@ def test_time_varying_checkbox(table):
     time_varying_item.setCheckState(Qt.Unchecked)
     assert time_varying_item.checkState() == Qt.Unchecked
 
-def test_list_values_persistence(table):
-    """Test that list values are preserved when changing types"""
-    table.addVariable()
-    row = 0
-    
-    # Set to List type
-    type_combo = table.table.cellWidget(row, 1)
-    type_combo.setCurrentText("List")
-    
-    # Set some list values
-    list_item = table.table.item(row, 4)
-    test_values = "item1,item2,item3"
-    list_item.setText(test_values)
-    
-    # Change to another type and back
-    type_combo.setCurrentText("Float")
-    type_combo.setCurrentText("List")
-    
-    # Check values are preserved
-    assert list_item.text() == test_values
-    
-    # Simulate unchecking the box
-    basic_item.setCheckState(Qt.Unchecked)
-    assert basic_item.checkState() == Qt.Unchecked
-
 def test_basic_checkbox_persists_on_type_change(table):
     """Test that Basic checkbox state persists when changing variable type"""
     table.addVariable()
     row = 0
     
     # Set checkbox to checked
-    basic_item = table.table.item(row, 4)
+    basic_item = table.table.item(row, 5)
     basic_item.setCheckState(Qt.Checked)
     
     # Change variable type

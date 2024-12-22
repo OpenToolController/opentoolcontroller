@@ -276,7 +276,6 @@ class RecipeVariableTable(QtWidgets.QMainWindow):
             
             # Update the model with new variables
             index = self._model.createIndex(self._current_node.row(), col.RECIPE_VARIABLES, self._current_node)
-            print(variables)
             self._model.setData(index, variables)
 
 
