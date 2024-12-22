@@ -15,10 +15,10 @@ def table(app):
 
 def test_initial_state(table):
     """Test initial state of the table"""
-    assert table.table.columnCount() == 5
+    assert table.table.columnCount() == 7
     assert table.table.rowCount() == 0
-    headers = [table.table.horizontalHeaderItem(i).text() for i in range(5)]
-    assert headers == ["Variable Name", "Variable Type", "Min", "Max", "Basic"]
+    headers = [table.table.horizontalHeaderItem(i).text() for i in range(7)]
+    assert headers == ["Variable Name", "Variable Type", "Min", "Max", "List Values", "Basic", "Time Varying"]
 
 def test_add_variable(table):
     """Test adding a new variable"""
@@ -118,6 +118,63 @@ def test_basic_checkbox_toggle(table):
     # Simulate checking the box
     basic_item.setCheckState(Qt.Checked)
     assert basic_item.checkState() == Qt.Checked
+
+def test_list_type_behavior(table):
+    """Test List type specific behaviors"""
+    table.addVariable()
+    row = 0
+    
+    # Change to List type
+    type_combo = table.table.cellWidget(row, 1)
+    type_combo.setCurrentText("List")
+    
+    # Check min/max are disabled
+    min_item = table.table.item(row, 2)
+    max_item = table.table.item(row, 3)
+    assert not (min_item.flags() & Qt.ItemIsEnabled)
+    assert not (max_item.flags() & Qt.ItemIsEnabled)
+    
+    # Check list values column is enabled
+    list_item = table.table.item(row, 4)
+    assert list_item.flags() & Qt.ItemIsEnabled
+    assert list_item.flags() & Qt.ItemIsEditable
+
+def test_time_varying_checkbox(table):
+    """Test Time Varying checkbox functionality"""
+    table.addVariable()
+    row = 0
+    
+    time_varying_item = table.table.item(row, 6)
+    # Check initial state
+    assert time_varying_item.checkState() == Qt.Unchecked
+    
+    # Test toggling
+    time_varying_item.setCheckState(Qt.Checked)
+    assert time_varying_item.checkState() == Qt.Checked
+    
+    time_varying_item.setCheckState(Qt.Unchecked)
+    assert time_varying_item.checkState() == Qt.Unchecked
+
+def test_list_values_persistence(table):
+    """Test that list values are preserved when changing types"""
+    table.addVariable()
+    row = 0
+    
+    # Set to List type
+    type_combo = table.table.cellWidget(row, 1)
+    type_combo.setCurrentText("List")
+    
+    # Set some list values
+    list_item = table.table.item(row, 4)
+    test_values = "item1,item2,item3"
+    list_item.setText(test_values)
+    
+    # Change to another type and back
+    type_combo.setCurrentText("Float")
+    type_combo.setCurrentText("List")
+    
+    # Check values are preserved
+    assert list_item.text() == test_values
     
     # Simulate unchecking the box
     basic_item.setCheckState(Qt.Unchecked)
