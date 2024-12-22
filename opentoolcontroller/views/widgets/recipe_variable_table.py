@@ -1,4 +1,5 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
+from opentoolcontroller.strings import col
 from PyQt5.QtCore import Qt
 
 class RecipeVariableTable(QtWidgets.QMainWindow):
@@ -32,10 +33,13 @@ class RecipeVariableTable(QtWidgets.QMainWindow):
         # Add buttons
         add_btn = QtWidgets.QPushButton("Add Variable")
         remove_btn = QtWidgets.QPushButton("Remove Variable")
+        apply_btn = QtWidgets.QPushButton("Apply")
         add_btn.clicked.connect(self.addVariable)
         remove_btn.clicked.connect(self.removeVariable)
+        apply_btn.clicked.connect(self.saveVariables)
         button_layout.addWidget(add_btn)
         button_layout.addWidget(remove_btn)
+        button_layout.addWidget(apply_btn)
         button_layout.addStretch()  # Push buttons to the left
         
         layout.addWidget(button_widget)
@@ -129,20 +133,20 @@ class RecipeVariableTable(QtWidgets.QMainWindow):
         current_row = self.table.currentRow()
         if current_row >= 0:
             self.table.removeRow(current_row)
-            self.saveVariables()
 
     def setModel(self, model, node):
-        """Set the model and current node for the table"""
+        """Set the model and current index for the table"""
         self._model = model
         self._current_node = node
-        # Load existing variables if any
         self.loadVariables()
         
     def loadVariables(self):
         """Load variables from the model"""
         if self._model and self._current_node:
             index = self._model.createIndex(self._current_node.row(), col.RECIPE_VARIABLES, self._current_node)
-            variables = self._model.data(index)
+            variables = self._model.data(index, QtCore.Qt.EditRole)
+        
+            self.setWindowTitle(self._current_node.name + " Recipe Variables")
             if variables:
                 # Clear existing rows
                 self.table.setRowCount(0)
@@ -169,10 +173,10 @@ class RecipeVariableTable(QtWidgets.QMainWindow):
             variables = []
             for row in range(self.table.rowCount()):
                 var = {
-                    'name': self.table.item(row, 0).text(),
+                    'name': self.table.item(row, 0).text() if self.table.item(row, 0).text() else "",
                     'type': self.table.cellWidget(row, 1).currentText(),
-                    'min': self.table.item(row, 2).text() if self.table.item(row, 2).text() else None,
-                    'max': self.table.item(row, 3).text() if self.table.item(row, 3).text() else None,
+                    'min': float(self.table.item(row, 2).text()) if self.table.item(row, 2).text() else None,
+                    'max': float(self.table.item(row, 3).text()) if self.table.item(row, 3).text() else None,
                     'basic': self.table.item(row, 4).checkState() == Qt.Checked
                 }
                 variables.append(var)
