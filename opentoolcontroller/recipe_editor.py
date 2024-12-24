@@ -37,10 +37,27 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
     def setSelection(self, current, old):
         model = current.model()
 
-        if hasattr(model, 'mapToSource') : current_index = model.mapToSource(current)
-        else                             : current_index = current
+        if hasattr(model, 'mapToSource'):
+            current_index = model.mapToSource(current)
+        else:
+            current_index = current
 
         node = current_index.internalPointer()
+        
+        # Clear existing rows in parameters table
+        self.ui_parameters.setRowCount(0)
+        
+        # Get recipe variables from node
+        recipe_vars = node.data(col.RECIPE_VARIABLES)
+        if recipe_vars:
+            # Filter for non-time-varying variables
+            static_vars = [var for var in recipe_vars if not var.get('time_varying', False)]
+            
+            # Set table rows and populate names
+            self.ui_parameters.setRowCount(len(static_vars))
+            for row, var in enumerate(static_vars):
+                name_item = QtWidgets.QTableWidgetItem(var.get('name', ''))
+                self.ui_parameters.setItem(row, 0, name_item)
 
 
     def setModel(self, model):
