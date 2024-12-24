@@ -24,10 +24,12 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
         geometry = self._settings.value('recipe_editor_geometry', bytes('', 'utf-8'))
         state = self._settings.value('recipe_editor_state', bytes('', 'utf-8'))
         splitter_state = self._settings.value('recipe_editor_splitter_state', bytes('', 'utf-8'))
+        splitter_2_state = self._settings.value('recipe_editor_splitter_2_state', bytes('', 'utf-8'))
 
         self.restoreGeometry(geometry)
         self.restoreState(state)
         self.ui_splitter.restoreState(splitter_state)
+        self.ui_splitter_2.restoreState(splitter_2_state)
         self.enableEditRecipe(False)
 
 
@@ -55,20 +57,16 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
         self.ui_tree.expand(root_index)
         self.ui_tree.hideColumn(1)
 
-        #self._node_editor.setModel(self._proxy_model)
-        #self._behavior_state_editor.setModel(self._proxy_model)
-        #self._recipe_variable_editor.setModel(self._proxy_model)
-
-        #for editor in self._specific_editors.values():
-        #    editor.setModel(self._proxy_model)
 
     def closeEvent(self, event):
         geometry = self.saveGeometry()
         self._settings.setValue('recipe_editor_geometry', geometry)
         state = self.saveState()
         splitter_state = self.ui_splitter.saveState()
+        splitter_2_state = self.ui_splitter_2.saveState()
         self._settings.setValue('recipe_editor_state', state)
         self._settings.setValue('recipe_editor_splitter_state', splitter_state)
+        self._settings.setValue('recipe_editor_splitter_2_state', splitter_2_state)
         super().closeEvent(event)
 
 
