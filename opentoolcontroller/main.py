@@ -8,10 +8,10 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 import xml.etree.ElementTree as ET
 from opentoolcontroller.tool_model import ToolModel, HalNode
 from opentoolcontroller.tool_editor import CommonEditor
+from opentoolcontroller.recipe_editor import RecipeEditor
 from opentoolcontroller.tool_control_view import ToolControlView
 from opentoolcontroller.alert_view import AlertView, AlertTableModel, ActionLogView, ActionLogTableModel
 from opentoolcontroller.login import LoginView, LoginModel
-from opentoolcontroller.views.widgets.recipe_editor import RecipeEditor
 
 from opentoolcontroller.bt_model import BTModel, BehaviorRunner
 
@@ -127,6 +127,7 @@ class Window(QtWidgets.QMainWindow):
         dock5.setContextMenuPolicy(QtCore.Qt.PreventContextMenu)
 
         self._recipe_editor = RecipeEditor()
+        self._recipe_editor.setModel(self.tool_model)
         dock6 = QtWidgets.QDockWidget('Recipe Editor', self, objectName='recipe_editor')
         dock6.setWidget(self._recipe_editor)
         dock6.setContextMenuPolicy(QtCore.Qt.PreventContextMenu)
@@ -260,6 +261,7 @@ class Window(QtWidgets.QMainWindow):
         self._tool_editor.close()
         self._control_view.close()
         self._alert_view.close()
+        self._recipe_editor.close()
         geometry = self.saveGeometry()
         self._settings.setValue('main_window_geometry', geometry)
         state = self.saveState()
