@@ -90,10 +90,15 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
                     
                 elif var_type == 'List':
                     editor = QtWidgets.QComboBox(self.ui_parameters)
-                    list_values = var.get('list_values', '').split(',')
-                    editor.addItems([x.strip() for x in list_values if x.strip()])
+                    list_values = var.get('list_values', [])
+                    # Handle both string and list cases
+                    if isinstance(list_values, str):
+                        list_values = [x.strip() for x in list_values.split(',') if x.strip()]
+                    elif isinstance(list_values, list):
+                        list_values = [str(x).strip() for x in list_values if str(x).strip()]
+                    editor.addItems(list_values)
                     current_value = var.get('value', '')
-                    index = editor.findText(current_value)
+                    index = editor.findText(str(current_value))
                     if index >= 0:
                         editor.setCurrentIndex(index)
                     self.ui_parameters.setCellWidget(row, 1, editor)
