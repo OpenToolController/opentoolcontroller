@@ -23,8 +23,8 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
         self.ui_parameters.setColumnCount(2)
         self.ui_parameters.setHorizontalHeaderLabels(["Parameter", "Value"])
         header = self.ui_parameters.horizontalHeader()
-        header.setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
-        header.setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(0, QtWidgets.QHeaderView.Interactive)
+        header.setSectionResizeMode(1, QtWidgets.QHeaderView.Interactive)
 
         self._settings = QtCore.QSettings('OpenToolController', 'test1')
         geometry = self._settings.value('recipe_editor_geometry', bytes('', 'utf-8'))
@@ -97,6 +97,9 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
                     if index >= 0:
                         editor.setCurrentIndex(index)
                     self.ui_parameters.setCellWidget(row, 1, editor)
+            
+            # After populating data, resize first column to content
+            self.ui_parameters.resizeColumnToContents(0)
 
 
     def setModel(self, model):
