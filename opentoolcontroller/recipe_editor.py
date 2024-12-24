@@ -19,6 +19,10 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
         super(recipe_editor_base, self).__init__(parent)
         self.setupUi(self)
 
+        # Setup parameters table
+        self.ui_parameters.setColumnCount(1)
+        self.ui_parameters.setHorizontalHeaderLabels(["Parameter"])
+        self.ui_parameters.horizontalHeader().setStretchLastSection(True)
 
         self._settings = QtCore.QSettings('OpenToolController', 'test1')
         geometry = self._settings.value('recipe_editor_geometry', bytes('', 'utf-8'))
