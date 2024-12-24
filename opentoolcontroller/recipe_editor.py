@@ -20,9 +20,11 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
         self.setupUi(self)
 
         # Setup parameters table
-        self.ui_parameters.setColumnCount(1)
-        self.ui_parameters.setHorizontalHeaderLabels(["Parameter"])
-        self.ui_parameters.horizontalHeader().setStretchLastSection(True)
+        self.ui_parameters.setColumnCount(2)
+        self.ui_parameters.setHorizontalHeaderLabels(["Parameter", "Value"])
+        header = self.ui_parameters.horizontalHeader()
+        header.setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
+        header.setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeToContents)
 
         self._settings = QtCore.QSettings('OpenToolController', 'test1')
         geometry = self._settings.value('recipe_editor_geometry', bytes('', 'utf-8'))
@@ -57,11 +59,44 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
             # Filter for non-time-varying variables
             static_vars = [var for var in recipe_vars if not var.get('time_varying', False)]
             
-            # Set table rows and populate names
+            # Set table rows and populate names and values
             self.ui_parameters.setRowCount(len(static_vars))
             for row, var in enumerate(static_vars):
+                # Set name in first column
                 name_item = QtWidgets.QTableWidgetItem(var.get('name', ''))
                 self.ui_parameters.setItem(row, 0, name_item)
+                
+                # Create appropriate editor for second column based on type
+                var_type = var.get('type', '')
+                
+                if var_type == 'Float':
+                    editor = QtWidgets.QDoubleSpinBox(self.ui_parameters)
+                    editor.setMinimum(float(var.get('min', -999999)))
+                    editor.setMaximum(float(var.get('max', 999999)))
+                    editor.setValue(float(var.get('value', 0)))
+                    self.ui_parameters.setCellWidget(row, 1, editor)
+                    
+                elif var_type == 'Integer':
+                    editor = QtWidgets.QSpinBox(self.ui_parameters)
+                    editor.setMinimum(int(var.get('min', -999999)))
+                    editor.setMaximum(int(var.get('max', 999999)))
+                    editor.setValue(int(var.get('value', 0)))
+                    self.ui_parameters.setCellWidget(row, 1, editor)
+                    
+                elif var_type == 'Boolean':
+                    editor = QtWidgets.QCheckBox(self.ui_parameters)
+                    editor.setChecked(var.get('value', False))
+                    self.ui_parameters.setCellWidget(row, 1, editor)
+                    
+                elif var_type == 'List':
+                    editor = QtWidgets.QComboBox(self.ui_parameters)
+                    list_values = var.get('list_values', '').split(',')
+                    editor.addItems([x.strip() for x in list_values if x.strip()])
+                    current_value = var.get('value', '')
+                    index = editor.findText(current_value)
+                    if index >= 0:
+                        editor.setCurrentIndex(index)
+                    self.ui_parameters.setCellWidget(row, 1, editor)
 
 
     def setModel(self, model):
