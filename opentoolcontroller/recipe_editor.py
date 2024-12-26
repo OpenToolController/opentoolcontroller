@@ -71,8 +71,9 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
             # Handle static variables
             self.ui_static_parameters.setRowCount(len(static_vars))
             for row, var in enumerate(static_vars):
-                # Set name in first column
+                # Set name in first column (read-only)
                 name_item = QtWidgets.QTableWidgetItem(var.get('name', ''))
+                name_item.setFlags(name_item.flags() & ~QtCore.Qt.ItemIsEditable)
                 self.ui_static_parameters.setItem(row, 0, name_item)
                 
                 # Create appropriate editor for second column based on type
@@ -118,8 +119,9 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
             # Handle dynamic variables
             self.ui_dynamic_parameters.setRowCount(len(dynamic_vars))
             for row, var in enumerate(dynamic_vars):
-                # Set name in first column
+                # Set name in first column (read-only)
                 name_item = QtWidgets.QTableWidgetItem(var.get('name', ''))
+                name_item.setFlags(name_item.flags() & ~QtCore.Qt.ItemIsEditable)
                 self.ui_dynamic_parameters.setItem(row, 0, name_item)
                 
                 # Create appropriate editor for second column based on type
