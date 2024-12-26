@@ -23,14 +23,21 @@ class RecipeVariableTable(QtWidgets.QMainWindow):
         self.table.setHorizontalHeaderLabels(["Variable Name", "Variable Type", "Min", "Max", "List Values", "Basic", "Dynamic"])
         self.table.horizontalHeader().setStretchLastSection(True)
         self.table.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Interactive)
-        # Enable drag and drop
-        self.table.setDragEnabled(True)
-        self.table.setAcceptDrops(True)
-        self.table.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
-        self.table.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
-        self.table.setDragDropMode(QtWidgets.QAbstractItemView.InternalMove)
+        # Enable drag and drop of rows
+
+
+        self.table.verticalHeader().setSectionsMovable(True)
+        self.table.verticalHeader().sectionMoved.connect(self.updateRowNumbers)
+
+
+
+        #self.table.setDragEnabled(True)
+        #self.table.setDragDropMode(QtWidgets.QAbstractItemView.InternalMove)
+        self.table.verticalHeader().setSectionsMovable(True)
+
         layout.addWidget(self.table)
         
+
         # Create button widget and layout
         button_widget = QtWidgets.QWidget()
         button_layout = QtWidgets.QHBoxLayout(button_widget)
@@ -85,6 +92,13 @@ class RecipeVariableTable(QtWidgets.QMainWindow):
         self.table.setItemDelegateForColumn(2, numeric_delegate)
         self.table.setItemDelegateForColumn(3, numeric_delegate)
         
+    def updateRowNumbers(self):
+        """Update the vertical header numbers to reflect the current row order."""
+        for visual_row in range(self.table.rowCount()):
+            logical_row = self.table.verticalHeader().logicalIndex(visual_row)
+            self.table.verticalHeaderItem(logical_row).setText(str(visual_row + 1))
+
+
 
     def handleTypeChange(self, var_type, row):
         """Handle changes to variable type by updating min/max fields"""
@@ -165,6 +179,9 @@ class RecipeVariableTable(QtWidgets.QMainWindow):
         
         # Initialize as Boolean (disabled min/max)
         type_combo.setCurrentText("Boolean")
+        
+
+        self.table.setVerticalHeaderItem(row, QtWidgets.QTableWidgetItem(str(row + 1)))  # Set vertical header items
 
     def removeVariable(self):
         current_row = self.table.currentRow()
@@ -216,6 +233,9 @@ class RecipeVariableTable(QtWidgets.QMainWindow):
                     dynamic_item.setFlags(dynamic_item.flags() | Qt.ItemIsUserCheckable)
                     dynamic_item.setCheckState(Qt.Checked if var.get('dynamic', False) else Qt.Unchecked)
                     self.table.setItem(row, 6, dynamic_item)
+        
+
+                    self.table.setVerticalHeaderItem(row, QtWidgets.QTableWidgetItem(str(row + 1)))  # Set vertical header items
                     
                 # After loading all variables, resize the name column
                 self.table.resizeColumnToContents(0)  # Column 0 is Variable Name
@@ -224,8 +244,11 @@ class RecipeVariableTable(QtWidgets.QMainWindow):
         """Save variables back to the model"""
         if self._model and self._current_node:
             variables = []
-            for row in range(self.table.rowCount()):
+            for visual_row in range(self.table.rowCount()):
                 try:
+
+                    row = self.table.verticalHeader().logicalIndex(visual_row) #If the user reorders the table
+
                     # Get name (default to empty string if cell is None)
                     name_item = self.table.item(row, 0)
                     name = name_item.text() if name_item else ""

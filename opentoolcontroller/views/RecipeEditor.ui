@@ -28,25 +28,25 @@
            <enum>QTabWidget::North</enum>
           </property>
           <property name="currentIndex">
-           <number>0</number>
+           <number>1</number>
           </property>
           <widget class="QWidget" name="tab">
            <attribute name="title">
-            <string>Parameters</string>
+            <string>Static Parameters</string>
            </attribute>
            <layout class="QVBoxLayout" name="verticalLayout">
             <item>
-             <widget class="QTableWidget" name="ui_parameters"/>
+             <widget class="QTableWidget" name="ui_static_parameters"/>
             </item>
            </layout>
           </widget>
           <widget class="QWidget" name="tab_2">
            <attribute name="title">
-            <string>Time Parameters</string>
+            <string>Dynamic Parameters</string>
            </attribute>
            <layout class="QVBoxLayout" name="verticalLayout_2">
             <item>
-             <widget class="QTableView" name="ui_time_parameters"/>
+             <widget class="QTableWidget" name="ui_dynamic_parameters"/>
             </item>
            </layout>
           </widget>
