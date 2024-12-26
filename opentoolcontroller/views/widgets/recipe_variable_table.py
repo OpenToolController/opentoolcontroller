@@ -23,6 +23,12 @@ class RecipeVariableTable(QtWidgets.QMainWindow):
         self.table.setHorizontalHeaderLabels(["Variable Name", "Variable Type", "Min", "Max", "List Values", "Basic", "Dynamic"])
         self.table.horizontalHeader().setStretchLastSection(True)
         self.table.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Interactive)
+        # Enable drag and drop
+        self.table.setDragEnabled(True)
+        self.table.setAcceptDrops(True)
+        self.table.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
+        self.table.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+        self.table.setDragDropMode(QtWidgets.QAbstractItemView.InternalMove)
         layout.addWidget(self.table)
         
         # Create button widget and layout
