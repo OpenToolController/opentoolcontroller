@@ -20,9 +20,9 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
         self.setupUi(self)
 
         # Setup parameters table
-        self.ui_parameters.setColumnCount(2)
-        self.ui_parameters.setHorizontalHeaderLabels(["Parameter", "Value"])
-        header = self.ui_parameters.horizontalHeader()
+        self.ui_static_parameters.setColumnCount(2)
+        self.ui_static_parameters.setHorizontalHeaderLabels(["Parameter", "Value"])
+        header = self.ui_static_parameters.horizontalHeader()
         header.setSectionResizeMode(0, QtWidgets.QHeaderView.Interactive)
         header.setSectionResizeMode(1, QtWidgets.QHeaderView.Interactive)
 
@@ -51,7 +51,7 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
         node = current_index.internalPointer()
         
         # Clear existing rows in parameters table
-        self.ui_parameters.setRowCount(0)
+        self.ui_static_parameters.setRowCount(0)
         
         # Get recipe variables from node
         recipe_vars = node.data(col.RECIPE_VARIABLES)
@@ -60,36 +60,36 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
             static_vars = [var for var in recipe_vars if not var.get('time_varying', False)]
             
             # Set table rows and populate names and values
-            self.ui_parameters.setRowCount(len(static_vars))
+            self.ui_static_parameters.setRowCount(len(static_vars))
             for row, var in enumerate(static_vars):
                 # Set name in first column
                 name_item = QtWidgets.QTableWidgetItem(var.get('name', ''))
-                self.ui_parameters.setItem(row, 0, name_item)
+                self.ui_static_parameters.setItem(row, 0, name_item)
                 
                 # Create appropriate editor for second column based on type
                 var_type = var.get('type', '')
                 
                 if var_type == 'Float':
-                    editor = QtWidgets.QDoubleSpinBox(self.ui_parameters)
+                    editor = QtWidgets.QDoubleSpinBox(self.ui_static_parameters)
                     editor.setMinimum(float(var.get('min', -999999)))
                     editor.setMaximum(float(var.get('max', 999999)))
                     editor.setValue(float(var.get('value', 0)))
-                    self.ui_parameters.setCellWidget(row, 1, editor)
+                    self.ui_static_parameters.setCellWidget(row, 1, editor)
                     
                 elif var_type == 'Integer':
-                    editor = QtWidgets.QSpinBox(self.ui_parameters)
+                    editor = QtWidgets.QSpinBox(self.ui_static_parameters)
                     editor.setMinimum(int(var.get('min', -999999)))
                     editor.setMaximum(int(var.get('max', 999999)))
                     editor.setValue(int(var.get('value', 0)))
-                    self.ui_parameters.setCellWidget(row, 1, editor)
+                    self.ui_static_parameters.setCellWidget(row, 1, editor)
                     
                 elif var_type == 'Boolean':
-                    editor = QtWidgets.QCheckBox(self.ui_parameters)
+                    editor = QtWidgets.QCheckBox(self.ui_static_parameters)
                     editor.setChecked(var.get('value', False))
-                    self.ui_parameters.setCellWidget(row, 1, editor)
+                    self.ui_static_parameters.setCellWidget(row, 1, editor)
                     
                 elif var_type == 'List':
-                    editor = QtWidgets.QComboBox(self.ui_parameters)
+                    editor = QtWidgets.QComboBox(self.ui_static_parameters)
                     list_values = var.get('list_values', [])
                     # Handle both string and list cases
                     if isinstance(list_values, str):
@@ -101,10 +101,10 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
                     index = editor.findText(str(current_value))
                     if index >= 0:
                         editor.setCurrentIndex(index)
-                    self.ui_parameters.setCellWidget(row, 1, editor)
+                    self.ui_static_parameters.setCellWidget(row, 1, editor)
             
             # After populating data, resize first column to content
-            self.ui_parameters.resizeColumnToContents(0)
+            self.ui_static_parameters.resizeColumnToContents(0)
 
 
     def setModel(self, model):
