@@ -19,10 +19,17 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
         super(recipe_editor_base, self).__init__(parent)
         self.setupUi(self)
 
-        # Setup parameters table
+        # Setup static parameters table
         self.ui_static_parameters.setColumnCount(2)
         self.ui_static_parameters.setHorizontalHeaderLabels(["Parameter", "Value"])
         header = self.ui_static_parameters.horizontalHeader()
+        header.setSectionResizeMode(0, QtWidgets.QHeaderView.Interactive)
+        header.setSectionResizeMode(1, QtWidgets.QHeaderView.Interactive)
+
+        # Setup dynamic parameters table
+        self.ui_dynamic_parameters.setColumnCount(2)
+        self.ui_dynamic_parameters.setHorizontalHeaderLabels(["Parameter", "Value"])
+        header = self.ui_dynamic_parameters.horizontalHeader()
         header.setSectionResizeMode(0, QtWidgets.QHeaderView.Interactive)
         header.setSectionResizeMode(1, QtWidgets.QHeaderView.Interactive)
 
@@ -50,16 +57,18 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
 
         node = current_index.internalPointer()
         
-        # Clear existing rows in parameters table
+        # Clear existing rows in both parameters tables
         self.ui_static_parameters.setRowCount(0)
+        self.ui_dynamic_parameters.setRowCount(0)
         
         # Get recipe variables from node
         recipe_vars = node.data(col.RECIPE_VARIABLES)
         if recipe_vars:
-            # Filter for non-time-varying variables
+            # Filter for static and dynamic variables
             static_vars = [var for var in recipe_vars if not var.get('time_varying', False)]
+            dynamic_vars = [var for var in recipe_vars if var.get('time_varying', False)]
             
-            # Set table rows and populate names and values
+            # Handle static variables
             self.ui_static_parameters.setRowCount(len(static_vars))
             for row, var in enumerate(static_vars):
                 # Set name in first column
@@ -105,6 +114,53 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
             
             # After populating data, resize first column to content
             self.ui_static_parameters.resizeColumnToContents(0)
+
+            # Handle dynamic variables
+            self.ui_dynamic_parameters.setRowCount(len(dynamic_vars))
+            for row, var in enumerate(dynamic_vars):
+                # Set name in first column
+                name_item = QtWidgets.QTableWidgetItem(var.get('name', ''))
+                self.ui_dynamic_parameters.setItem(row, 0, name_item)
+                
+                # Create appropriate editor for second column based on type
+                var_type = var.get('type', '')
+                
+                if var_type == 'Float':
+                    editor = QtWidgets.QDoubleSpinBox(self.ui_dynamic_parameters)
+                    editor.setMinimum(float(var.get('min', -999999)))
+                    editor.setMaximum(float(var.get('max', 999999)))
+                    editor.setValue(float(var.get('value', 0)))
+                    self.ui_dynamic_parameters.setCellWidget(row, 1, editor)
+                    
+                elif var_type == 'Integer':
+                    editor = QtWidgets.QSpinBox(self.ui_dynamic_parameters)
+                    editor.setMinimum(int(var.get('min', -999999)))
+                    editor.setMaximum(int(var.get('max', 999999)))
+                    editor.setValue(int(var.get('value', 0)))
+                    self.ui_dynamic_parameters.setCellWidget(row, 1, editor)
+                    
+                elif var_type == 'Boolean':
+                    editor = QtWidgets.QCheckBox(self.ui_dynamic_parameters)
+                    editor.setChecked(var.get('value', False))
+                    self.ui_dynamic_parameters.setCellWidget(row, 1, editor)
+                    
+                elif var_type == 'List':
+                    editor = QtWidgets.QComboBox(self.ui_dynamic_parameters)
+                    list_values = var.get('list_values', [])
+                    # Handle both string and list cases
+                    if isinstance(list_values, str):
+                        list_values = [x.strip() for x in list_values.split(',') if x.strip()]
+                    elif isinstance(list_values, list):
+                        list_values = [str(x).strip() for x in list_values if str(x).strip()]
+                    editor.addItems(list_values)
+                    current_value = var.get('value', '')
+                    index = editor.findText(str(current_value))
+                    if index >= 0:
+                        editor.setCurrentIndex(index)
+                    self.ui_dynamic_parameters.setCellWidget(row, 1, editor)
+            
+            # After populating data, resize first column to content
+            self.ui_dynamic_parameters.resizeColumnToContents(0)
 
 
     def setModel(self, model):
