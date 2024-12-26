@@ -20,7 +20,7 @@ class RecipeVariableTable(QtWidgets.QMainWindow):
         # Create table
         self.table = QtWidgets.QTableWidget()
         self.table.setColumnCount(7)
-        self.table.setHorizontalHeaderLabels(["Variable Name", "Variable Type", "Min", "Max", "List Values", "Basic", "Time Varying"])
+        self.table.setHorizontalHeaderLabels(["Variable Name", "Variable Type", "Min", "Max", "List Values", "Basic", "Dynamic"])
         self.table.horizontalHeader().setStretchLastSection(True)
         self.table.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Interactive)
         layout.addWidget(self.table)
@@ -206,10 +206,10 @@ class RecipeVariableTable(QtWidgets.QMainWindow):
                     basic_item.setCheckState(Qt.Checked if var.get('basic', False) else Qt.Unchecked)
                     self.table.setItem(row, 5, basic_item)
                     
-                    time_varying_item = QtWidgets.QTableWidgetItem()
-                    time_varying_item.setFlags(time_varying_item.flags() | Qt.ItemIsUserCheckable)
-                    time_varying_item.setCheckState(Qt.Checked if var.get('time_varying', False) else Qt.Unchecked)
-                    self.table.setItem(row, 6, time_varying_item)
+                    dynamic_item = QtWidgets.QTableWidgetItem()
+                    dynamic_item.setFlags(dynamic_item.flags() | Qt.ItemIsUserCheckable)
+                    dynamic_item.setCheckState(Qt.Checked if var.get('dynamic', False) else Qt.Unchecked)
+                    self.table.setItem(row, 6, dynamic_item)
                     
                 # After loading all variables, resize the name column
                 self.table.resizeColumnToContents(0)  # Column 0 is Variable Name
@@ -252,9 +252,9 @@ class RecipeVariableTable(QtWidgets.QMainWindow):
                     basic_item = self.table.item(row, 5)
                     basic = basic_item.checkState() == Qt.Checked if basic_item else False
                     
-                    # Get time varying checkbox state
-                    time_varying_item = self.table.item(row, 6)
-                    time_varying = time_varying_item.checkState() == Qt.Checked if time_varying_item else False
+                    # Get dynamic checkbox state
+                    dynamic_item = self.table.item(row, 6)
+                    dynamic = dynamic_item.checkState() == Qt.Checked if dynamic_item else False
                     list_values = []
                     if list_item and list_item.text():
                         list_values = [x.strip() for x in list_item.text().split(',')]
@@ -266,7 +266,7 @@ class RecipeVariableTable(QtWidgets.QMainWindow):
                         'max': max_val,
                         'list_values': list_values if var_type == "List" else [],
                         'basic': basic,
-                        'time_varying': time_varying
+                        'dynamic': dynamic
                     }
                     variables.append(var)
                     

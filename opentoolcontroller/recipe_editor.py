@@ -65,8 +65,8 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
         recipe_vars = node.data(col.RECIPE_VARIABLES)
         if recipe_vars:
             # Filter for static and dynamic variables
-            static_vars = [var for var in recipe_vars if not var.get('time_varying', False)]
-            dynamic_vars = [var for var in recipe_vars if var.get('time_varying', False)]
+            static_vars = [var for var in recipe_vars if not var.get('dynamic', False)]
+            dynamic_vars = [var for var in recipe_vars if var.get('dynamic', False)]
             
             # Handle static variables
             self.ui_static_parameters.setRowCount(len(static_vars))
