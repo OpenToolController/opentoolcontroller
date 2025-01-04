@@ -88,38 +88,8 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
                 # Create appropriate editor for second column based on type
                 var_type = var.get('type', '')
                 
-                if var_type == 'Float':
-                    editor = QtWidgets.QDoubleSpinBox(self.ui_static_parameters)
-                    editor.setMinimum(float(var.get('min', -999999)))
-                    editor.setMaximum(float(var.get('max', 999999)))
-                    editor.setValue(float(var.get('value', 0)))
-                    self.ui_static_parameters.setCellWidget(row, 1, editor)
-                    
-                elif var_type == 'Integer':
-                    editor = QtWidgets.QSpinBox(self.ui_static_parameters)
-                    editor.setMinimum(int(var.get('min', -999999)))
-                    editor.setMaximum(int(var.get('max', 999999)))
-                    editor.setValue(int(var.get('value', 0)))
-                    self.ui_static_parameters.setCellWidget(row, 1, editor)
-                    
-                elif var_type == 'Boolean':
-                    editor = QtWidgets.QCheckBox(self.ui_static_parameters)
-                    editor.setChecked(var.get('value', False))
-                    self.ui_static_parameters.setCellWidget(row, 1, editor)
-                    
-                elif var_type == 'List':
-                    editor = QtWidgets.QComboBox(self.ui_static_parameters)
-                    list_values = var.get('list_values', [])
-                    # Handle both string and list cases
-                    if isinstance(list_values, str):
-                        list_values = [x.strip() for x in list_values.split(',') if x.strip()]
-                    elif isinstance(list_values, list):
-                        list_values = [str(x).strip() for x in list_values if str(x).strip()]
-                    editor.addItems(list_values)
-                    current_value = var.get('value', '')
-                    index = editor.findText(str(current_value))
-                    if index >= 0:
-                        editor.setCurrentIndex(index)
+                editor = self.createEditorForVariable(var, self.ui_static_parameters)
+                if editor:
                     self.ui_static_parameters.setCellWidget(row, 1, editor)
             
             # After populating data, resize first column to content
@@ -136,38 +106,8 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
                 # Create appropriate editor for second column based on type
                 var_type = var.get('type', '')
                 
-                if var_type == 'Float':
-                    editor = QtWidgets.QDoubleSpinBox(self.ui_dynamic_parameters)
-                    editor.setMinimum(float(var.get('min', -999999)))
-                    editor.setMaximum(float(var.get('max', 999999)))
-                    editor.setValue(float(var.get('value', 0)))
-                    self.ui_dynamic_parameters.setCellWidget(row, 1, editor)
-                    
-                elif var_type == 'Integer':
-                    editor = QtWidgets.QSpinBox(self.ui_dynamic_parameters)
-                    editor.setMinimum(int(var.get('min', -999999)))
-                    editor.setMaximum(int(var.get('max', 999999)))
-                    editor.setValue(int(var.get('value', 0)))
-                    self.ui_dynamic_parameters.setCellWidget(row, 1, editor)
-                    
-                elif var_type == 'Boolean':
-                    editor = QtWidgets.QCheckBox(self.ui_dynamic_parameters)
-                    editor.setChecked(var.get('value', False))
-                    self.ui_dynamic_parameters.setCellWidget(row, 1, editor)
-                    
-                elif var_type == 'List':
-                    editor = QtWidgets.QComboBox(self.ui_dynamic_parameters)
-                    list_values = var.get('list_values', [])
-                    # Handle both string and list cases
-                    if isinstance(list_values, str):
-                        list_values = [x.strip() for x in list_values.split(',') if x.strip()]
-                    elif isinstance(list_values, list):
-                        list_values = [str(x).strip() for x in list_values if str(x).strip()]
-                    editor.addItems(list_values)
-                    current_value = var.get('value', '')
-                    index = editor.findText(str(current_value))
-                    if index >= 0:
-                        editor.setCurrentIndex(index)
+                editor = self.createEditorForVariable(var, self.ui_dynamic_parameters)
+                if editor:
                     self.ui_dynamic_parameters.setCellWidget(row, 1, editor)
             
             # After populating data, resize first column to content
@@ -230,32 +170,9 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
                 var = next((v for v in recipe_vars if v.get('name') == var_name), None)
                 if var:
                     var_type = var.get('type', '')
-                    if var_type == 'Float':
-                        editor = QtWidgets.QDoubleSpinBox(self.ui_dynamic_parameters)
-                        editor.setMinimum(float(var.get('min', -999999)))
-                        editor.setMaximum(float(var.get('max', 999999)))
-                        editor.setValue(float(var.get('value', 0)))
-                    elif var_type == 'Integer':
-                        editor = QtWidgets.QSpinBox(self.ui_dynamic_parameters)
-                        editor.setMinimum(int(var.get('min', -999999)))
-                        editor.setMaximum(int(var.get('max', 999999)))
-                        editor.setValue(int(var.get('value', 0)))
-                    elif var_type == 'Boolean':
-                        editor = QtWidgets.QCheckBox(self.ui_dynamic_parameters)
-                        editor.setChecked(var.get('value', False))
-                    elif var_type == 'List':
-                        editor = QtWidgets.QComboBox(self.ui_dynamic_parameters)
-                        list_values = var.get('list_values', [])
-                        if isinstance(list_values, str):
-                            list_values = [x.strip() for x in list_values.split(',') if x.strip()]
-                        elif isinstance(list_values, list):
-                            list_values = [str(x).strip() for x in list_values if str(x).strip()]
-                        editor.addItems(list_values)
-                        current_value = var.get('value', '')
-                        index = editor.findText(str(current_value))
-                        if index >= 0:
-                            editor.setCurrentIndex(index)
-                    self.ui_dynamic_parameters.setCellWidget(row, insert_pos, editor)
+                    editor = self.createEditorForVariable(var, self.ui_dynamic_parameters)
+                    if editor:
+                        self.ui_dynamic_parameters.setCellWidget(row, insert_pos, editor)
 
     def deleteStep(self):
         """Delete the step column at the position specified by ui_step spinbox"""
@@ -280,25 +197,37 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
             headers.append(f"Step {i}")
         self.ui_dynamic_parameters.setHorizontalHeaderLabels(headers)
 
-    def createEditorWidget(self, template_widget, row):
-        """Create a new editor widget based on the template widget type"""
-        if isinstance(template_widget, QtWidgets.QDoubleSpinBox):
-            editor = QtWidgets.QDoubleSpinBox(self.ui_dynamic_parameters)
-            editor.setMinimum(template_widget.minimum())
-            editor.setMaximum(template_widget.maximum())
-            editor.setValue(template_widget.value())
-        elif isinstance(template_widget, QtWidgets.QSpinBox):
-            editor = QtWidgets.QSpinBox(self.ui_dynamic_parameters)
-            editor.setMinimum(template_widget.minimum())
-            editor.setMaximum(template_widget.maximum())
-            editor.setValue(template_widget.value())
-        elif isinstance(template_widget, QtWidgets.QCheckBox):
-            editor = QtWidgets.QCheckBox(self.ui_dynamic_parameters)
-            editor.setChecked(template_widget.isChecked())
-        elif isinstance(template_widget, QtWidgets.QComboBox):
-            editor = QtWidgets.QComboBox(self.ui_dynamic_parameters)
-            editor.addItems([template_widget.itemText(i) for i in range(template_widget.count())])
-            editor.setCurrentText(template_widget.currentText())
+    def createEditorForVariable(self, var, parent_widget):
+        """Create an editor widget based on the variable type and configuration"""
+        var_type = var.get('type', '')
+        editor = None
+        
+        if var_type == 'Float':
+            editor = QtWidgets.QDoubleSpinBox(parent_widget)
+            editor.setMinimum(float(var.get('min', -999999)))
+            editor.setMaximum(float(var.get('max', 999999)))
+            editor.setValue(float(var.get('value', 0)))
+        elif var_type == 'Integer':
+            editor = QtWidgets.QSpinBox(parent_widget)
+            editor.setMinimum(int(var.get('min', -999999)))
+            editor.setMaximum(int(var.get('max', 999999)))
+            editor.setValue(int(var.get('value', 0)))
+        elif var_type == 'Boolean':
+            editor = QtWidgets.QCheckBox(parent_widget)
+            editor.setChecked(var.get('value', False))
+        elif var_type == 'List':
+            editor = QtWidgets.QComboBox(parent_widget)
+            list_values = var.get('list_values', [])
+            if isinstance(list_values, str):
+                list_values = [x.strip() for x in list_values.split(',') if x.strip()]
+            elif isinstance(list_values, list):
+                list_values = [str(x).strip() for x in list_values if str(x).strip()]
+            editor.addItems(list_values)
+            current_value = var.get('value', '')
+            index = editor.findText(str(current_value))
+            if index >= 0:
+                editor.setCurrentIndex(index)
+        
         return editor
 
 
