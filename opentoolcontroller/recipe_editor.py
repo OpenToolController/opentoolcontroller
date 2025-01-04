@@ -64,6 +64,7 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
             current_index = current
 
         node = current_index.internalPointer()
+        self._current_node = node
         
         # Clear existing rows in both parameters tables
         self.ui_static_parameters.setRowCount(0)
@@ -219,12 +220,42 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
         self.updateStepHeaders()
         self.ui_step.setMaximum(self.ui_dynamic_parameters.columnCount())
         
-        # Copy editors from previous column for each row
+        # Create editors for each row in the new column
         for row in range(self.ui_dynamic_parameters.rowCount()):
-            prev_widget = self.ui_dynamic_parameters.cellWidget(row, insert_pos - 1)
-            if prev_widget:
-                new_widget = self.createEditorWidget(prev_widget, row)
-                self.ui_dynamic_parameters.setCellWidget(row, insert_pos, new_widget)
+            # Get the variable type from the first column's item
+            var_name = self.ui_dynamic_parameters.item(row, 0).text()
+            # Find the variable in recipe_vars
+            recipe_vars = self._current_node.data(col.RECIPE_VARIABLES)
+            if recipe_vars:
+                var = next((v for v in recipe_vars if v.get('name') == var_name), None)
+                if var:
+                    var_type = var.get('type', '')
+                    if var_type == 'Float':
+                        editor = QtWidgets.QDoubleSpinBox(self.ui_dynamic_parameters)
+                        editor.setMinimum(float(var.get('min', -999999)))
+                        editor.setMaximum(float(var.get('max', 999999)))
+                        editor.setValue(float(var.get('value', 0)))
+                    elif var_type == 'Integer':
+                        editor = QtWidgets.QSpinBox(self.ui_dynamic_parameters)
+                        editor.setMinimum(int(var.get('min', -999999)))
+                        editor.setMaximum(int(var.get('max', 999999)))
+                        editor.setValue(int(var.get('value', 0)))
+                    elif var_type == 'Boolean':
+                        editor = QtWidgets.QCheckBox(self.ui_dynamic_parameters)
+                        editor.setChecked(var.get('value', False))
+                    elif var_type == 'List':
+                        editor = QtWidgets.QComboBox(self.ui_dynamic_parameters)
+                        list_values = var.get('list_values', [])
+                        if isinstance(list_values, str):
+                            list_values = [x.strip() for x in list_values.split(',') if x.strip()]
+                        elif isinstance(list_values, list):
+                            list_values = [str(x).strip() for x in list_values if str(x).strip()]
+                        editor.addItems(list_values)
+                        current_value = var.get('value', '')
+                        index = editor.findText(str(current_value))
+                        if index >= 0:
+                            editor.setCurrentIndex(index)
+                    self.ui_dynamic_parameters.setCellWidget(row, insert_pos, editor)
 
     def deleteStep(self):
         """Delete the step column at the position specified by ui_step spinbox"""
