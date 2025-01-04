@@ -28,10 +28,14 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
 
         # Setup dynamic parameters table
         self.ui_dynamic_parameters.setColumnCount(2)
-        self.ui_dynamic_parameters.setHorizontalHeaderLabels(["Parameter", "Value"])
+        self.ui_dynamic_parameters.setHorizontalHeaderLabels(["Parameter", "Step 1"])
         header = self.ui_dynamic_parameters.horizontalHeader()
         header.setSectionResizeMode(0, QtWidgets.QHeaderView.Interactive)
         header.setSectionResizeMode(1, QtWidgets.QHeaderView.Interactive)
+
+        # Connect step manipulation buttons
+        self.ui_insert_step.clicked.connect(self.insertStep)
+        self.ui_delete_step.clicked.connect(self.deleteStep)
 
         self._settings = QtCore.QSettings('OpenToolController', 'test1')
         geometry = self._settings.value('recipe_editor_geometry', bytes('', 'utf-8'))
@@ -195,5 +199,69 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
     def enableEditRecipe(self, enable):
         pass
 
+    def insertStep(self):
+        """Insert a new step column at the position specified by ui_step spinbox"""
+        current_cols = self.ui_dynamic_parameters.columnCount()
+        insert_pos = self.ui_step.value()
+        
+        # Ensure insert position is valid
+        if insert_pos < 1 or insert_pos > current_cols:
+            return
+            
+        # Insert new column
+        self.ui_dynamic_parameters.insertColumn(insert_pos)
+        
+        # Update column headers
+        self.updateStepHeaders()
+        
+        # Copy editors from previous column for each row
+        for row in range(self.ui_dynamic_parameters.rowCount()):
+            prev_widget = self.ui_dynamic_parameters.cellWidget(row, insert_pos - 1)
+            if prev_widget:
+                new_widget = self.createEditorWidget(prev_widget, row)
+                self.ui_dynamic_parameters.setCellWidget(row, insert_pos, new_widget)
+
+    def deleteStep(self):
+        """Delete the step column at the position specified by ui_step spinbox"""
+        current_cols = self.ui_dynamic_parameters.columnCount()
+        delete_pos = self.ui_step.value()
+        
+        # Ensure delete position is valid (can't delete parameter column)
+        if delete_pos < 1 or delete_pos >= current_cols:
+            return
+            
+        # Remove column
+        self.ui_dynamic_parameters.removeColumn(delete_pos)
+        
+        # Update column headers
+        self.updateStepHeaders()
+
+    def updateStepHeaders(self):
+        """Update the column headers to maintain proper step numbering"""
+        headers = ["Parameter"]
+        for i in range(1, self.ui_dynamic_parameters.columnCount()):
+            headers.append(f"Step {i}")
+        self.ui_dynamic_parameters.setHorizontalHeaderLabels(headers)
+
+    def createEditorWidget(self, template_widget, row):
+        """Create a new editor widget based on the template widget type"""
+        if isinstance(template_widget, QtWidgets.QDoubleSpinBox):
+            editor = QtWidgets.QDoubleSpinBox(self.ui_dynamic_parameters)
+            editor.setMinimum(template_widget.minimum())
+            editor.setMaximum(template_widget.maximum())
+            editor.setValue(template_widget.value())
+        elif isinstance(template_widget, QtWidgets.QSpinBox):
+            editor = QtWidgets.QSpinBox(self.ui_dynamic_parameters)
+            editor.setMinimum(template_widget.minimum())
+            editor.setMaximum(template_widget.maximum())
+            editor.setValue(template_widget.value())
+        elif isinstance(template_widget, QtWidgets.QCheckBox):
+            editor = QtWidgets.QCheckBox(self.ui_dynamic_parameters)
+            editor.setChecked(template_widget.isChecked())
+        elif isinstance(template_widget, QtWidgets.QComboBox):
+            editor = QtWidgets.QComboBox(self.ui_dynamic_parameters)
+            editor.addItems([template_widget.itemText(i) for i in range(template_widget.count())])
+            editor.setCurrentText(template_widget.currentText())
+        return editor
 
 
