@@ -33,6 +33,10 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
         header.setSectionResizeMode(0, QtWidgets.QHeaderView.Interactive)
         header.setSectionResizeMode(1, QtWidgets.QHeaderView.Interactive)
 
+        # Setup step spinbox
+        self.ui_step.setMinimum(1)
+        self.ui_step.setMaximum(2)  # Initial max is current columns + 1
+        
         # Connect step manipulation buttons
         self.ui_insert_step.clicked.connect(self.insertStep)
         self.ui_delete_step.clicked.connect(self.deleteStep)
@@ -211,8 +215,9 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
         # Insert new column
         self.ui_dynamic_parameters.insertColumn(insert_pos)
         
-        # Update column headers
+        # Update column headers and spinbox maximum
         self.updateStepHeaders()
+        self.ui_step.setMaximum(self.ui_dynamic_parameters.columnCount())
         
         # Copy editors from previous column for each row
         for row in range(self.ui_dynamic_parameters.rowCount()):
@@ -233,8 +238,9 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
         # Remove column
         self.ui_dynamic_parameters.removeColumn(delete_pos)
         
-        # Update column headers
+        # Update column headers and spinbox maximum
         self.updateStepHeaders()
+        self.ui_step.setMaximum(self.ui_dynamic_parameters.columnCount())
 
     def updateStepHeaders(self):
         """Update the column headers to maintain proper step numbering"""
