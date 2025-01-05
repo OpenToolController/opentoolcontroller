@@ -266,21 +266,7 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
             elif action == delete_action:
                 self.deleteStep(column)
                 
-                # Create editors for the new column
-                for row in range(self.ui_dynamic_parameters.rowCount()):
-                    var_name = self.ui_dynamic_parameters.item(row, 0).text()
-                    recipe_vars = self._current_node.data(col.RECIPE_VARIABLES)
-                    if recipe_vars:
-                        var = next((v for v in recipe_vars if v.get('name') == var_name), None)
-                        if var:
-                            editor = self.createEditorForVariable(var, self.ui_dynamic_parameters)
-                            if editor:
-                                self.ui_dynamic_parameters.setCellWidget(row, insert_pos, editor)
                 
-                # Update recipe data after insertion
-                self.onParameterChanged(None)
-
-
 
 
     def copyStep(self, column):
@@ -596,6 +582,7 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
         
         # Update recipe data after deletion
         self.onParameterChanged(None)
+        print("done delete")
 
     def updateStepHeaders(self):
         """Update the column headers to maintain proper step numbering"""
