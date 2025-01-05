@@ -60,7 +60,7 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
         
         # Connect step manipulation buttons
         self.ui_insert_step.clicked.connect(self.insertStep)
-        self.ui_delete_step.clicked.connect(self.deleteStep)
+        self.ui_delete_step.clicked.connect(lambda: self.deleteStep(None))
         self.ui_save_as.clicked.connect(self.saveRecipeAs)
 
         self._settings = QtCore.QSettings('OpenToolController', 'test1')
