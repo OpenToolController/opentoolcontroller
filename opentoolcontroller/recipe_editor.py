@@ -237,6 +237,10 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
             
             insert_action = menu.addAction("Insert Step")
             
+            # Add delete action only for existing columns
+            if column > 0:
+                delete_action = menu.addAction("Delete Step")
+            
             # Show menu and get selected action
             action = menu.exec_(self.ui_dynamic_parameters.horizontalHeader().viewport().mapToGlobal(pos))
             
@@ -259,6 +263,13 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
                 self.ui_dynamic_parameters.insertColumn(insert_pos)
                 self.updateStepHeaders()
                 self.ui_step.setMaximum(self.ui_dynamic_parameters.columnCount())
+            elif action == delete_action:
+                # Remove column
+                self.ui_dynamic_parameters.removeColumn(column)
+                self.updateStepHeaders()
+                self.ui_step.setMaximum(self.ui_dynamic_parameters.columnCount())
+                # Update recipe data after deletion
+                self.onParameterChanged(None)
                 
                 # Create editors for the new column
                 for row in range(self.ui_dynamic_parameters.rowCount()):
