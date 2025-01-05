@@ -452,6 +452,7 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
                     display_name = f"{recipe_name}*" if modified else recipe_name
                     item = QtWidgets.QListWidgetItem(display_name)
                     item.setData(QtCore.Qt.UserRole, file_path)  # Store full path in item data
+                    print("here: ", file_path)
                     item.setToolTip(file_path)  # Keep tooltip for visibility on hover
                     self.ui_recipes.addItem(item)
 
