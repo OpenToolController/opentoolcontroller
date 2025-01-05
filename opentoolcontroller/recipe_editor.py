@@ -217,40 +217,29 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
         return recipe_data
 
     def showHeaderContextMenu(self, pos):
-        """Show context menu for header"""
-        # Get the column number
-        column = self.ui_dynamic_parameters.horizontalHeader().logicalIndexAt(pos)
-        header_width = sum(self.ui_dynamic_parameters.horizontalHeader().sectionSize(i) 
-                          for i in range(self.ui_dynamic_parameters.columnCount()))
-        
-        # Show menu for step columns or when clicking past the last column
-        if column > 0 or pos.x() > header_width:
-            menu = QtWidgets.QMenu(self)
-            
-            # Add copy action only for existing columns
-            if column > 0:
-                copy_action = menu.addAction("Copy Step")
-            
-            # Add paste action if we have clipboard data
-            paste_action = menu.addAction("Paste Step")
-            paste_action.setEnabled(self._step_clipboard is not None)
-            
-            # Show menu and get selected action
-            action = menu.exec_(self.ui_dynamic_parameters.horizontalHeader().viewport().mapToGlobal(pos))
-            
-            if action == paste_action:
-                # If clicking past last column, paste at end
-                if pos.x() > header_width:
-                    # Add new column at the end
-                    new_column = self.ui_dynamic_parameters.columnCount()
-                    self.ui_dynamic_parameters.insertColumn(new_column)
-                    self.updateStepHeaders()
-                    self.ui_step.setMaximum(self.ui_dynamic_parameters.columnCount())
-                    self.pasteStep(new_column)
-                else:
-                    self.pasteStep(column)
-            elif column > 0 and action == copy_action:
-                self.copyStep(column)
+        """Show context menu for header"""                                                                                                                                                            
+        # Get the column number                                                                                                                                                                       
+        column = self.ui_dynamic_parameters.horizontalHeader().logicalIndexAt(pos)                                                                                                                    
+                                                                                                                                                                                                       
+        # Only show menu for step columns (not parameter column)                                                                                                                                      
+        if column > 0:                                                                                                                                                                                
+            menu = QtWidgets.QMenu(self)                                                                                                                                                              
+                                                                                                                                                                                                       
+            # Add copy and paste actions                                                                                                                                                              
+            copy_action = menu.addAction("Copy Step")                                                                                                                                                 
+            paste_action = menu.addAction("Paste Step")                                                                                                                                               
+            paste_action.setEnabled(self._step_clipboard is not None)                                                                                                                                 
+                                                                                                                                                                                                       
+            # Show menu and get selected action                                                                                                                                                       
+            action = menu.exec_(self.ui_dynamic_parameters.horizontalHeader().viewport().mapToGlobal(pos))                                                                                            
+                                                                                                                                                                                                       
+            if action == copy_action:                                                                                                                                                                 
+                self.copyStep(column)                                                                                                                                                                 
+            elif action == paste_action:                                                                                                                                                              
+                self.pasteStep(column)  
+
+
+
 
     def copyStep(self, column):
         """Copy all parameter values from a step as a dictionary"""
