@@ -21,6 +21,7 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
         super(recipe_editor_base, self).__init__(parent)
         self.setupUi(self)
         self._allow_parameter_changed = True
+        self._updating_ui = False
         
         # Dictionary to store open recipes for each node
         self._node_recipes = {}  # {node_id: [(recipe_name, recipe_data, file_path, modified), ...]}
@@ -186,18 +187,19 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
             if not current_item:
                 return
                 
-            recipe_name = current_item.text()
+            file_path = current_item.data(QtCore.Qt.UserRole)
             node_id = id(self._current_node)
             
             # Find the recipe data
             if node_id in self._node_recipes:
-                for i, (name, data, file_path, _) in enumerate(self._node_recipes[node_id]):
-                    if name == recipe_name:
+                for i, (name, data, path, _) in enumerate(self._node_recipes[node_id]):
+                    if path == file_path:
                         # Update recipe data with current values
                         updated_data = self.getCurrentRecipeData()
-                        self._node_recipes[node_id][i] = (name, updated_data, file_path, True)
+                        self._node_recipes[node_id][i] = (name, updated_data, path, True)
+                        # Update UI to show modified state
+                        self.setRecipeModified()
                         break
-            print('\n', self._node_recipes)
 
     def getCurrentRecipeData(self):
         """Get current recipe data from both parameter tables"""
@@ -371,6 +373,34 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
                     # Update recipe list
                     self.updateRecipeList()
                     self.ui_recipes.setCurrentRow(0)
+                    break
+
+    def setRecipeModified(self):
+        """Set the current recipe as modified and update UI"""
+        if self._updating_ui or not self._allow_parameter_changed:
+            return
+            
+        if not self._current_node:
+            return
+            
+        current_item = self.ui_recipes.currentItem()
+        if not current_item:
+            return
+            
+        file_path = current_item.data(QtCore.Qt.UserRole)
+        node_id = id(self._current_node)
+        
+        # Find and update the recipe data
+        if node_id in self._node_recipes:
+            for i, (name, data, path, modified) in enumerate(self._node_recipes[node_id]):
+                if path == file_path and not modified:
+                    # Set modified flag
+                    self._node_recipes[node_id][i] = (name, data, path, True)
+                    
+                    # Update UI
+                    self._updating_ui = True
+                    current_item.setText(f"{name}*")
+                    self._updating_ui = False
                     break
 
     def enableEditRecipe(self, enable):
@@ -665,8 +695,9 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
                     if editor:
                         self.ui_dynamic_parameters.setCellWidget(row, insert_pos, editor)
         
-        # Update recipe data after inserting column
+        # Update recipe data and modified state after inserting column
         self.onParameterChanged(None)
+        self.setRecipeModified()
 
     def deleteStep(self, column=None):
         """Delete the specified step column or the one specified by ui_step spinbox"""
@@ -686,8 +717,9 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
         self.updateStepHeaders()
         self.ui_step.setMaximum(self.ui_dynamic_parameters.columnCount())
         
-        # Update recipe data after deletion
+        # Update recipe data and modified state after deletion
         self.onParameterChanged(None)
+        self.setRecipeModified()
 
     def updateStepHeaders(self):
         """Update the column headers to maintain proper step numbering"""
