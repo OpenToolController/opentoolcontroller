@@ -88,8 +88,6 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
         
         # Get recipe variables from node
         recipe_vars = node.data(col.RECIPE_VARIABLES)
-        print("node: ", node)
-        print("HMMM:", recipe_vars)
         if recipe_vars:
             # Filter for static and dynamic variables
             static_vars = [var for var in recipe_vars if not var.get('dynamic', False)]
@@ -280,9 +278,6 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
                     widget = self.ui_dynamic_parameters.cellWidget(row, column)
                     if not widget:
                         # Create widget if it doesn't exist
-                        print("\nHERE:", self._current_node)
-                        print("\nHERE:", self._current_node.data(col.RECIPE_VARIABLES))
-                        print("\n")
                         recipe_vars = self._current_node.data(col.RECIPE_VARIABLES)
                         var = next((v for v in recipe_vars if v.get('name') == param_name), None)
                         if var:
