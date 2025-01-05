@@ -578,8 +578,10 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
         """Delete the specified step column or the one specified by ui_step spinbox"""
         current_cols = self.ui_dynamic_parameters.columnCount()
         
+        print('col:', column)
         # Use provided column or get from spinbox
         delete_pos = column if column is not None else self.ui_step.value()
+        print("Del: ", current_cols, delete_pos)
         
         # Ensure delete position is valid (can't delete parameter column)
         if delete_pos < 1 or delete_pos >= current_cols:
