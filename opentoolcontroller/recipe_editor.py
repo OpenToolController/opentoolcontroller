@@ -2,6 +2,7 @@
 from PyQt5 import QtCore, QtGui, uic, QtWidgets
 import os
 import json
+from pathlib import Path
 
 from opentoolcontroller.views.widgets.tool_tree_view import ToolTreeView
 from opentoolcontroller.tool_model import LeafFilterProxyModel
@@ -19,6 +20,15 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
     def __init__(self, parent=None):
         super(recipe_editor_base, self).__init__(parent)
         self.setupUi(self)
+        
+        # Dictionary to store open recipes for each node
+        self._node_recipes = {}  # {node_id: [(recipe_name, recipe_data), ...]}
+        
+        # Setup recipe list
+        self.ui_recipes.itemSelectionChanged.connect(self.recipeSelectionChanged)
+        
+        # Connect open button
+        self.ui_open.clicked.connect(self.openRecipe)
 
         # Setup static parameters table
         self.ui_static_parameters.setColumnCount(2)
@@ -67,6 +77,9 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
 
         node = current_index.internalPointer()
         self._current_node = node
+        
+        # Update recipe list for the new node
+        self.updateRecipeList()
         
         # Clear existing rows in both parameters tables
         self.ui_static_parameters.setRowCount(0)
@@ -145,6 +158,146 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
 
     def enableEditRecipe(self, enable):
         pass
+
+    def openRecipe(self):
+        """Open a recipe file and add it to the current node's recipe list"""
+        if not self._current_node:
+            return
+            
+        filename, _ = QtWidgets.QFileDialog.getOpenFileName(
+            self, "Open Recipe", "", "Recipe Files (*.rcp);;All Files (*)"
+        )
+        
+        if filename:
+            try:
+                with open(filename, 'r') as f:
+                    recipe_data = json.load(f)
+                
+                # Validate recipe against node parameters
+                if self.validateRecipe(recipe_data):
+                    # Add to node's recipe list
+                    node_id = id(self._current_node)
+                    recipe_name = Path(filename).name
+                    if node_id not in self._node_recipes:
+                        self._node_recipes[node_id] = []
+                    self._node_recipes[node_id].append((recipe_name, recipe_data))
+                    
+                    # Update recipe list
+                    self.updateRecipeList()
+                    
+                    # Select the newly added recipe
+                    last_row = self.ui_recipes.count() - 1
+                    self.ui_recipes.setCurrentRow(last_row)
+                else:
+                    QtWidgets.QMessageBox.warning(
+                        self,
+                        "Invalid Recipe",
+                        "Recipe parameters do not match the selected node's parameters."
+                    )
+                    
+            except Exception as e:
+                QtWidgets.QMessageBox.critical(
+                    self,
+                    "Error",
+                    f"Failed to open recipe: {str(e)}"
+                )
+
+    def validateRecipe(self, recipe_data):
+        """Validate recipe parameters against current node parameters"""
+        if not self._current_node:
+            return False
+            
+        node_vars = self._current_node.data(col.RECIPE_VARIABLES)
+        if not node_vars:
+            return False
+            
+        # Get sets of parameter names from node and recipe
+        node_static = {var['name'] for var in node_vars if not var.get('dynamic', False)}
+        node_dynamic = {var['name'] for var in node_vars if var.get('dynamic', False)}
+        
+        recipe_static = set(recipe_data.get('static_parameters', {}).keys())
+        recipe_dynamic = set(recipe_data.get('dynamic_parameters', {}).keys())
+        
+        # Check if parameter sets match exactly
+        return (node_static == recipe_static and 
+                node_dynamic == recipe_dynamic)
+
+    def updateRecipeList(self):
+        """Update the recipe list for the current node"""
+        self.ui_recipes.clear()
+        if self._current_node:
+            node_id = id(self._current_node)
+            if node_id in self._node_recipes:
+                for recipe_name, _ in self._node_recipes[node_id]:
+                    self.ui_recipes.addItem(recipe_name)
+
+    def recipeSelectionChanged(self):
+        """Handle recipe selection change"""
+        current_item = self.ui_recipes.currentItem()
+        if current_item and self._current_node:
+            recipe_name = current_item.text()
+            node_id = id(self._current_node)
+            
+            # Find the recipe data
+            recipe_data = None
+            if node_id in self._node_recipes:
+                for name, data in self._node_recipes[node_id]:
+                    if name == recipe_name:
+                        recipe_data = data
+                        break
+            
+            if recipe_data:
+                self.displayRecipe(recipe_data)
+
+    def displayRecipe(self, recipe_data):
+        """Display the recipe data in the parameter tables"""
+        # Handle static parameters
+        static_params = recipe_data.get('static_parameters', {})
+        for row in range(self.ui_static_parameters.rowCount()):
+            param_name = self.ui_static_parameters.item(row, 0).text()
+            if param_name in static_params:
+                widget = self.ui_static_parameters.cellWidget(row, 1)
+                self.setWidgetValue(widget, static_params[param_name])
+        
+        # Handle dynamic parameters
+        dynamic_params = recipe_data.get('dynamic_parameters', {})
+        for row in range(self.ui_dynamic_parameters.rowCount()):
+            param_name = self.ui_dynamic_parameters.item(row, 0).text()
+            if param_name in dynamic_params:
+                step_values = dynamic_params[param_name]
+                
+                # Add columns if needed
+                while self.ui_dynamic_parameters.columnCount() < len(step_values) + 1:
+                    col = self.ui_dynamic_parameters.columnCount()
+                    self.ui_dynamic_parameters.insertColumn(col)
+                    self.updateStepHeaders()
+                
+                # Set values for each step
+                for col, value in enumerate(step_values, start=1):
+                    widget = self.ui_dynamic_parameters.cellWidget(row, col)
+                    if not widget:
+                        # Create widget if it doesn't exist
+                        recipe_vars = self._current_node.data(col.RECIPE_VARIABLES)
+                        var = next((v for v in recipe_vars if v.get('name') == param_name), None)
+                        if var:
+                            widget = self.createEditorForVariable(var, self.ui_dynamic_parameters)
+                            if widget:
+                                self.ui_dynamic_parameters.setCellWidget(row, col, widget)
+                    if widget:
+                        self.setWidgetValue(widget, value)
+
+    def setWidgetValue(self, widget, value):
+        """Set a widget's value based on its type"""
+        if isinstance(widget, QtWidgets.QDoubleSpinBox):
+            widget.setValue(float(value))
+        elif isinstance(widget, QtWidgets.QSpinBox):
+            widget.setValue(int(value))
+        elif isinstance(widget, QtWidgets.QCheckBox):
+            widget.setChecked(bool(value))
+        elif isinstance(widget, QtWidgets.QComboBox):
+            index = widget.findText(str(value))
+            if index >= 0:
+                widget.setCurrentIndex(index)
 
     def saveRecipeAs(self):
         """Save the recipe parameters to a JSON file"""
