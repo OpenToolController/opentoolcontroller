@@ -46,6 +46,13 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
         header.setSectionResizeMode(0, QtWidgets.QHeaderView.Interactive)
         header.setSectionResizeMode(1, QtWidgets.QHeaderView.Interactive)
         self.ui_dynamic_parameters.itemChanged.connect(self.onParameterChanged)
+        
+        # Enable context menu for header
+        self.ui_dynamic_parameters.horizontalHeader().setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.ui_dynamic_parameters.horizontalHeader().customContextMenuRequested.connect(self.showHeaderContextMenu)
+        
+        # Store clipboard data
+        self._step_clipboard = None
 
         # Setup step spinbox
         self.ui_step.setMinimum(1)
@@ -208,6 +215,57 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
             recipe_data['dynamic_parameters'][param_name] = step_values
             
         return recipe_data
+
+    def showHeaderContextMenu(self, pos):
+        """Show context menu for header"""
+        # Get the column number
+        column = self.ui_dynamic_parameters.horizontalHeader().logicalIndexAt(pos)
+        
+        # Only show menu for step columns (not parameter column)
+        if column > 0:
+            menu = QtWidgets.QMenu(self)
+            
+            # Add copy and paste actions
+            copy_action = menu.addAction("Copy Step")
+            paste_action = menu.addAction("Paste Step")
+            paste_action.setEnabled(self._step_clipboard is not None)
+            
+            # Show menu and get selected action
+            action = menu.exec_(self.ui_dynamic_parameters.horizontalHeader().viewport().mapToGlobal(pos))
+            
+            if action == copy_action:
+                self.copyStep(column)
+            elif action == paste_action:
+                self.pasteStep(column)
+
+    def copyStep(self, column):
+        """Copy all parameter values from a step"""
+        step_data = []
+        for row in range(self.ui_dynamic_parameters.rowCount()):
+            widget = self.ui_dynamic_parameters.cellWidget(row, column)
+            if widget:
+                value = self._getWidgetValue(widget)
+                step_data.append(value)
+        self._step_clipboard = step_data
+
+    def pasteStep(self, column):
+        """Paste copied step data into the specified column"""
+        if not self._step_clipboard or len(self._step_clipboard) != self.ui_dynamic_parameters.rowCount():
+            QtWidgets.QMessageBox.warning(
+                self,
+                "Invalid Paste",
+                "Clipboard data does not match current parameters."
+            )
+            return
+            
+        # Paste values into widgets
+        for row, value in enumerate(self._step_clipboard):
+            widget = self.ui_dynamic_parameters.cellWidget(row, column)
+            if widget:
+                self.setWidgetValue(widget, value)
+        
+        # Update recipe data after paste
+        self.onParameterChanged(None)
 
     def enableEditRecipe(self, enable):
         pass
