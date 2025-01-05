@@ -37,6 +37,7 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
         header = self.ui_static_parameters.horizontalHeader()
         header.setSectionResizeMode(0, QtWidgets.QHeaderView.Interactive)
         header.setSectionResizeMode(1, QtWidgets.QHeaderView.Interactive)
+        self.ui_static_parameters.itemChanged.connect(self.onParameterChanged)
 
         # Setup dynamic parameters table
         self.ui_dynamic_parameters.setColumnCount(2)
@@ -44,6 +45,7 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
         header = self.ui_dynamic_parameters.horizontalHeader()
         header.setSectionResizeMode(0, QtWidgets.QHeaderView.Interactive)
         header.setSectionResizeMode(1, QtWidgets.QHeaderView.Interactive)
+        self.ui_dynamic_parameters.itemChanged.connect(self.onParameterChanged)
 
         # Setup step spinbox
         self.ui_step.setMinimum(1)
@@ -156,6 +158,56 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
         self._settings.setValue('recipe_editor_splitter_2_state', splitter_2_state)
         super().closeEvent(event)
 
+
+    def onParameterChanged(self, item):
+        """Handle changes to parameter values in either table"""
+        if not self._current_node:
+            return
+            
+        current_item = self.ui_recipes.currentItem()
+        if not current_item:
+            return
+            
+        recipe_name = current_item.text()
+        node_id = id(self._current_node)
+        
+        # Find the recipe data
+        if node_id in self._node_recipes:
+            for i, (name, data) in enumerate(self._node_recipes[node_id]):
+                if name == recipe_name:
+                    # Update recipe data with current values
+                    updated_data = self.getCurrentRecipeData()
+                    self._node_recipes[node_id][i] = (name, updated_data)
+                    break
+
+    def getCurrentRecipeData(self):
+        """Get current recipe data from both parameter tables"""
+        recipe_data = {
+            'static_parameters': {},
+            'dynamic_parameters': {}
+        }
+        
+        # Collect static parameters
+        for row in range(self.ui_static_parameters.rowCount()):
+            param_name = self.ui_static_parameters.item(row, 0).text()
+            widget = self.ui_static_parameters.cellWidget(row, 1)
+            value = self._getWidgetValue(widget)
+            recipe_data['static_parameters'][param_name] = value
+        
+        # Collect dynamic parameters
+        for row in range(self.ui_dynamic_parameters.rowCount()):
+            param_name = self.ui_dynamic_parameters.item(row, 0).text()
+            step_values = []
+            
+            # Collect values for each step
+            for column in range(1, self.ui_dynamic_parameters.columnCount()):
+                widget = self.ui_dynamic_parameters.cellWidget(row, column)
+                value = self._getWidgetValue(widget)
+                step_values.append(value)
+            
+            recipe_data['dynamic_parameters'][param_name] = step_values
+            
+        return recipe_data
 
     def enableEditRecipe(self, enable):
         pass
@@ -433,14 +485,17 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
             editor.setMinimum(float(var.get('min', -999999)))
             editor.setMaximum(float(var.get('max', 999999)))
             editor.setValue(float(var.get('value', 0)))
+            editor.valueChanged.connect(lambda: self.onParameterChanged(None))
         elif var_type == 'Integer':
             editor = QtWidgets.QSpinBox(parent_widget)
             editor.setMinimum(int(var.get('min', -999999)))
             editor.setMaximum(int(var.get('max', 999999)))
             editor.setValue(int(var.get('value', 0)))
+            editor.valueChanged.connect(lambda: self.onParameterChanged(None))
         elif var_type == 'Boolean':
             editor = QtWidgets.QCheckBox(parent_widget)
             editor.setChecked(var.get('value', False))
+            editor.stateChanged.connect(lambda: self.onParameterChanged(None))
         elif var_type == 'List':
             editor = QtWidgets.QComboBox(parent_widget)
             list_values = var.get('list_values', [])
@@ -453,6 +508,7 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
             index = editor.findText(str(current_value))
             if index >= 0:
                 editor.setCurrentIndex(index)
+            editor.currentTextChanged.connect(lambda: self.onParameterChanged(None))
         
         return editor
 
