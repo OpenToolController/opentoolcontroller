@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtCore, QtGui, uic, QtWidgets
 import os
+import json
 
 from opentoolcontroller.views.widgets.tool_tree_view import ToolTreeView
 from opentoolcontroller.tool_model import LeafFilterProxyModel
@@ -40,6 +41,7 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
         # Connect step manipulation buttons
         self.ui_insert_step.clicked.connect(self.insertStep)
         self.ui_delete_step.clicked.connect(self.deleteStep)
+        self.ui_save_as.clicked.connect(self.saveRecipeAs)
 
         self._settings = QtCore.QSettings('OpenToolController', 'test1')
         geometry = self._settings.value('recipe_editor_geometry', bytes('', 'utf-8'))
@@ -143,6 +145,73 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
 
     def enableEditRecipe(self, enable):
         pass
+
+    def saveRecipeAs(self):
+        """Save the recipe parameters to a JSON file"""
+        filename, _ = QtWidgets.QFileDialog.getSaveFileName(
+            self, "Save Recipe", "", "Recipe Files (*.rcp);;All Files (*)"
+        )
+        
+        if filename:
+            # Add .rcp extension if not present
+            if not filename.endswith('.rcp'):
+                filename += '.rcp'
+            
+            recipe_data = {
+                'static_parameters': [],
+                'dynamic_parameters': []
+            }
+            
+            # Collect static parameters
+            for row in range(self.ui_static_parameters.rowCount()):
+                param_name = self.ui_static_parameters.item(row, 0).text()
+                widget = self.ui_static_parameters.cellWidget(row, 1)
+                value = self._getWidgetValue(widget)
+                
+                recipe_data['static_parameters'].append({
+                    'name': param_name,
+                    'value': value
+                })
+            
+            # Collect dynamic parameters
+            dynamic_params = []
+            for row in range(self.ui_dynamic_parameters.rowCount()):
+                param_name = self.ui_dynamic_parameters.item(row, 0).text()
+                step_values = []
+                
+                # Collect values for each step
+                for col in range(1, self.ui_dynamic_parameters.columnCount()):
+                    widget = self.ui_dynamic_parameters.cellWidget(row, col)
+                    value = self._getWidgetValue(widget)
+                    step_values.append(value)
+                
+                recipe_data['dynamic_parameters'].append({
+                    'name': param_name,
+                    'steps': step_values
+                })
+            
+            # Save to file
+            try:
+                with open(filename, 'w') as f:
+                    json.dump(recipe_data, f, indent=4)
+            except Exception as e:
+                QtWidgets.QMessageBox.critical(
+                    self,
+                    "Error",
+                    f"Failed to save recipe: {str(e)}"
+                )
+
+    def _getWidgetValue(self, widget):
+        """Helper method to get the value from a widget based on its type"""
+        if isinstance(widget, QtWidgets.QDoubleSpinBox):
+            return widget.value()
+        elif isinstance(widget, QtWidgets.QSpinBox):
+            return widget.value()
+        elif isinstance(widget, QtWidgets.QCheckBox):
+            return widget.isChecked()
+        elif isinstance(widget, QtWidgets.QComboBox):
+            return widget.currentText()
+        return None
 
     def insertStep(self):
         """Insert a new step column at the position specified by ui_step spinbox"""
