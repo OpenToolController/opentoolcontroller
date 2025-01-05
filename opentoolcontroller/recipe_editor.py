@@ -158,8 +158,8 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
                 filename += '.rcp'
             
             recipe_data = {
-                'static_parameters': [],
-                'dynamic_parameters': []
+                'static_parameters': {},
+                'dynamic_parameters': {}
             }
             
             # Collect static parameters
@@ -167,14 +167,9 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
                 param_name = self.ui_static_parameters.item(row, 0).text()
                 widget = self.ui_static_parameters.cellWidget(row, 1)
                 value = self._getWidgetValue(widget)
-                
-                recipe_data['static_parameters'].append({
-                    'name': param_name,
-                    'value': value
-                })
+                recipe_data['static_parameters'][param_name] = value
             
             # Collect dynamic parameters
-            dynamic_params = []
             for row in range(self.ui_dynamic_parameters.rowCount()):
                 param_name = self.ui_dynamic_parameters.item(row, 0).text()
                 step_values = []
@@ -185,10 +180,7 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
                     value = self._getWidgetValue(widget)
                     step_values.append(value)
                 
-                recipe_data['dynamic_parameters'].append({
-                    'name': param_name,
-                    'steps': step_values
-                })
+                recipe_data['dynamic_parameters'][param_name] = step_values
             
             # Save to file
             try:
