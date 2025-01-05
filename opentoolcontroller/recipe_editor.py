@@ -22,7 +22,7 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
         self.setupUi(self)
         
         # Dictionary to store open recipes for each node
-        self._node_recipes = {}  # {node_id: [(recipe_name, recipe_data), ...]}
+        self._node_recipes = {}  # {node_id: [(recipe_name, recipe_data, file_path), ...]}
         self._current_node = None
         
         # Setup recipe list
@@ -62,6 +62,7 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
         self.ui_insert_step.clicked.connect(lambda: self.insertStep(None))
         self.ui_delete_step.clicked.connect(lambda: self.deleteStep(None))
         self.ui_save_as.clicked.connect(self.saveRecipeAs)
+        self.ui_save.clicked.connect(self.saveRecipe)
 
         self._settings = QtCore.QSettings('OpenToolController', 'test1')
         geometry = self._settings.value('recipe_editor_geometry', bytes('', 'utf-8'))
@@ -180,11 +181,11 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
         
         # Find the recipe data
         if node_id in self._node_recipes:
-            for i, (name, data) in enumerate(self._node_recipes[node_id]):
+            for i, (name, data, file_path) in enumerate(self._node_recipes[node_id]):
                 if name == recipe_name:
                     # Update recipe data with current values
                     updated_data = self.getCurrentRecipeData()
-                    self._node_recipes[node_id][i] = (name, updated_data)
+                    self._node_recipes[node_id][i] = (name, updated_data, file_path)
                     break
 
     def getCurrentRecipeData(self):
@@ -336,7 +337,7 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
                     recipe_name = Path(filename).name
                     if node_id not in self._node_recipes:
                         self._node_recipes[node_id] = []
-                    self._node_recipes[node_id].append((recipe_name, recipe_data))
+                    self._node_recipes[node_id].append((recipe_name, recipe_data, filename))
                     
                     # Update recipe list
                     self.updateRecipeList()
@@ -384,8 +385,10 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
         if self._current_node:
             node_id = id(self._current_node)
             if node_id in self._node_recipes:
-                for recipe_name, _ in self._node_recipes[node_id]:
-                    self.ui_recipes.addItem(recipe_name)
+                for recipe_name, _, file_path in self._node_recipes[node_id]:
+                    item = QtWidgets.QListWidgetItem(recipe_name)
+                    item.setToolTip(file_path)
+                    self.ui_recipes.addItem(item)
 
     def recipeSelectionChanged(self):
         """Handle recipe selection change"""
@@ -397,7 +400,7 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
             # Find the recipe data
             recipe_data = None
             if node_id in self._node_recipes:
-                for name, data in self._node_recipes[node_id]:
+                for name, data, _ in self._node_recipes[node_id]:
                     if name == recipe_name:
                         recipe_data = data
                         break
@@ -465,6 +468,37 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
             index = widget.findText(str(value))
             if index >= 0:
                 widget.setCurrentIndex(index)
+
+    def saveRecipe(self):
+        """Save the current recipe to its file"""
+        if not self._current_node:
+            return
+            
+        current_item = self.ui_recipes.currentItem()
+        if not current_item:
+            return
+            
+        recipe_name = current_item.text()
+        node_id = id(self._current_node)
+        
+        # Find the recipe data and file path
+        if node_id in self._node_recipes:
+            for name, data, file_path in self._node_recipes[node_id]:
+                if name == recipe_name:
+                    # Get current data
+                    recipe_data = self.getCurrentRecipeData()
+                    
+                    # Save to file
+                    try:
+                        with open(file_path, 'w') as f:
+                            json.dump(recipe_data, f, indent=4)
+                    except Exception as e:
+                        QtWidgets.QMessageBox.critical(
+                            self,
+                            "Error",
+                            f"Failed to save recipe: {str(e)}"
+                        )
+                    break
 
     def saveRecipeAs(self):
         """Save the recipe parameters to a JSON file"""
