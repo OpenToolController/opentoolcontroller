@@ -227,6 +227,12 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
         if column > 0 or pos.x() > header_width:
             menu = QtWidgets.QMenu(self)
             
+            # Initialize actions
+            copy_action = None
+            paste_action = None
+            insert_action = None
+            delete_action = None
+            
             # Add copy action only for existing columns
             if column > 0:
                 copy_action = menu.addAction("Copy Step")
