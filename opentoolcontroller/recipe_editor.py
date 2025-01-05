@@ -239,30 +239,43 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
                 self.pasteStep(column)
 
     def copyStep(self, column):
-        """Copy all parameter values from a step"""
-        step_data = []
+        """Copy all parameter values from a step as a dictionary"""
+        step_data = {}
         for row in range(self.ui_dynamic_parameters.rowCount()):
+            param_name = self.ui_dynamic_parameters.item(row, 0).text()
             widget = self.ui_dynamic_parameters.cellWidget(row, column)
             if widget:
                 value = self._getWidgetValue(widget)
-                step_data.append(value)
+                step_data[param_name] = value
         self._step_clipboard = step_data
 
     def pasteStep(self, column):
         """Paste copied step data into the specified column"""
-        if not self._step_clipboard or len(self._step_clipboard) != self.ui_dynamic_parameters.rowCount():
+        if not self._step_clipboard:
+            return
+            
+        # Verify parameters match
+        current_params = set()
+        for row in range(self.ui_dynamic_parameters.rowCount()):
+            param_name = self.ui_dynamic_parameters.item(row, 0).text()
+            current_params.add(param_name)
+            
+        clipboard_params = set(self._step_clipboard.keys())
+        
+        if current_params != clipboard_params:
             QtWidgets.QMessageBox.warning(
                 self,
                 "Invalid Paste",
-                "Clipboard data does not match current parameters."
+                "Clipboard parameters do not match current parameters."
             )
             return
             
         # Paste values into widgets
-        for row, value in enumerate(self._step_clipboard):
+        for row in range(self.ui_dynamic_parameters.rowCount()):
+            param_name = self.ui_dynamic_parameters.item(row, 0).text()
             widget = self.ui_dynamic_parameters.cellWidget(row, column)
-            if widget:
-                self.setWidgetValue(widget, value)
+            if widget and param_name in self._step_clipboard:
+                self.setWidgetValue(widget, self._step_clipboard[param_name])
         
         # Update recipe data after paste
         self.onParameterChanged(None)
