@@ -451,7 +451,8 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
                     # Add asterisk to modified recipes
                     display_name = f"{recipe_name}*" if modified else recipe_name
                     item = QtWidgets.QListWidgetItem(display_name)
-                    item.setToolTip(file_path)
+                    item.setData(QtCore.Qt.UserRole, file_path)  # Store full path in item data
+                    item.setToolTip(file_path)  # Keep tooltip for visibility on hover
                     self.ui_recipes.addItem(item)
 
         self.ui_recipes.itemSelectionChanged.connect(self.recipeSelectionChanged)
@@ -460,16 +461,14 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
         """Handle recipe selection change"""
         current_item = self.ui_recipes.currentItem()
         if current_item and self._current_node:
-            recipe_name = current_item.text()
+            file_path = current_item.data(QtCore.Qt.UserRole)
             node_id = id(self._current_node)
-            print("selected changed ", recipe_name, " - ", node_id)
-            print(self._current_node.name)
             
             # Find the recipe data
             recipe_data = None
             if node_id in self._node_recipes:
-                for name, data, _, _ in self._node_recipes[node_id]:
-                    if name == recipe_name:
+                for name, data, path, _ in self._node_recipes[node_id]:
+                    if path == file_path:
                         recipe_data = data
                         break
             
