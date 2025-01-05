@@ -20,6 +20,7 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
     def __init__(self, parent=None):
         super(recipe_editor_base, self).__init__(parent)
         self.setupUi(self)
+        self._allow_parameter_changed = True
         
         # Dictionary to store open recipes for each node
         self._node_recipes = {}  # {node_id: [(recipe_name, recipe_data, file_path, modified), ...]}
@@ -80,6 +81,7 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
 
     #INPUTS: QModelIndex, QModelIndex
     def setSelection(self, current, old):
+        self._allow_parameter_changed = False
         model = current.model()
 
         if hasattr(model, 'mapToSource'):
@@ -95,7 +97,9 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
         
         # Clear existing rows in both parameters tables
         self.ui_static_parameters.setRowCount(0)
+        self.ui_static_parameters.setColumnCount(2)
         self.ui_dynamic_parameters.setRowCount(0)
+        self.ui_dynamic_parameters.setColumnCount(2)
         
         # Get recipe variables from node
         recipe_vars = node.data(col.RECIPE_VARIABLES)
@@ -113,6 +117,7 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
                 self.ui_static_parameters.setItem(row, 0, name_item)
                 
                 # Create appropriate editor for second column based on type
+                #TODO Keep?
                 var_type = var.get('type', '')
                 
                 editor = self.createEditorForVariable(var, self.ui_static_parameters)
@@ -131,6 +136,7 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
                 self.ui_dynamic_parameters.setItem(row, 0, name_item)
                 
                 # Create appropriate editor for second column based on type
+                #TODO Keep?
                 var_type = var.get('type', '')
                 
                 editor = self.createEditorForVariable(var, self.ui_dynamic_parameters)
@@ -139,6 +145,8 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
             
             # After populating data, resize first column to content
             self.ui_dynamic_parameters.resizeColumnToContents(0)
+        self._allow_parameter_changed = True
+        self.ui_recipes.setCurrentRow(0)
 
 
     def setModel(self, model):
@@ -169,25 +177,27 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
 
 
     def onParameterChanged(self, item):
-        """Handle changes to parameter values in either table"""
-        if not self._current_node:
-            return
+        if self._allow_parameter_changed:
+            """Handle changes to parameter values in either table"""
+            if not self._current_node:
+                return
+                
+            current_item = self.ui_recipes.currentItem()
+            if not current_item:
+                return
+                
+            recipe_name = current_item.text()
+            node_id = id(self._current_node)
             
-        current_item = self.ui_recipes.currentItem()
-        if not current_item:
-            return
-            
-        recipe_name = current_item.text()
-        node_id = id(self._current_node)
-        
-        # Find the recipe data
-        if node_id in self._node_recipes:
-            for i, (name, data, file_path, _) in enumerate(self._node_recipes[node_id]):
-                if name == recipe_name:
-                    # Update recipe data with current values
-                    updated_data = self.getCurrentRecipeData()
-                    self._node_recipes[node_id][i] = (name, updated_data, file_path, True)
-                    break
+            # Find the recipe data
+            if node_id in self._node_recipes:
+                for i, (name, data, file_path, _) in enumerate(self._node_recipes[node_id]):
+                    if name == recipe_name:
+                        # Update recipe data with current values
+                        updated_data = self.getCurrentRecipeData()
+                        self._node_recipes[node_id][i] = (name, updated_data, file_path, True)
+                        break
+            print('\n', self._node_recipes)
 
     def getCurrentRecipeData(self):
         """Get current recipe data from both parameter tables"""
@@ -360,6 +370,7 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
                     
                     # Update recipe list
                     self.updateRecipeList()
+                    self.ui_recipes.setCurrentRow(0)
                     break
 
     def enableEditRecipe(self, enable):
@@ -430,6 +441,8 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
 
     def updateRecipeList(self):
         """Update the recipe list for the current node"""
+        self.ui_recipes.itemSelectionChanged.disconnect(self.recipeSelectionChanged)
+
         self.ui_recipes.clear()
         if self._current_node:
             node_id = id(self._current_node)
@@ -441,12 +454,16 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
                     item.setToolTip(file_path)
                     self.ui_recipes.addItem(item)
 
+        self.ui_recipes.itemSelectionChanged.connect(self.recipeSelectionChanged)
+
     def recipeSelectionChanged(self):
         """Handle recipe selection change"""
         current_item = self.ui_recipes.currentItem()
         if current_item and self._current_node:
             recipe_name = current_item.text()
             node_id = id(self._current_node)
+            print("selected changed ", recipe_name, " - ", node_id)
+            print(self._current_node.name)
             
             # Find the recipe data
             recipe_data = None
@@ -460,9 +477,12 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
                 self.displayRecipe(recipe_data)
 
     def displayRecipe(self, recipe_data):
+        print("displayRecipe")
+        self._allow_parameter_changed = False
         """Display the recipe data in the parameter tables"""
         # Handle static parameters
         static_params = recipe_data.get('static_parameters', {})
+        print("static_params",static_params)
         for row in range(self.ui_static_parameters.rowCount()):
             param_name = self.ui_static_parameters.item(row, 0).text()
             if param_name in static_params:
@@ -506,6 +526,7 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
                                 self.ui_dynamic_parameters.setCellWidget(row, column, widget)
                     if widget:
                         self.setWidgetValue(widget, value)
+        self._allow_parameter_changed = True
 
     def setWidgetValue(self, widget, value):
         """Set a widget's value based on its type"""
