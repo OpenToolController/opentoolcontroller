@@ -271,13 +271,13 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
                 
                 # Add columns if needed
                 while self.ui_dynamic_parameters.columnCount() < len(step_values) + 1:
-                    col = self.ui_dynamic_parameters.columnCount()
-                    self.ui_dynamic_parameters.insertColumn(col)
+                    column = self.ui_dynamic_parameters.columnCount()
+                    self.ui_dynamic_parameters.insertColumn(column)
                     self.updateStepHeaders()
                 
                 # Set values for each step
-                for col, value in enumerate(step_values, start=1):
-                    widget = self.ui_dynamic_parameters.cellWidget(row, col)
+                for column, value in enumerate(step_values, start=1):
+                    widget = self.ui_dynamic_parameters.cellWidget(row, column)
                     if not widget:
                         # Create widget if it doesn't exist
                         print("\nHERE:", self._current_node)
@@ -288,7 +288,7 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
                         if var:
                             widget = self.createEditorForVariable(var, self.ui_dynamic_parameters)
                             if widget:
-                                self.ui_dynamic_parameters.setCellWidget(row, col, widget)
+                                self.ui_dynamic_parameters.setCellWidget(row, column, widget)
                     if widget:
                         self.setWidgetValue(widget, value)
 
@@ -334,8 +334,8 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
                 step_values = []
                 
                 # Collect values for each step
-                for col in range(1, self.ui_dynamic_parameters.columnCount()):
-                    widget = self.ui_dynamic_parameters.cellWidget(row, col)
+                for column in range(1, self.ui_dynamic_parameters.columnCount()):
+                    widget = self.ui_dynamic_parameters.cellWidget(row, column)
                     value = self._getWidgetValue(widget)
                     step_values.append(value)
                 
