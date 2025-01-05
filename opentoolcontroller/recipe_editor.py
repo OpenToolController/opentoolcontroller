@@ -264,12 +264,7 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
                 self.updateStepHeaders()
                 self.ui_step.setMaximum(self.ui_dynamic_parameters.columnCount())
             elif action == delete_action:
-                # Remove column
-                self.ui_dynamic_parameters.removeColumn(column)
-                self.updateStepHeaders()
-                self.ui_step.setMaximum(self.ui_dynamic_parameters.columnCount())
-                # Update recipe data after deletion
-                self.onParameterChanged(None)
+                self.deleteStep(column)
                 
                 # Create editors for the new column
                 for row in range(self.ui_dynamic_parameters.rowCount()):
@@ -579,10 +574,12 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
         # Update recipe data after inserting column
         self.onParameterChanged(None)
 
-    def deleteStep(self):
-        """Delete the step column at the position specified by ui_step spinbox"""
+    def deleteStep(self, column=None):
+        """Delete the specified step column or the one specified by ui_step spinbox"""
         current_cols = self.ui_dynamic_parameters.columnCount()
-        delete_pos = self.ui_step.value()
+        
+        # Use provided column or get from spinbox
+        delete_pos = column if column is not None else self.ui_step.value()
         
         # Ensure delete position is valid (can't delete parameter column)
         if delete_pos < 1 or delete_pos >= current_cols:
@@ -594,6 +591,9 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
         # Update column headers and spinbox maximum
         self.updateStepHeaders()
         self.ui_step.setMaximum(self.ui_dynamic_parameters.columnCount())
+        
+        # Update recipe data after deletion
+        self.onParameterChanged(None)
 
     def updateStepHeaders(self):
         """Update the column headers to maintain proper step numbering"""
