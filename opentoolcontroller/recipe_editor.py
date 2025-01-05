@@ -260,9 +260,7 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
             elif action == insert_action:
                 # If clicking past last column, insert at end
                 insert_pos = self.ui_dynamic_parameters.columnCount() if pos.x() > header_width else column
-                self.ui_dynamic_parameters.insertColumn(insert_pos)
-                self.updateStepHeaders()
-                self.ui_step.setMaximum(self.ui_dynamic_parameters.columnCount())
+                self.insertStep(insert_pos)
             elif action == delete_action:
                 self.deleteStep(column)
                 
@@ -524,10 +522,12 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
             return widget.currentText()
         return None
 
-    def insertStep(self):
-        """Insert a new step column at the position specified by ui_step spinbox"""
+    def insertStep(self, column=None):
+        """Insert a new step column at the specified position or the one from ui_step spinbox"""
         current_cols = self.ui_dynamic_parameters.columnCount()
-        insert_pos = self.ui_step.value()
+        
+        # Use provided column or get from spinbox
+        insert_pos = column if column is not None else self.ui_step.value()
         
         # Ensure insert position is valid
         if insert_pos < 1 or insert_pos > current_cols:
