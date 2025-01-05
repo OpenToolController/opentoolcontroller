@@ -438,6 +438,9 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
         self.updateStepHeaders()
         self.ui_step.setMaximum(self.ui_dynamic_parameters.columnCount())
         
+        # Update recipe data after deleting column
+        self.onParameterChanged(None)
+        
         # Create editors for each row in the new column
         for row in range(self.ui_dynamic_parameters.rowCount()):
             # Get the variable type from the first column's item
@@ -451,6 +454,9 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
                     editor = self.createEditorForVariable(var, self.ui_dynamic_parameters)
                     if editor:
                         self.ui_dynamic_parameters.setCellWidget(row, insert_pos, editor)
+        
+        # Update recipe data after inserting column
+        self.onParameterChanged(None)
 
     def deleteStep(self):
         """Delete the step column at the position specified by ui_step spinbox"""
