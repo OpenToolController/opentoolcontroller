@@ -262,16 +262,27 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
         
         # Handle dynamic parameters
         dynamic_params = recipe_data.get('dynamic_parameters', {})
+        
+        # Clear all step columns, keeping only the Parameter column
+        while self.ui_dynamic_parameters.columnCount() > 1:
+            self.ui_dynamic_parameters.removeColumn(1)
+            
+        # Add the needed number of step columns
+        max_steps = max((len(steps) for steps in dynamic_params.values()), default=0)
+        for i in range(max_steps):
+            self.ui_dynamic_parameters.insertColumn(self.ui_dynamic_parameters.columnCount())
+            
+        # Update headers after column changes
+        self.updateStepHeaders()
+        
+        # Update spinbox maximum
+        self.ui_step.setMaximum(self.ui_dynamic_parameters.columnCount())
+        
+        # Now populate the values
         for row in range(self.ui_dynamic_parameters.rowCount()):
             param_name = self.ui_dynamic_parameters.item(row, 0).text()
             if param_name in dynamic_params:
                 step_values = dynamic_params[param_name]
-                
-                # Add columns if needed
-                while self.ui_dynamic_parameters.columnCount() < len(step_values) + 1:
-                    column = self.ui_dynamic_parameters.columnCount()
-                    self.ui_dynamic_parameters.insertColumn(column)
-                    self.updateStepHeaders()
                 
                 # Set values for each step
                 for column, value in enumerate(step_values, start=1):
