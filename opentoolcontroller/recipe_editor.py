@@ -573,13 +573,13 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
         if not current_item:
             return
             
-        recipe_name = current_item.text()
+        file_path = current_item.data(QtCore.Qt.UserRole)
         node_id = id(self._current_node)
         
         # Find the recipe data and file path
         if node_id in self._node_recipes:
-            for i, (name, data, file_path, modified) in enumerate(self._node_recipes[node_id]):
-                if name == recipe_name:
+            for i, (name, data, path, modified) in enumerate(self._node_recipes[node_id]):
+                if path == file_path:
                     # Get current data
                     recipe_data = self.getCurrentRecipeData()
                     
