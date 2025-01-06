@@ -404,9 +404,36 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
                 
                 # Validate recipe against node parameters
                 if self.validateRecipe(recipe_data):
-                    # Add to node's recipe list
                     node_id = id(self._current_node)
                     recipe_name = Path(filename).name
+                    
+                    # Check if recipe is already open
+                    if node_id in self._node_recipes:
+                        for i, (existing_name, existing_data, existing_path, modified) in enumerate(self._node_recipes[node_id]):
+                            if existing_path == filename:
+                                # Recipe is already open, check if data is different
+                                if existing_data != recipe_data:
+                                    reply = QtWidgets.QMessageBox.question(
+                                        self,
+                                        "Recipe Already Open",
+                                        f"Recipe '{recipe_name}' is already open with different data. Do you want to overwrite the current version?",
+                                        QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
+                                        QtWidgets.QMessageBox.No
+                                    )
+                                    
+                                    if reply == QtWidgets.QMessageBox.Yes:
+                                        # Update existing recipe data
+                                        self._node_recipes[node_id][i] = (recipe_name, recipe_data, filename, False)
+                                        self.updateRecipeList()
+                                        # Select the updated recipe
+                                        for row in range(self.ui_recipes.count()):
+                                            item = self.ui_recipes.item(row)
+                                            if item.data(QtCore.Qt.UserRole) == filename:
+                                                self.ui_recipes.setCurrentRow(row)
+                                                break
+                                return
+                    
+                    # Recipe not already open, add it
                     if node_id not in self._node_recipes:
                         self._node_recipes[node_id] = []
                     self._node_recipes[node_id].append((recipe_name, recipe_data, filename, False))
