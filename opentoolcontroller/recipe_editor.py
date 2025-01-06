@@ -587,8 +587,9 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
                     try:
                         with open(file_path, 'w') as f:
                             json.dump(recipe_data, f, indent=4)
-                            # Reset modified flag after successful save
+                            # Reset modified flag and update display name
                             self._node_recipes[node_id][i] = (name, recipe_data, file_path, False)
+                            current_item.setText(name)  # Remove star from display
                     except Exception as e:
                         QtWidgets.QMessageBox.critical(
                             self,
