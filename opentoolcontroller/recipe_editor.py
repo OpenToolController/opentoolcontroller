@@ -21,7 +21,6 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
         super(recipe_editor_base, self).__init__(parent)
         self.setupUi(self)
         self._allow_parameter_changed = True
-        self._updating_ui = False
         
         # Dictionary to store open recipes for each node
         self._node_recipes = {}  # {node_id: [(recipe_name, recipe_data, file_path, modified), ...]}
@@ -192,11 +191,11 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
             
             # Find the recipe data
             if node_id in self._node_recipes:
-                for i, (name, data, path, _) in enumerate(self._node_recipes[node_id]):
+                for i, (name, data, path, modified) in enumerate(self._node_recipes[node_id]):
                     if path == file_path:
                         # Update recipe data with current values
                         updated_data = self.getCurrentRecipeData()
-                        self._node_recipes[node_id][i] = (name, updated_data, path, True)
+                        self._node_recipes[node_id][i] = (name, updated_data, path, modified)
                         # Update UI to show modified state
                         self.setRecipeModified()
                         break
@@ -377,7 +376,7 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
 
     def setRecipeModified(self):
         """Set the current recipe as modified and update UI"""
-        if self._updating_ui or not self._allow_parameter_changed:
+        if not self._allow_parameter_changed:
             return
             
         if not self._current_node:
@@ -393,14 +392,10 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
         # Find and update the recipe data
         if node_id in self._node_recipes:
             for i, (name, data, path, modified) in enumerate(self._node_recipes[node_id]):
-                if path == file_path and not modified:
-                    # Set modified flag
+                if path == file_path:
+                    print(modified)
                     self._node_recipes[node_id][i] = (name, data, path, True)
-                    
-                    # Update UI
-                    self._updating_ui = True
                     current_item.setText(f"{name}*")
-                    self._updating_ui = False
                     break
 
     def enableEditRecipe(self, enable):
@@ -482,13 +477,13 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
                     display_name = f"{recipe_name}*" if modified else recipe_name
                     item = QtWidgets.QListWidgetItem(display_name)
                     item.setData(QtCore.Qt.UserRole, file_path)  # Store full path in item data
-                    print("here: ", file_path)
                     item.setToolTip(file_path)  # Keep tooltip for visibility on hover
                     self.ui_recipes.addItem(item)
 
         self.ui_recipes.itemSelectionChanged.connect(self.recipeSelectionChanged)
 
     def recipeSelectionChanged(self):
+        print("recipeSelectionChanged")
         """Handle recipe selection change"""
         current_item = self.ui_recipes.currentItem()
         if current_item and self._current_node:
@@ -507,12 +502,10 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
                 self.displayRecipe(recipe_data)
 
     def displayRecipe(self, recipe_data):
-        print("displayRecipe")
         self._allow_parameter_changed = False
         """Display the recipe data in the parameter tables"""
         # Handle static parameters
         static_params = recipe_data.get('static_parameters', {})
-        print("static_params",static_params)
         for row in range(self.ui_static_parameters.rowCount()):
             param_name = self.ui_static_parameters.item(row, 0).text()
             if param_name in static_params:
