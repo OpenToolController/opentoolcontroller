@@ -346,7 +346,7 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
                         reply = QtWidgets.QMessageBox.question(
                             self,
                             "Save Changes",
-                            f"Do you want to save changes to {recipe_name}?",
+                            f"Do you want to save changes to {name}?",
                             QtWidgets.QMessageBox.Save | QtWidgets.QMessageBox.Discard | QtWidgets.QMessageBox.Cancel
                         )
                         
