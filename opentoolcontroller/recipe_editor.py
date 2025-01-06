@@ -322,8 +322,8 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
             if widget and param_name in self._step_clipboard:
                 self.setWidgetValue(widget, self._step_clipboard[param_name])
         
-        # Update recipe data after paste
-        self.onParameterChanged(None)
+        # Update recipe data and modified state
+        self.setRecipeModified()
 
     def closeRecipe(self):
         """Close the currently selected recipe"""
@@ -374,7 +374,7 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
                     self.ui_recipes.setCurrentRow(0)
                     break
 
-    def setRecipeModified(self):
+    def setRecipeModified(self, modified=True):
         """Set the current recipe as modified and update UI"""
         if not self._allow_parameter_changed:
             return
@@ -391,10 +391,13 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
         
         # Find and update the recipe data
         if node_id in self._node_recipes:
-            for i, (name, data, path, modified) in enumerate(self._node_recipes[node_id]):
+            for i, (name, data, path, _) in enumerate(self._node_recipes[node_id]):
                 if path == file_path:
-                    self._node_recipes[node_id][i] = (name, data, path, True)
-                    current_item.setText(f"{name}*")
+                    # Update recipe data with current values if being modified
+                    if modified:
+                        data = self.getCurrentRecipeData()
+                    self._node_recipes[node_id][i] = (name, data, path, modified)
+                    current_item.setText(f"{name}*" if modified else name)
                     break
 
     def enableEditRecipe(self, enable):
@@ -585,9 +588,7 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
                     try:
                         with open(file_path, 'w') as f:
                             json.dump(recipe_data, f, indent=4)
-                            # Reset modified flag and update display name
-                            self._node_recipes[node_id][i] = (name, recipe_data, file_path, False)
-                            current_item.setText(name)  # Remove star from display
+                            self.setRecipeModified(False)
                     except Exception as e:
                         QtWidgets.QMessageBox.critical(
                             self,
@@ -687,8 +688,7 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
                     if editor:
                         self.ui_dynamic_parameters.setCellWidget(row, insert_pos, editor)
         
-        # Update recipe data and modified state after inserting column
-        self.onParameterChanged(None)
+        # Update recipe data and modified state
         self.setRecipeModified()
 
     def deleteStep(self, column=None):
@@ -709,8 +709,7 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
         self.updateStepHeaders()
         self.ui_step.setMaximum(self.ui_dynamic_parameters.columnCount())
         
-        # Update recipe data and modified state after deletion
-        self.onParameterChanged(None)
+        # Update recipe data and modified state
         self.setRecipeModified()
 
     def updateStepHeaders(self):
