@@ -177,28 +177,9 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
 
 
     def onParameterChanged(self, item):
+        """Handle changes to parameter values in either table"""
         if self._allow_parameter_changed:
-            """Handle changes to parameter values in either table"""
-            if not self._current_node:
-                return
-                
-            current_item = self.ui_recipes.currentItem()
-            if not current_item:
-                return
-                
-            file_path = current_item.data(QtCore.Qt.UserRole)
-            node_id = id(self._current_node)
-            
-            # Find the recipe data
-            if node_id in self._node_recipes:
-                for i, (name, data, path, modified) in enumerate(self._node_recipes[node_id]):
-                    if path == file_path:
-                        # Update recipe data with current values
-                        updated_data = self.getCurrentRecipeData()
-                        self._node_recipes[node_id][i] = (name, updated_data, path, modified)
-                        # Update UI to show modified state
-                        self.setRecipeModified()
-                        break
+            self.setRecipeModified()
 
     def getCurrentRecipeData(self):
         """Get current recipe data from both parameter tables"""
