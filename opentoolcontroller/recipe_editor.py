@@ -393,7 +393,6 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
         if node_id in self._node_recipes:
             for i, (name, data, path, modified) in enumerate(self._node_recipes[node_id]):
                 if path == file_path:
-                    print(modified)
                     self._node_recipes[node_id][i] = (name, data, path, True)
                     current_item.setText(f"{name}*")
                     break
@@ -483,7 +482,6 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
         self.ui_recipes.itemSelectionChanged.connect(self.recipeSelectionChanged)
 
     def recipeSelectionChanged(self):
-        print("recipeSelectionChanged")
         """Handle recipe selection change"""
         current_item = self.ui_recipes.currentItem()
         if current_item and self._current_node:
