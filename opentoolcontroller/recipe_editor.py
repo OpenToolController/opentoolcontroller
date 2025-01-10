@@ -38,7 +38,6 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
         header = self.ui_static_parameters.horizontalHeader()
         header.setSectionResizeMode(0, QtWidgets.QHeaderView.Interactive)
         header.setSectionResizeMode(1, QtWidgets.QHeaderView.Interactive)
-        #self.ui_static_parameters.itemChanged.connect(self.onParameterChanged)
         self.ui_static_parameters.itemChanged.connect(self.recipeModified)
 
         # Setup dynamic parameters table
@@ -47,7 +46,6 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
         header = self.ui_dynamic_parameters.horizontalHeader()
         header.setSectionResizeMode(0, QtWidgets.QHeaderView.Interactive)
         header.setSectionResizeMode(1, QtWidgets.QHeaderView.Interactive)
-        #self.ui_dynamic_parameters.itemChanged.connect(self.onParameterChanged)
         self.ui_dynamic_parameters.itemChanged.connect(self.recipeModified)
         
         # Enable context menu for header
@@ -63,6 +61,8 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
         
         # Connect step manipulation buttons
         self.ui_insert_step.clicked.connect(lambda: self.insertStep(None))
+        self.ui_copy_step.clicked.connect(lambda: self.copyStep(None))
+        self.ui_paste_step.clicked.connect(lambda: self.pasteStep(None))
         self.ui_delete_step.clicked.connect(lambda: self.deleteStep(None))
         self.ui_save_as.clicked.connect(self.saveRecipeAs)
         self.ui_save.clicked.connect(self.saveRecipe)
@@ -177,11 +177,6 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
         self._settings.setValue('recipe_editor_splitter_2_state', splitter_2_state)
         super().closeEvent(event)
 
-
-    #def onParameterChanged(self, item):
-    #    """Handle changes to parameter values in either table"""
-    #    if self._allow_parameter_changed:
-    #        self.setRecipeModified()
 
     def getCurrentRecipeData(self):
         """Get current recipe data from both parameter tables"""
@@ -306,7 +301,6 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
                 self.setWidgetValue(widget, self._step_clipboard[param_name])
         
         # Update recipe data and modified state
-        #self.setRecipeModified()
         self.recipeModified()
 
     def closeRecipe(self):
@@ -358,7 +352,6 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
                     self.ui_recipes.setCurrentRow(0)
                     break
 
-    #def setRecipeModified(self, modified=True):
     def recipeModified(self, modified=True):
         """Set the current recipe as modified and update UI"""
         if not self._allow_parameter_changed:
@@ -600,7 +593,6 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
                     try:
                         with open(file_path, 'w') as f:
                             json.dump(recipe_data, f, indent=4)
-                            #self.setRecipeModified(False)
                             self.recipeModified(False)
                     except Exception as e:
                         QtWidgets.QMessageBox.critical(
@@ -702,7 +694,6 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
                         self.ui_dynamic_parameters.setCellWidget(row, insert_pos, editor)
         
         # Update recipe data and modified state
-        #self.setRecipeModified()
         self.recipeModified()
 
     def deleteStep(self, column=None):
@@ -724,7 +715,6 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
         self.ui_step.setMaximum(self.ui_dynamic_parameters.columnCount())
         
         # Update recipe data and modified state
-        #self.setRecipeModified()
         self.recipeModified()
 
     def updateStepHeaders(self):
@@ -744,19 +734,16 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
             editor.setMinimum(float(var.get('min', -999999)))
             editor.setMaximum(float(var.get('max', 999999)))
             editor.setValue(float(var.get('value', 0)))
-            #editor.valueChanged.connect(lambda: self.onParameterChanged(None))
             editor.valueChanged.connect(self.recipeModified)
         elif var_type == 'Integer':
             editor = QtWidgets.QSpinBox(parent_widget)
             editor.setMinimum(int(var.get('min', -999999)))
             editor.setMaximum(int(var.get('max', 999999)))
             editor.setValue(int(var.get('value', 0)))
-            #editor.valueChanged.connect(lambda: self.onParameterChanged(None))
             editor.valueChanged.connect(self.recipeModified)
         elif var_type == 'Boolean':
             editor = QtWidgets.QCheckBox(parent_widget)
             editor.setChecked(var.get('value', False))
-            #editor.stateChanged.connect(lambda: self.onParameterChanged(None))
             editor.stateChanged.connect(self.recipeModified)
         elif var_type == 'List':
             editor = QtWidgets.QComboBox(parent_widget)
@@ -770,7 +757,6 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
             index = editor.findText(str(current_value))
             if index >= 0:
                 editor.setCurrentIndex(index)
-            #editor.currentTextChanged.connect(lambda: self.onParameterChanged(None))
             editor.currentTextChanged.connect(self.recipeModified)
         
         return editor
