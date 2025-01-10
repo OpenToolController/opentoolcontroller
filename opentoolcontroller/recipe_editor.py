@@ -261,20 +261,34 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
                 
 
 
-    def copyStep(self, column):
+    def copyStep(self, column=None):
         """Copy all parameter values from a step as a dictionary"""
+        # Use provided column or get from spinbox
+        copy_pos = column if column is not None else self.ui_step.value()
+        
+        # Ensure copy position is valid
+        if copy_pos < 1 or copy_pos >= self.ui_dynamic_parameters.columnCount():
+            return
+            
         step_data = {}
         for row in range(self.ui_dynamic_parameters.rowCount()):
             param_name = self.ui_dynamic_parameters.item(row, 0).text()
-            widget = self.ui_dynamic_parameters.cellWidget(row, column)
+            widget = self.ui_dynamic_parameters.cellWidget(row, copy_pos)
             if widget:
                 value = self._getWidgetValue(widget)
                 step_data[param_name] = value
         self._step_clipboard = step_data
 
-    def pasteStep(self, column):
+    def pasteStep(self, column=None):
         """Paste copied step data into the specified column"""
         if not self._step_clipboard:
+            return
+            
+        # Use provided column or get from spinbox
+        paste_pos = column if column is not None else self.ui_step.value()
+        
+        # Ensure paste position is valid
+        if paste_pos < 1 or paste_pos >= self.ui_dynamic_parameters.columnCount():
             return
             
         # Verify parameters match
@@ -296,7 +310,7 @@ class RecipeEditor(recipe_editor_base, recipe_editor_form):
         # Paste values into widgets
         for row in range(self.ui_dynamic_parameters.rowCount()):
             param_name = self.ui_dynamic_parameters.item(row, 0).text()
-            widget = self.ui_dynamic_parameters.cellWidget(row, column)
+            widget = self.ui_dynamic_parameters.cellWidget(row, paste_pos)
             if widget and param_name in self._step_clipboard:
                 self.setWidgetValue(widget, self._step_clipboard[param_name])
         
